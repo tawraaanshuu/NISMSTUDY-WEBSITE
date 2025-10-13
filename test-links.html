@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Public Folder Links - NISMSTUDY.COM</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #10b981;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .link-group {
+            margin-bottom: 30px;
+        }
+        .link-group h2 {
+            color: #333;
+            border-bottom: 2px solid #10b981;
+            padding-bottom: 10px;
+        }
+        .link-list {
+            list-style: none;
+            padding: 0;
+        }
+        .link-list li {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #10b981;
+        }
+        .link-list a {
+            text-decoration: none;
+            color: #10b981;
+            font-weight: bold;
+        }
+        .link-list a:hover {
+            color: #059669;
+        }
+        .status {
+            float: right;
+            font-size: 12px;
+            color: #666;
+        }
+        .instructions {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Public Folder Links Test</h1>
+        
+        <div class="instructions">
+            <h3>📋 Instructions:</h3>
+            <p><strong>Before testing these links, make sure your server is running:</strong></p>
+            <ol>
+                <li>Open Command Prompt in your project folder</li>
+                <li>Run: <code>npm start</code> or <code>npm run demo</code></li>
+                <li>Wait for "Server running on port 5000" message</li>
+                <li>Then test the links below</li>
+            </ol>
+            <p><strong>If links don't work:</strong> The server might not be running or there's a port conflict.</p>
+        </div>
+
+        <div class="link-group">
+            <h2>🏠 Main Pages</h2>
+            <ul class="link-list">
+                <li>
+                    <a href="http://localhost:5000/" target="_blank">Homepage (index.html)</a>
+                    <span class="status">Main site</span>
+                </li>
+                <li>
+                    <a href="http://localhost:5000/login.html" target="_blank">Login Page</a>
+                    <span class="status">User authentication</span>
+                </li>
+                <li>
+                    <a href="http://localhost:5000/dashboard.html" target="_blank">Student Dashboard</a>
+                    <span class="status">Progress tracking</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="link-group">
+            <h2>📚 Course & Study Materials</h2>
+            <ul class="link-list">
+                <li>
+                    <a href="http://localhost:5000/course-detail.html" target="_blank">Course Details</a>
+                    <span class="status">Course information</span>
+                </li>
+                <li>
+                    <a href="http://localhost:5000/free-materials.html" target="_blank">Free Materials</a>
+                    <span class="status">Download resources</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="link-group">
+            <h2>✍️ Quiz & Testing</h2>
+            <ul class="link-list">
+                <li>
+                    <a href="http://localhost:5000/quiz-interface.html" target="_blank">Quiz Interface</a>
+                    <span class="status">Take mock tests</span>
+                </li>
+                <li>
+                    <a href="http://localhost:5000/quiz-result.html" target="_blank">Quiz Results</a>
+                    <span class="status">View scores</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="link-group">
+            <h2>⚙️ Admin Panel (Hidden from Public)</h2>
+            <ul class="link-list">
+                <li style="background: #fff3cd; border-left-color: #ffc107;">
+                    <strong>🔒 Admin Access Only</strong>
+                    <span class="status">Direct URL access</span>
+                </li>
+                <li>
+                    <a href="http://localhost:5000/admin.html" target="_blank">Admin Panel (Direct Access)</a>
+                    <span class="status">For administrators only</span>
+                </li>
+                <li>
+                    <a href="http://localhost:5000/admin-panel.html" target="_blank">Admin Panel (Alternative)</a>
+                    <span class="status">Alternative admin UI</span>
+                </li>
+            </ul>
+            <p style="color: #856404; font-size: 14px; margin-top: 10px;">
+                <strong>Note:</strong> Admin panels are hidden from public navigation for security.
+            </p>
+        </div>
+
+        <div class="link-group">
+            <h2>🔧 Server Status</h2>
+            <ul class="link-list">
+                <li>
+                    <a href="http://localhost:5000/api/health" target="_blank">Health Check</a>
+                    <span class="status">Server status</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="instructions">
+            <h3>🚨 Troubleshooting:</h3>
+            <ul>
+                <li><strong>If you get "ERR_FILE_NOT_FOUND":</strong> Make sure you're using the full URL with <code>http://localhost:5000/</code></li>
+                <li><strong>If you get "Connection refused":</strong> The server is not running. Start it with <code>npm start</code></li>
+                <li><strong>If you get "Port already in use":</strong> Kill existing processes or use <code>npm run demo</code></li>
+                <li><strong>If links work but show errors:</strong> Check browser console (F12) for JavaScript errors</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; color: #666;">
+            <p>💡 <strong>Tip:</strong> Bookmark this page for easy testing of all your public folder links!</p>
+        </div>
+    </div>
+</body>
+</html>

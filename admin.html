@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - NISMSTUDY.COM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+        }
+
+        .header-actions {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #10b981;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #10b981;
+            border-bottom-color: #10b981;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+        }
+
+        .file-upload {
+            border: 2px dashed #10b981;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            background: #f0fdf4;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .question-item {
+            border: 1px solid #e0e0e0;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+        }
+
+        .quiz-instructions {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #10b981;
+        }
+
+        .quiz-instructions ul {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .quiz-instructions li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 NISMSTUDY.COM - Admin Panel</h1>
+        <div class="header-actions">
+            <span id="adminName">Admin</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <h3>Total Students</h3>
+                <div class="value" id="totalStudents">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Courses</h3>
+                <div class="value" id="totalCourses">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Quizzes</h3>
+                <div class="value" id="totalQuizzes">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Study Materials</h3>
+                <div class="value" id="totalMaterials">-</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('upload')">Upload PDF</button>
+            <button class="tab" onclick="showTab('quiz')">Create Quiz</button>
+            <button class="tab" onclick="showTab('courses')">Manage Courses</button>
+        </div>
+
+        <div id="upload-tab" class="tab-content active">
+            <div class="section">
+                <h2>Upload Study Material (PDF)</h2>
+                <div id="upload-success" class="success-message"></div>
+                <div id="upload-error" class="error-message"></div>
+
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label>Select Course*</label>
+                        <select id="uploadCourse" required>
+                            <option value="">Loading courses...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Material Title*</label>
+                        <input type="text" id="uploadTitle" required placeholder="e.g., Chapter 1: Introduction to Mutual Funds">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="uploadDescription" rows="3" placeholder="Brief description of the study material"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isFree"> Make this material free (available to all users)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Upload PDF File*</label>
+                        <div class="file-upload" onclick="document.getElementById('pdfFile').click()">
+                            <p>📄 Click to select PDF file (Max 10MB)</p>
+                            <p id="fileName" style="margin-top: 0.5rem; color: #10b981;"></p>
+                            <input type="file" id="pdfFile" accept=".pdf" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Upload Material</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="quiz-tab" class="tab-content">
+            <div class="section">
+                <h2>Create Quiz</h2>
+                <div class="quiz-instructions">
+                    <h3>📝 Quiz Requirements:</h3>
+                    <ul>
+                        <li><strong>Quizzes 1-8:</strong> Must have exactly <strong>50 questions</strong> (2 hours duration)</li>
+                        <li><strong>Quizzes 9-10:</strong> Must have exactly <strong>100 questions</strong> (3 hours duration)</li>
+                        <li>Passing percentage is set to <strong>60%</strong></li>
+                        <li>All questions must be multiple choice (4 options)</li>
+                    </ul>
+                </div>
+
+                <div id="quiz-success" class="success-message"></div>
+                <div id="quiz-error" class="error-message"></div>
+
+                <form id="quizForm">
+                    <div class="form-group">
+                        <label>Select Course*</label>
+                        <select id="quizCourse" required>
+                            <option value="">Loading courses...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Quiz Number* (1-10)</label>
+                        <select id="quizNumber" required onchange="updateQuestionCount()">
+                            <option value="">Select quiz number</option>
+                            <option value="1">Quiz 1 (50 questions)</option>
+                            <option value="2">Quiz 2 (50 questions)</option>
+                            <option value="3">Quiz 3 (50 questions)</option>
+                            <option value="4">Quiz 4 (50 questions)</option>
+                            <option value="5">Quiz 5 (50 questions)</option>
+                            <option value="6">Quiz 6 (50 questions)</option>
+                            <option value="7">Quiz 7 (50 questions)</option>
+                            <option value="8">Quiz 8 (50 questions)</option>
+                            <option value="9">Quiz 9 (100 questions)</option>
+                            <option value="10">Quiz 10 (100 questions)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Quiz Title*</label>
+                        <input type="text" id="quizTitle" required placeholder="e.g., Mid-term Assessment">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="quizDescription" rows="3" placeholder="Brief description of the quiz"></textarea>
+                    </div>
+
+                    <div id="questionsContainer">
+                        <p style="color: #666;">Select a quiz number to start adding questions</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitQuiz" style="display: none;">Create Quiz</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="courses-tab" class="tab-content">
+            <div class="section">
+                <h2>Manage Courses</h2>
+                <p style="color: #666; margin-bottom: 1rem;">Course list and management features will be displayed here</p>
+                <div id="coursesLoading" class="loading">Loading courses...</div>
+                <div id="coursesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>
+

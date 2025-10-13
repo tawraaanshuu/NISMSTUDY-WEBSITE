@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NISMSTUDY - Example Page with Chatbot</title>
+  <style>
+    /* Basic page styling (your existing styles) */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    header {
+      background: #4a90e2;
+      color: white;
+      padding: 1rem 0;
+      text-align: center;
+    }
+
+    nav {
+      background: #357abd;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 4rem 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .courses {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .course-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .course-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .course-card h3 {
+      color: #4a90e2;
+      margin-bottom: 0.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #4a90e2;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 1rem;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: #357abd;
+    }
+
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 2rem;
+      margin-top: 3rem;
+    }
+
+    .features {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin: 3rem 0;
+      text-align: center;
+    }
+
+    .feature {
+      flex: 1;
+      min-width: 200px;
+      padding: 1rem;
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <h1>🎓 NISMSTUDY.COM</h1>
+    <p>Your Gateway to NISM Certification Success</p>
+  </header>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="#courses">Courses</a>
+    <a href="#features">Features</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <h1>Master NISM Certifications</h1>
+    <p>Comprehensive study materials, mock tests, and expert guidance</p>
+    <a href="#courses" class="btn">Explore Courses</a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Features -->
+    <section class="features" id="features">
+      <div class="feature">
+        <div class="feature-icon">📚</div>
+        <h3>Quality Content</h3>
+        <p>Expert-curated study materials</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📝</div>
+        <h3>Mock Tests</h3>
+        <p>Practice with real exam patterns</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🤖</div>
+        <h3>AI Assistant</h3>
+        <p>24/7 instant help - try the chat!</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🏆</div>
+        <h3>High Success Rate</h3>
+        <p>Students consistently pass</p>
+      </div>
+    </section>
+
+    <!-- Courses -->
+    <section id="courses">
+      <h2>Popular Courses</h2>
+      <div class="courses">
+        <div class="course-card">
+          <h3>📊 NISM Series V-A</h3>
+          <p>Mutual Fund Distributors Certification</p>
+          <p><strong>₹999</strong></p>
+          <a href="#" class="btn">View Details</a>
+        </div>
+        <div class="course-card">
+          <h3>📈 NISM Series VIII</h3>
+          <p>Equity Derivatives Certification</p>
+          <p><strong>₹1,499</strong></p>
+          <a href="#" class="btn">View Details</a>
+        </div>
+        <div class="course-card">
+          <h3>🔍 NISM Series XV</h3>
+          <p>Research Analyst Certification</p>
+          <p><strong>₹1,999</strong></p>
+          <a href="#" class="btn">View Details</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" style="margin-top: 3rem;">
+      <h2>Why Choose Us?</h2>
+      <p style="margin: 1rem 0;">
+        NISMSTUDY.COM is dedicated to helping students achieve their NISM certification goals. 
+        Our comprehensive study materials, expertly designed mock tests, and innovative AI-powered 
+        chat assistant ensure you have everything you need to succeed.
+      </p>
+      <p style="margin: 1rem 0;">
+        <strong>💬 Have questions? Try our AI chat assistant!</strong> Click the chat button 
+        in the bottom-right corner to ask anything about our courses, registration, payments, 
+        or exam preparation.
+      </p>
+    </section>
+
+    <!-- Call to Action -->
+    <section style="text-align: center; margin: 3rem 0; padding: 2rem; background: #f5f5f5; border-radius: 8px;">
+      <h2>Ready to Start Your Journey?</h2>
+      <p style="margin: 1rem 0;">Join thousands of successful NISM certification holders</p>
+      <a href="#" class="btn" style="font-size: 1.2rem; padding: 15px 30px;">Get Started Now</a>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer id="contact">
+    <h3>Contact Us</h3>
+    <p>Email: support@nismstudy.com</p>
+    <p>Phone: +91-XXXXXXXXXX</p>
+    <p style="margin-top: 1rem;">© 2025 NISMSTUDY.COM - All Rights Reserved</p>
+  </footer>
+
+  <!-- 
+    ========================================
+    AI CHATBOT WIDGET
+    ========================================
+    The chatbot will appear as a floating button in the bottom-right corner.
+    Users can click it to ask questions anytime!
+  -->
+  
+  <div class="chat-widget">
+    <button class="chat-button" id="chatButton" aria-label="Open chat">
+      <svg class="icon-chat" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+        <path d="M7 9h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/>
+      </svg>
+      <svg class="icon-close" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
+      <span class="notification-badge" id="notificationBadge" style="display: none;">1</span>
+    </button>
+
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-header">
+        <div class="chat-header-avatar">🤖</div>
+        <div class="chat-header-info">
+          <h3>NISM Study Assistant</h3>
+          <p>
+            <span class="chat-header-status"></span>
+            Online - We reply instantly
+          </p>
+        </div>
+      </div>
+
+      <div class="quick-questions" id="quickQuestions">
+        <button class="quick-question-btn" data-question="What courses do you offer?">📚 Courses</button>
+        <button class="quick-question-btn" data-question="How do I register?">✍️ Register</button>
+        <button class="quick-question-btn" data-question="What payment methods do you accept?">💳 Payment</button>
+        <button class="quick-question-btn" data-question="Do you provide mock tests?">📝 Mock Tests</button>
+        <button class="quick-question-btn" data-question="What is your refund policy?">↩️ Refund</button>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <div class="welcome-message">
+          <h4>👋 Welcome to NISMSTUDY!</h4>
+          <p>Hi! I'm your AI assistant. Ask me anything about NISM certifications, courses, exams, or our platform.</p>
+        </div>
+      </div>
+
+      <div class="chat-input">
+        <input 
+          type="text" 
+          id="chatInput" 
+          placeholder="Type your question here..." 
+          autocomplete="off"
+          aria-label="Type your message"
+        />
+        <button id="sendButton" aria-label="Send message">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Chatbot Styles and JavaScript -->
+  <link rel="stylesheet" href="/chatbot-styles.css">
+  <script src="/chatbot.js"></script>
+
+</body>
+</html>
+
+
+
