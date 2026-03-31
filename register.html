@@ -1,263 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - NISMSTUDY.COM</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .register-container {
-            background: white;
-            padding: 3rem;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .logo-icon {
-            font-size: 2rem;
-        }
-
-        h1 {
-            color: #1a202c;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: #718096;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #2d3748;
-            font-weight: 500;
-        }
-
-        input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-            margin-top: 1rem;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .error-message {
-            background: #fed7d7;
-            color: #c53030;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            display: none;
-        }
-
-        .success-message {
-            background: #c6f6d5;
-            color: #22543d;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            display: none;
-        }
-
-        .back-link {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-            display: inline-block;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register - NISMSTUDY.COM</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body { background:#f7f9fc; }
+    .auth-wrap { max-width:480px; margin:60px auto; background:#fff; padding:32px; border-radius:18px; box-shadow:0 16px 40px rgba(15,23,42,.08); }
+    .auth-wrap h1 { margin-bottom:8px; }
+    .auth-wrap p { color:#64748b; margin-bottom:24px; }
+    .auth-wrap label { display:block; margin:14px 0 6px; font-weight:600; }
+    .auth-wrap input { width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; }
+    .auth-wrap button { width:100%; margin-top:18px; padding:12px 14px; border:0; border-radius:10px; background:#2563eb; color:#fff; font-weight:700; cursor:pointer; }
+    .auth-wrap .muted { margin-top:14px; font-size:14px; }
+    .auth-wrap .error { color:#dc2626; min-height:22px; margin-top:12px; }
+    .auth-wrap .success { color:#15803d; min-height:22px; margin-top:12px; }
+  </style>
 </head>
 <body>
-    <div class="register-container">
-        <div class="logo">
-            <span class="logo-icon">📊</span>
-            <span>NISMSTUDY.COM</span>
-        </div>
+  <div class="auth-wrap">
+    <h1>Create Account</h1>
+    <p>Create your student account to access courses and exams.</p>
+    <form id="registerForm">
+      <label for="fullName">Full Name</label>
+      <input id="fullName" type="text" required />
+      <label for="email">Email</label>
+      <input id="email" type="email" required />
+      <label for="phone">Phone</label>
+      <input id="phone" type="text" />
+      <label for="password">Password</label>
+      <input id="password" type="password" required />
+      <label for="confirmPassword">Confirm Password</label>
+      <input id="confirmPassword" type="password" required />
+      <div id="authError" class="error"></div>
+      <div id="authSuccess" class="success"></div>
+      <button id="submitBtn" type="submit">Create Account</button>
+    </form>
+    <p class="muted">Already have an account? <a href="/login.html">Sign in</a></p>
+    <p class="muted"><a href="/">← Back to Website</a></p>
+  </div>
 
-        <h1>Create Account</h1>
-        <p class="subtitle">Join thousands of successful students</p>
-
-        <div id="error-message" class="error-message"></div>
-        <div id="success-message" class="success-message"></div>
-
-        <form id="registerForm">
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" required placeholder="Enter your full name">
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" required placeholder="Enter your email">
-            </div>
-
-            <div class="form-group">
-                <label for="phone">Phone Number (Optional)</label>
-                <input type="tel" id="phone" placeholder="Enter your phone number">
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required placeholder="At least 6 characters" minlength="6">
-            </div>
-
-            <div class="form-group">
-                <label for="confirmPassword">Confirm Password</label>
-                <input type="password" id="confirmPassword" required placeholder="Re-enter your password">
-            </div>
-
-            <button type="submit" class="btn">Create Account</button>
-        </form>
-
-        <p style="margin-top: 20px; color: #718096;">
-            Already have an account? <a href="login.html" style="color: #667eea; text-decoration: none;">Sign in</a>
-        </p>
-        <a href="/index.html" class="back-link">← Back to Website</a>
-    </div>
-
-    <script>
-        const API_URL = window.location.origin + '/api';
-
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-
-            // Validate passwords match
-            if (password !== confirmPassword) {
-                showMessage('error-message', 'Passwords do not match!');
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Creating account...';
-
-            try {
-                const response = await fetch(`${API_URL}/auth/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ name, email, phone, password })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    // Store token
-                    localStorage.setItem('authToken', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-
-                    showMessage('success-message', 'Account created successfully! Redirecting...');
-
-                    // Redirect to dashboard
-                    setTimeout(() => {
-                        window.location.href = '/public/dashboard.html';
-                    }, 1500);
-                } else {
-                    showMessage('error-message', data.message || 'Registration failed');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Create Account';
-                }
-            } catch (error) {
-                console.error('Registration error:', error);
-                showMessage('error-message', 'Error connecting to server. Please try again.');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Account';
-            }
-        });
-
-        function showMessage(elementId, message) {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.style.display = 'block';
-            
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 5000);
-        }
-
-        // Check if already logged in
-        if (localStorage.getItem('authToken')) {
-            window.location.href = '/public/dashboard.html';
-        }
-    </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/supabase-config.js"></script>
+  <script src="/auth.js"></script>
 </body>
 </html>
-
-
-

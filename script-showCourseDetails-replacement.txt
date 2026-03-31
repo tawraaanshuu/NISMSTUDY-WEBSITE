@@ -1,0 +1,8 @@
+Replace only the showCourseDetails() function in your current script.js with this:
+
+function showCourseDetails(courseId) {
+  const map = window.COURSE_SLUG_MAP || {};
+  const slug = map[courseId] || courseId;
+  sessionStorage.setItem('selectedCourse', slug);
+  window.location.href = '/course-detail.html?slug=' + encodeURIComponent(slug);
+}

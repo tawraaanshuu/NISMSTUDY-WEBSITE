@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course Detail - NISMSTUDY.COM</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body { background:#f8fafc; }
+    .page { max-width:1100px; margin:0 auto; padding:32px 20px 60px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:24px; }
+    .pill { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background:#dbeafe; color:#1d4ed8; font-weight:600; font-size:14px; }
+    .card { background:#fff; border-radius:20px; box-shadow:0 16px 40px rgba(15,23,42,.06); padding:24px; }
+    .course-hero { display:grid; grid-template-columns:1.3fr .7fr; gap:20px; }
+    .meta { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin-top:18px; }
+    .meta .item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:14px; }
+    .section-title { margin:32px 0 14px; }
+    .message { margin-top:16px; padding:14px 16px; border-radius:14px; font-size:14px; }
+    .message.info { background:#eff6ff; color:#1d4ed8; }
+    .message.warn { background:#fff7ed; color:#c2410c; }
+    .quiz-grid { display:grid; gap:16px; }
+    .quiz-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:18px; display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center; }
+    .quiz-badges { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .badge { padding:6px 10px; border-radius:999px; background:#f1f5f9; font-size:13px; }
+    .quiz-action { min-width:200px; text-align:right; }
+    .btn { display:inline-block; border:0; border-radius:10px; padding:12px 16px; font-weight:700; text-decoration:none; cursor:pointer; }
+    .btn-primary { background:#2563eb; color:#fff; }
+    .btn-secondary { background:#e2e8f0; color:#0f172a; }
+    .btn-disabled { background:#e5e7eb; color:#6b7280; cursor:not-allowed; }
+    .tiny { color:#64748b; font-size:13px; margin-top:8px; }
+    .hidden { display:none; }
+    @media (max-width: 900px) {
+      .course-hero { grid-template-columns:1fr; }
+      .meta { grid-template-columns:1fr; }
+      .quiz-card { grid-template-columns:1fr; }
+      .quiz-action { text-align:left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <a href="/" class="btn btn-secondary">← Back to Home</a>
+      <div>
+        <a href="/login.html" class="btn btn-secondary">Login</a>
+      </div>
+    </div>
+
+    <div class="card course-hero">
+      <div>
+        <div class="pill">Pilot Course Page</div>
+        <h1 id="courseTitle">Loading course...</h1>
+        <p id="courseDescription" class="tiny">Please wait while we load the course details from Supabase.</p>
+        <div class="meta">
+          <div class="item"><strong>Price</strong><div id="coursePrice" class="tiny">—</div></div>
+          <div class="item"><strong>Status</strong><div id="courseStatus" class="tiny">—</div></div>
+          <div class="item"><strong>Slug</strong><div id="courseSlug" class="tiny">—</div></div>
+        </div>
+      </div>
+      <div class="card" style="box-shadow:none;border:1px solid #e2e8f0;">
+        <h3 style="margin-top:0;">Pilot notes</h3>
+        <ul>
+          <li>Phase 1 shows the course and exam sequence from Supabase.</li>
+          <li>Full tests stay locked until 8 mocks are completed.</li>
+          <li>Phase 2 will wire the actual exam start page, timer, answers, and submit flow.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="authInfo" class="message info hidden"></div>
+    <div id="errorBox" class="message warn hidden"></div>
+
+    <h2 class="section-title">Exam Sequence</h2>
+    <div id="quizGrid" class="quiz-grid"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/supabase-config.js"></script>
+  <script src="/course-detail.js"></script>
+</body>
+</html>
