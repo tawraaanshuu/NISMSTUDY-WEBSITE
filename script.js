@@ -43,10 +43,8 @@ function showEnroll() {
 }
 
 // Show Course Details - Redirects to course detail page
-function showCourseDetails(courseId) {
-    // Store the course ID in session storage so the course detail page can use it
-    sessionStorage.setItem('selectedCourse', courseId);
-    window.location.href = '/course-detail.html?course=' + courseId;
+function showCourseDetails(courseSlug) {
+  window.location.href = '/course-detail.html?slug=' + encodeURIComponent(courseSlug);
 }
 
 // Show Mock Tests - Redirects to quiz interface
