@@ -51,7 +51,6 @@ function showCourseDetails(courseSlug) {
 function showMockTests() {
     window.location.href = '/course-detail.html?slug=nism-series-v-a-mutual-fund-distributors';
 }
-
 // Show Free Materials
 function showFreeMaterials() {
     window.location.href = '/free-materials.html';
