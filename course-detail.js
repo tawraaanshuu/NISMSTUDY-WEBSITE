@@ -25,20 +25,13 @@
 
   function getSlugFromUrl() {
     const url = new URL(window.location.href);
-    const directSlug = url.searchParams.get('slug');
-    if (directSlug) return directSlug;
-
-    const selectedCourse = sessionStorage.getItem('selectedCourse');
-    if (!selectedCourse) return null;
-
-    const map = window.COURSE_SLUG_MAP || {};
-    return map[selectedCourse] || selectedCourse;
+    return url.searchParams.get('slug');
   }
 
   function setCourseDetails(course) {
     $('courseTitle').textContent = course.title || 'Course';
     $('courseDescription').textContent = course.long_description || course.short_description || 'Course details loaded from Supabase.';
-    $('coursePrice').textContent = course.price_inr ? `₹${course.price_inr}` : 'Free';
+    $('coursePrice').textContent = typeof course.price_inr === 'number' ? `₹${course.price_inr}` : 'Free';
     $('courseStatus').textContent = course.status || 'draft';
     $('courseSlug').textContent = course.slug || '—';
   }
@@ -48,47 +41,6 @@
     el.textContent = text;
     el.className = `message ${type}`;
     el.classList.remove('hidden');
-  }
-
-  function renderQuizzes(quizzes, completedMockCount, hasSession) {
-    const grid = $('quizGrid');
-    grid.innerHTML = '';
-
-    quizzes.forEach((quiz) => {
-      const fullTestLocked = quiz.exam_type === 'full' && completedMockCount < (quiz.required_completed_mocks || 0);
-      const buttonLabel = !hasSession
-        ? 'Login to Continue'
-        : fullTestLocked
-          ? 'Locked'
-          : 'Phase 2: Start Exam';
-
-      const actionClass = !hasSession || fullTestLocked ? 'btn btn-disabled' : 'btn btn-primary';
-      const note = !hasSession
-        ? 'Login is required before we can check your completed mocks and unlock full tests.'
-        : fullTestLocked
-          ? 'Complete all 8 mock tests to unlock this full test.'
-          : 'Sequence is correct. Exam start flow comes in Phase 2.';
-
-      const card = document.createElement('div');
-      card.className = 'quiz-card';
-      card.innerHTML = `
-        <div>
-          <h3 style="margin:0 0 6px 0;">${quiz.title}</h3>
-          <div class="quiz-badges">
-            <span class="badge">Order ${quiz.exam_order}</span>
-            <span class="badge">${quiz.total_questions} questions</span>
-            <span class="badge">${quiz.max_marks} marks</span>
-            <span class="badge">${quiz.duration_minutes} mins</span>
-            <span class="badge">${quiz.exam_type === 'full' ? 'Full Test' : 'Mock Test'}</span>
-          </div>
-          <div class="tiny">${note}</div>
-        </div>
-        <div class="quiz-action">
-          <button class="${actionClass}" ${!hasSession || fullTestLocked ? 'disabled' : ''}>${buttonLabel}</button>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
   }
 
   async function fetchCompletedMockCount(userId, courseId) {
@@ -105,8 +57,80 @@
       return 0;
     }
 
-    const uniqueQuizIds = new Set((data || []).map(row => row.quiz_id));
-    return uniqueQuizIds.size;
+    return new Set((data || []).map((row) => row.quiz_id)).size;
+  }
+
+  async function fetchInProgressAttemptMap(userId, courseId) {
+    const { data, error } = await supabase
+      .from('exam_attempts')
+      .select('id, quiz_id, status, submitted_at, quizzes!inner(course_id)')
+      .eq('user_id', userId)
+      .eq('quizzes.course_id', courseId)
+      .eq('status', 'in_progress')
+      .is('submitted_at', null);
+
+    if (error) {
+      console.warn('Could not fetch in-progress attempts:', error.message);
+      return new Map();
+    }
+
+    const map = new Map();
+    (data || []).forEach((row) => {
+      if (!map.has(row.quiz_id)) map.set(row.quiz_id, row.id);
+    });
+    return map;
+  }
+
+  function renderQuizzes(courseSlug, quizzes, completedMockCount, session, inProgressMap) {
+    const grid = $('quizGrid');
+    grid.innerHTML = '';
+
+    quizzes.forEach((quiz) => {
+      const hasQuizId = Boolean(quiz.id);
+      const isFullTest = quiz.exam_type === 'full';
+      const fullTestLocked = isFullTest && completedMockCount < (quiz.required_completed_mocks || 0);
+      const inProgressAttemptId = hasQuizId ? inProgressMap.get(quiz.id) : null;
+
+      let actionHtml = '<button class="btn btn-disabled" disabled>Unavailable</button>';
+      let note = 'This exam is not available yet.';
+
+      if (!session) {
+        actionHtml = '<a class="btn btn-secondary" href="/login.html">Login to Continue</a>';
+        note = 'Login is required before you can start or resume an exam.';
+      } else if (!hasQuizId) {
+        actionHtml = '<button class="btn btn-disabled" disabled>Unavailable</button>';
+        note = 'Quiz data could not be read from Supabase.';
+      } else if (fullTestLocked) {
+        actionHtml = '<button class="btn btn-disabled" disabled>Locked</button>';
+        note = 'Complete all 8 mock tests to unlock this full test.';
+      } else if (inProgressAttemptId) {
+        actionHtml = `<a class="btn btn-primary" href="/quiz-interface.html?slug=${encodeURIComponent(courseSlug)}&quizId=${encodeURIComponent(quiz.id)}&attemptId=${encodeURIComponent(inProgressAttemptId)}">Resume Exam</a>`;
+        note = 'You have an unfinished attempt for this exam.';
+      } else {
+        actionHtml = `<a class="btn btn-primary" href="/quiz-interface.html?slug=${encodeURIComponent(courseSlug)}&quizId=${encodeURIComponent(quiz.id)}">Start Exam</a>`;
+        note = 'Ready to start.';
+      }
+
+      const card = document.createElement('div');
+      card.className = 'quiz-card';
+      card.innerHTML = `
+        <div>
+          <h3 style="margin:0 0 6px 0;">${quiz.title}</h3>
+          <div class="quiz-badges">
+            <span class="badge">Order ${quiz.exam_order}</span>
+            <span class="badge">${quiz.total_questions} questions</span>
+            <span class="badge">${quiz.max_marks} marks</span>
+            <span class="badge">${quiz.duration_minutes} mins</span>
+            <span class="badge">${isFullTest ? 'Full Test' : 'Mock Test'}</span>
+          </div>
+          <div class="tiny">${note}</div>
+        </div>
+        <div class="quiz-action">
+          ${actionHtml}
+        </div>
+      `;
+      grid.appendChild(card);
+    });
   }
 
   async function load() {
@@ -117,13 +141,12 @@
     }
 
     if (!PILOT_SLUGS.has(slug)) {
-      showMessage('authInfo', 'This Phase 1 page is currently wired for the 3 pilot courses only.', 'info');
+      showMessage('authInfo', 'This Phase 2 flow is currently wired for the 3 pilot courses only.', 'info');
     }
 
     const { data: { session } } = await supabase.auth.getSession();
-
     if (!session) {
-      showMessage('authInfo', 'You are not logged in. We will still show the pilot exam sequence, but full unlock checks need a logged-in Supabase user.', 'info');
+      showMessage('authInfo', 'You are not logged in. You can still view the exam sequence, but login is required to start exams and check full-test unlock status.', 'info');
     }
 
     const { data: course, error: courseError } = await supabase
@@ -133,7 +156,7 @@
       .single();
 
     if (courseError) {
-      showMessage('errorBox', `Could not load course ${slug}. Make sure the course is published or log in as an allowed user.`, 'warn');
+      showMessage('errorBox', `Could not load course ${slug}. Make sure the course exists and is readable for your current user.`, 'warn');
       return;
     }
 
@@ -148,17 +171,19 @@
 
     if (quizError || !quizData || !quizData.length) {
       quizzes = FALLBACK_SEQUENCE;
-      showMessage('authInfo', 'Using fallback exam sequence because your current user cannot read quizzes yet. This still matches your Supabase pilot structure.', 'info');
+      showMessage('authInfo', 'Using fallback exam sequence because your current user cannot read quizzes yet. Start/Resume links need readable quiz rows.', 'info');
     } else {
       quizzes = quizData;
     }
 
     let completedMockCount = 0;
+    let inProgressMap = new Map();
     if (session?.user?.id) {
       completedMockCount = await fetchCompletedMockCount(session.user.id, course.id);
+      inProgressMap = await fetchInProgressAttemptMap(session.user.id, course.id);
     }
 
-    renderQuizzes(quizzes, completedMockCount, Boolean(session));
+    renderQuizzes(course.slug, quizzes, completedMockCount, session, inProgressMap);
   }
 
   document.addEventListener('DOMContentLoaded', load);

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Interface - NISMSTUDY.COM</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body { background:#f8fafc; }
+    .page { max-width:1200px; margin:0 auto; padding:24px 16px 40px; }
+    .hidden { display:none; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; }
+    .header-card, .question-card, .panel-card { background:#fff; border-radius:20px; box-shadow:0 16px 40px rgba(15,23,42,.06); padding:20px; }
+    .layout { display:grid; grid-template-columns:1fr 300px; gap:18px; align-items:start; }
+    .tiny { color:#64748b; font-size:13px; }
+    .title { margin:0 0 6px 0; }
+    .sub { margin:0; color:#475569; }
+    .pill-row, .quiz-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .pill, .mini-pill { background:#eff6ff; color:#1d4ed8; border-radius:999px; padding:6px 10px; font-size:13px; font-weight:600; }
+    .mini-pill { background:#f1f5f9; color:#334155; }
+    .question-actions, .footer-actions { display:flex; flex-wrap:wrap; gap:10px; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:12px; padding:12px 16px; font-weight:700; text-decoration:none; cursor:pointer; }
+    .btn-primary { background:#2563eb; color:#fff; }
+    .btn-secondary { background:#e2e8f0; color:#0f172a; }
+    .btn-danger { background:#dc2626; color:#fff; }
+    .btn-disabled { background:#e5e7eb; color:#6b7280; cursor:not-allowed; }
+    .question-text { font-size:22px; line-height:1.45; margin:0 0 20px; color:#0f172a; }
+    .options { display:grid; gap:12px; }
+    .option { border:1px solid #cbd5e1; border-radius:16px; padding:14px; display:flex; gap:12px; align-items:flex-start; cursor:pointer; }
+    .option.selected { border-color:#2563eb; background:#eff6ff; }
+    .option input { margin-top:4px; }
+    .option-letter { font-weight:800; min-width:26px; }
+    .message { margin-bottom:16px; padding:14px 16px; border-radius:14px; font-size:14px; }
+    .message.info { background:#eff6ff; color:#1d4ed8; }
+    .message.warn { background:#fff7ed; color:#c2410c; }
+    .message.error { background:#fef2f2; color:#b91c1c; }
+    .message.success { background:#ecfdf5; color:#047857; }
+    .status-box { display:grid; gap:12px; }
+    .timer { font-size:30px; font-weight:800; color:#0f172a; }
+    .timer.warn { color:#b45309; }
+    .timer.danger { color:#b91c1c; }
+    .grid-nav { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:8px; }
+    .nav-btn { border:1px solid #cbd5e1; background:#fff; border-radius:10px; min-height:42px; font-weight:700; cursor:pointer; }
+    .nav-btn.current { background:#2563eb; color:#fff; border-color:#2563eb; }
+    .nav-btn.answered { background:#dcfce7; border-color:#16a34a; color:#166534; }
+    .nav-btn.current.answered { background:#1d4ed8; color:#fff; border-color:#1d4ed8; }
+    .footer-actions { margin-top:20px; justify-content:space-between; }
+    .meta-list { display:grid; gap:10px; margin-top:14px; }
+    .meta-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:12px; }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns:1fr; }
+      .grid-nav { grid-template-columns:repeat(5, minmax(0,1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <a id="backToCourse" href="/" class="btn btn-secondary">← Back to Course</a>
+      <a href="/login.html" class="btn btn-secondary">Login</a>
+    </div>
+
+    <div id="messageBox" class="message info hidden"></div>
+
+    <div class="header-card">
+      <div class="pill-row"><span class="pill">Pilot Exam Page</span></div>
+      <h1 id="quizTitle" class="title">Loading exam…</h1>
+      <p id="courseTitle" class="sub">Please wait while we load the course and exam from Supabase.</p>
+      <div class="quiz-meta">
+        <span class="mini-pill" id="metaQuestions">— questions</span>
+        <span class="mini-pill" id="metaMarks">— marks</span>
+        <span class="mini-pill" id="metaDuration">— mins</span>
+        <span class="mini-pill" id="metaType">—</span>
+      </div>
+    </div>
+
+    <div class="layout" style="margin-top:18px;">
+      <div>
+        <div class="question-card">
+          <div class="tiny" id="questionProgress">Question 1 of 1</div>
+          <h2 id="questionText" class="question-text">Loading question…</h2>
+          <div id="options" class="options"></div>
+          <div class="footer-actions">
+            <div class="question-actions">
+              <button id="prevBtn" class="btn btn-secondary">Previous</button>
+              <button id="nextBtn" class="btn btn-secondary">Next</button>
+            </div>
+            <div class="question-actions">
+              <button id="submitBtn" class="btn btn-danger">Submit Exam</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-box">
+        <div class="panel-card">
+          <div class="tiny">Time Remaining</div>
+          <div id="timer" class="timer">--:--:--</div>
+          <div class="tiny" id="autosaveStatus">Autosave ready</div>
+        </div>
+
+        <div class="panel-card">
+          <h3 style="margin-top:0;">Attempt Status</h3>
+          <div class="meta-list">
+            <div class="meta-item"><strong>Answered</strong><div id="answeredCount" class="tiny">0</div></div>
+            <div class="meta-item"><strong>Violations</strong><div id="violationCount" class="tiny">0</div></div>
+            <div class="meta-item"><strong>Auto-submit Rule</strong><div class="tiny">Exam auto-submits when time ends or after 3 tab switches.</div></div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <h3 style="margin-top:0;">Question Navigator</h3>
+          <div id="questionNav" class="grid-nav"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/supabase-config.js"></script>
+  <script src="/quiz-interface.js"></script>
+</body>
+</html>
