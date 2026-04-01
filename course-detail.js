@@ -162,19 +162,23 @@
 
     setCourseDetails(course);
 
-    let quizzes = [];
     const { data: quizData, error: quizError } = await supabase
-      .from('quizzes')
-      .select('*')
-      .eq('course_id', course.id)
-      .order('exam_order', { ascending: true });
+  .from('quizzes')
+  .select('id,title,exam_type,exam_order,total_questions,max_marks,duration_minutes,required_completed_mocks')
+  .eq('course_id', course.id)
+  .order('exam_order', { ascending: true });
 
-    if (quizError || !quizData || !quizData.length) {
-      quizzes = FALLBACK_SEQUENCE;
-      showMessage('authInfo', 'Using fallback exam sequence because your current user cannot read quizzes yet. Start/Resume links need readable quiz rows.', 'info');
-    } else {
-      quizzes = quizData;
-    }
+if (quizError) {
+  showMessage('errorBox', `quizzes SELECT failed: ${quizError.message}`, 'warn');
+  return;
+}
+
+if (!quizData || !quizData.length) {
+  showMessage('errorBox', `No quizzes found for course_id=${course.id}`, 'warn');
+  return;
+}
+
+const quizzes = quizData;
 
     let completedMockCount = 0;
     let inProgressMap = new Map();
