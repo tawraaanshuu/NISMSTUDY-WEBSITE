@@ -1,13 +1,7 @@
 (function () {
   const { createClient } = window.supabase;
   const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-
-  const PILOT_SLUGS = new Set([
-    'nism-series-i-currency-derivatives',
-    'nism-series-v-a-mutual-fund-distributors',
-    'nism-series-viii-equity-derivatives'
-  ]);
-
+  
   const FALLBACK_SEQUENCE = [
     { title: 'Mock Test 1', exam_type: 'mock', exam_order: 1, total_questions: 50, max_marks: 50, duration_minutes: 90, required_completed_mocks: 0 },
     { title: 'Mock Test 2', exam_type: 'mock', exam_order: 2, total_questions: 50, max_marks: 50, duration_minutes: 90, required_completed_mocks: 0 },
@@ -140,11 +134,7 @@
       return;
     }
 
-    if (!PILOT_SLUGS.has(slug)) {
-      showMessage('authInfo', 'This Phase 2 flow is currently wired for the 3 pilot courses only.', 'info');
-    }
-
-    const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       showMessage('authInfo', 'You are not logged in. You can still view the exam sequence, but login is required to start exams and check full-test unlock status.', 'info');
     }
