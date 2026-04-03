@@ -43,13 +43,26 @@ function showEnroll() {
 }
 
 // Show Course Details - Redirects to course detail page
-function showCourseDetails(courseSlug) {
-  window.location.href = '/course-detail.html?slug=' + encodeURIComponent(courseSlug);
+const LIVE_COURSE_SLUGS = new Set([
+  'nism-series-i-currency-derivatives',
+  'nism-series-v-a-mutual-fund-distributors',
+  'nism-series-viii-equity-derivatives'
+]);
+
+function showCourseDetails(slug) {
+  const realSlug = (window.COURSE_SLUG_MAP && window.COURSE_SLUG_MAP[slug]) || slug;
+
+  if (!LIVE_COURSE_SLUGS.has(realSlug)) {
+    alert('This course is coming soon.');
+    return;
+  }
+
+  window.location.href = '/course-detail.html?slug=' + encodeURIComponent(realSlug);
 }
 
 // Show Mock Tests - Redirects to quiz interface
 function showMockTests() {
-    window.location.href = '/course-detail.html?slug=nism-series-v-a-mutual-fund-distributors';
+    scrollToSection('courses');
 }
 // Show Free Materials
 function showFreeMaterials() {
