@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NISMSTUDY - Mock Center</title>
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="dashboard.html">
+      <span class="brand-badge">NS</span>
+      <span>Mock Center</span>
+    </a>
+    <div class="nav-actions">
+      <a class="btn btn-secondary" href="dashboard.html">Dashboard</a>
+      <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </div>
+</header>
+<main>
+  <section class="page-hero">
+    <div class="container">
+      <span class="kicker">Unlimited within access window</span>
+      <h1>Take your mock test</h1>
+      <p class="lead">You can retake the mock as many times as you want while your paid access is active.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div id="mockMeta" class="card">Loading mock test...</div>
+      <form id="mockForm" class="stack" style="margin-top:18px;"></form>
+      <div id="mockActions" class="action-row hidden" style="margin-top:18px;">
+        <button class="btn btn-primary" type="submit" form="mockForm">Submit Mock</button>
+        <button class="btn btn-secondary" type="button" id="retakeBtn">Retake</button>
+      </div>
+      <div id="mockResult" class="notice hidden" style="margin-top:18px;"></div>
+    </div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
+  supabaseUrl: '',
+  supabaseAnonKey: '',
+  accessDays: 15,
+  defaultPriceLabel: 'Rs 329',
+  adminEmails: ['info@nismstudy.in'],
+  tables: {
+    profiles: 'profiles',
+    courses: 'courses',
+    quizzes: 'quizzes',
+    examAccess: 'exam_access',
+    paymentRecords: 'payment_records',
+    mockAttempts: 'mock_attempts',
+    homeSupport: 'home_support_content'
+  }
+};
+</script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(async function() {
+  const auth = await NISM_APP.requireAuth('login.html');
+  if (!auth) return;
+  document.getElementById('logoutBtn').addEventListener('click', () => NISM_APP.signOutUser());
+  const courseId = NISM_APP.qs('course');
+  const meta = document.getElementById('mockMeta');
+  const form = document.getElementById('mockForm');
+  const actions = document.getElementById('mockActions');
+  const result = document.getElementById('mockResult');
+  const retakeBtn = document.getElementById('retakeBtn');
+  if (!courseId) {
+    meta.innerHTML = 'Missing course reference.';
+    return;
+  }
+  try {
+    const [course, accessRecords] = await Promise.all([
+      NISM_APP.fetchCourse(courseId),
+      NISM_APP.fetchAccessRecords(auth.user.id)
+    ]);
+    const access = NISM_APP.findActiveAccess(accessRecords, courseId);
+    if (!course || !access) {
+      meta.innerHTML = 'Access not active for this exam. Purchase it from the dashboard first.';
+      return;
+    }
+    const quizzes = await NISM_APP.fetchQuizzes(courseId);
+    meta.innerHTML = `
+      <div class="badge-row">
+        <span class="status-pill ok">Access active until ${NISM_APP.fmtDate(access.access_until)}</span>
+        <span class="pill info">${quizzes.length} question(s)</span>
+      </div>
+      <h3>${NISM_APP.escapeHtml(course.exam_name || course.title || 'Mock Test')}</h3>
+      <p class="muted">Submit when finished. You can retake this mock any number of times before access ends.</p>`;
+    if (!quizzes.length) {
+      form.innerHTML = '<div class="notice">No quiz questions have been added for this exam yet.</div>';
+      return;
+    }
+    renderQuiz(quizzes);
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      let score = 0;
+      const answers = [];
+      quizzes.forEach((quiz) => {
+        const selected = form.querySelector(`input[name="q_${quiz.id}"]:checked`);
+        const answer = selected ? selected.value : '';
+        const correct = answer === quiz.correct_option;
+        if (correct) score += 1;
+        answers.push({ question_id: quiz.id, answer, correct });
+      });
+      result.classList.remove('hidden');
+      result.innerHTML = `You scored <strong>${score} / ${quizzes.length}</strong>. You can retake the mock again anytime before <strong>${NISM_APP.fmtDate(access.access_until)}</strong>.`;
+      await NISM_APP.saveMockAttempt({
+        userId: auth.user.id,
+        courseId,
+        score,
+        totalQuestions: quizzes.length,
+        answers
+      });
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+    actions.classList.remove('hidden');
+    retakeBtn.addEventListener('click', () => {
+      form.reset();
+      result.classList.add('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  } catch (error) {
+    console.error(error);
+    meta.innerHTML = 'Unable to load the mock test right now.';
+  }
+
+  function renderQuiz(quizzes) {
+    form.innerHTML = quizzes.map((quiz, index) => `
+      <article class="card quiz-question">
+        <div class="badge-row"><span class="pill info">Question ${index + 1}</span></div>
+        <h3>${NISM_APP.escapeHtml(quiz.question_text)}</h3>
+        <div class="option-list">
+          ${['A','B','C','D'].map(option => `
+            <label class="option-item">
+              <input type="radio" name="q_${quiz.id}" value="${option}">
+              <span><strong>${option}.</strong> ${NISM_APP.escapeHtml(quiz['option_' + option.toLowerCase()] || '')}</span>
+            </label>`).join('')}
+        </div>
+      </article>`).join('');
+  }
+})();
+</script>
+</body>
+</html>

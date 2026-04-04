@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NISMSTUDY - Payment Success</title>
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="dashboard.html">
+      <span class="brand-badge">NS</span>
+      <span>Payment Success</span>
+    </a>
+  </div>
+</header>
+<main class="auth-shell">
+  <div class="container">
+    <section class="card center">
+      <span class="kicker">Activation</span>
+      <h1 style="font-size:clamp(2rem,3vw,3rem);">Activating your exam access</h1>
+      <div id="paymentSuccessBox" class="notice">Please wait...</div>
+      <div class="action-row" style="justify-content:center; margin-top:18px;">
+        <a class="btn btn-primary hidden" id="goMockBtn" href="#">Start Mock</a>
+        <a class="btn btn-secondary" href="dashboard.html">Go to Dashboard</a>
+      </div>
+    </section>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
+  supabaseUrl: '',
+  supabaseAnonKey: '',
+  accessDays: 15,
+  defaultPriceLabel: 'Rs 329',
+  adminEmails: ['info@nismstudy.in'],
+  tables: {
+    profiles: 'profiles',
+    courses: 'courses',
+    quizzes: 'quizzes',
+    examAccess: 'exam_access',
+    paymentRecords: 'payment_records',
+    mockAttempts: 'mock_attempts',
+    homeSupport: 'home_support_content'
+  }
+};
+</script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(async function() {
+  const auth = await NISM_APP.requireAuth('login.html');
+  if (!auth) return;
+  const courseId = NISM_APP.qs('course');
+  const paymentStatus = NISM_APP.qs('payment_status');
+  const paymentRef = NISM_APP.qs('payment_ref') || `web-${Date.now()}`;
+  const box = document.getElementById('paymentSuccessBox');
+  const goMockBtn = document.getElementById('goMockBtn');
+  if (!courseId) {
+    box.innerHTML = 'Missing course reference. Open the dashboard and try again.';
+    return;
+  }
+  try {
+    const course = await NISM_APP.fetchCourse(courseId);
+    if (!course) {
+      box.innerHTML = 'Course not found.';
+      return;
+    }
+    if (paymentStatus !== 'success') {
+      box.innerHTML = 'Payment not marked as success yet. Complete payment and return with <code>payment_status=success</code>.';
+      return;
+    }
+    const access = await NISM_APP.recordPaymentAndGrantAccess({
+      user: auth.user,
+      course,
+      paymentRef,
+      rawPayload: Object.fromEntries(new URLSearchParams(window.location.search).entries())
+    });
+    box.innerHTML = `Payment recorded for <strong>${NISM_APP.escapeHtml(course.exam_name || course.title || 'exam')}</strong>.<br>Unlimited mocks are active until <strong>${NISM_APP.fmtDate(access.access_until)}</strong>.`;
+    goMockBtn.href = `mock-center.html?course=${course.id}`;
+    goMockBtn.classList.remove('hidden');
+  } catch (error) {
+    console.error(error);
+    box.innerHTML = 'Unable to activate access automatically. Check Supabase table permissions and payment settings.';
+  }
+})();
+</script>
+</body>
+</html>

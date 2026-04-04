@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NISMSTUDY - Checkout</title>
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="dashboard.html">
+      <span class="brand-badge">NS</span>
+      <span>Checkout</span>
+    </a>
+    <div class="nav-actions">
+      <a class="btn btn-secondary" href="dashboard.html">Back to Dashboard</a>
+    </div>
+  </div>
+</header>
+<main class="auth-shell">
+  <div class="container">
+    <section class="card">
+      <span class="kicker">Secure exam access</span>
+      <h1 style="font-size:clamp(2rem,3vw,3rem);">Confirm your purchase</h1>
+      <div id="checkoutCard">Loading exam details...</div>
+      <div id="checkoutStatus" class="notice" style="margin-top:18px;">Payment is handled by your configured payment link. This page does not replace your payment gateway.</div>
+    </section>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
+  supabaseUrl: '',
+  supabaseAnonKey: '',
+  accessDays: 15,
+  defaultPriceLabel: 'Rs 329',
+  adminEmails: ['info@nismstudy.in'],
+  tables: {
+    profiles: 'profiles',
+    courses: 'courses',
+    quizzes: 'quizzes',
+    examAccess: 'exam_access',
+    paymentRecords: 'payment_records',
+    mockAttempts: 'mock_attempts',
+    homeSupport: 'home_support_content'
+  }
+};
+</script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(async function() {
+  const auth = await NISM_APP.requireAuth('login.html');
+  if (!auth) return;
+  const courseId = NISM_APP.qs('course');
+  const target = document.getElementById('checkoutCard');
+  const status = document.getElementById('checkoutStatus');
+  if (!courseId) {
+    target.innerHTML = '<div class="notice">No exam selected. Go back to the dashboard.</div>';
+    return;
+  }
+  try {
+    const course = await NISM_APP.fetchCourse(courseId);
+    if (!course) {
+      target.innerHTML = '<div class="notice">Exam not found.</div>';
+      return;
+    }
+    const successUrl = `${window.location.origin}${window.location.pathname.replace('checkout.html', 'payment-success.html')}?course=${course.id}&payment_status=success`;
+    target.innerHTML = `
+      <div class="grid-2">
+        <div class="card card-compact">
+          <h3>${NISM_APP.escapeHtml(course.exam_name || course.title || 'Exam')}</h3>
+          <p class="muted">${NISM_APP.escapeHtml(course.description || 'Unlimited mock tests after successful payment.')}</p>
+          <p class="price">${NISM_APP.money(course.price || '329')}</p>
+          <p class="small">Access duration: ${course.mock_duration_days || 15} days</p>
+        </div>
+        <div class="card card-compact">
+          <h3>How payment works</h3>
+          <ol class="small">
+            <li>Click Proceed to Payment.</li>
+            <li>Complete payment on your configured payment link.</li>
+            <li>Set your gateway success/return URL to the link shown below.</li>
+            <li>After success, this bundle grants exam access for the next 15 days.</li>
+          </ol>
+          <div class="notice">Success return URL:<br><code>${NISM_APP.escapeHtml(successUrl)}&payment_ref={gateway_payment_id}</code></div>
+        </div>
+      </div>
+      <div class="action-row" style="margin-top:18px;">
+        <a class="btn btn-primary" id="paymentBtn" href="#">Proceed to Payment</a>
+        <a class="btn btn-secondary" href="dashboard.html">Cancel</a>
+      </div>`;
+
+    const paymentBtn = document.getElementById('paymentBtn');
+    if (course.payment_url) {
+      paymentBtn.href = course.payment_url;
+      status.innerHTML = 'Payment link loaded from the course record. After payment, redirect back to <code>payment-success.html</code> with the course and payment reference.';
+    } else {
+      paymentBtn.classList.add('btn-danger');
+      paymentBtn.removeAttribute('href');
+      paymentBtn.textContent = 'Payment Link Not Set';
+      status.innerHTML = 'Set <code>payment_url</code> for this exam from the admin portal before students purchase it.';
+    }
+  } catch (error) {
+    console.error(error);
+    target.innerHTML = '<div class="notice">Unable to load checkout details.</div>';
+  }
+})();
+</script>
+</body>
+</html>

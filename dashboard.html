@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NISMSTUDY - Dashboard</title>
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="dashboard.html">
+      <span class="brand-badge">NS</span>
+      <span>Student Dashboard</span>
+    </a>
+    <div class="nav-actions">
+      <a class="btn btn-secondary" href="login.html">Login Page</a>
+      <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </div>
+</header>
+<main>
+  <section class="page-hero">
+    <div class="container">
+      <span class="kicker">Protected area</span>
+      <h1>Your exam access and mock tests</h1>
+      <p class="lead">Only logged-in students can see this page. Pick an exam, complete payment, and use unlimited mocks for the next 15 days.</p>
+      <div id="dashboardAuthSummary"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container grid-3">
+      <div class="metric"><strong id="metricCourses">0</strong><span class="small">Published exams</span></div>
+      <div class="metric"><strong id="metricActive">0</strong><span class="small">Active accesses</span></div>
+      <div class="metric"><strong>15 Days</strong><span class="small">Default access window per paid exam</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>Available exams</h2>
+      <p class="lead">Click an exam to pay or start mocks if access is already active.</p>
+      <div id="dashboardCourseGrid" class="grid-3"></div>
+    </div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
+  supabaseUrl: '',
+  supabaseAnonKey: '',
+  accessDays: 15,
+  defaultPriceLabel: 'Rs 329',
+  adminEmails: ['info@nismstudy.in'],
+  tables: {
+    profiles: 'profiles',
+    courses: 'courses',
+    quizzes: 'quizzes',
+    examAccess: 'exam_access',
+    paymentRecords: 'payment_records',
+    mockAttempts: 'mock_attempts',
+    homeSupport: 'home_support_content'
+  }
+};
+</script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(async function() {
+  const auth = await NISM_APP.requireAuth('login.html');
+  if (!auth) return;
+  const logoutBtn = document.getElementById('logoutBtn');
+  logoutBtn.addEventListener('click', () => NISM_APP.signOutUser());
+  await NISM_APP.upsertProfileFromUser(auth.user);
+  const profile = await NISM_APP.getProfile(auth.user.id);
+  NISM_APP.renderAuthSummary(document.getElementById('dashboardAuthSummary'), auth.user, profile);
+
+  const courses = await NISM_APP.fetchPublishedCourses().catch(() => []);
+  const accessRecords = await NISM_APP.fetchAccessRecords(auth.user.id).catch(() => []);
+  document.getElementById('metricCourses').textContent = String(courses.length);
+  document.getElementById('metricActive').textContent = String(accessRecords.filter(item => new Date(item.access_until).getTime() > Date.now()).length);
+  const grid = document.getElementById('dashboardCourseGrid');
+  if (!courses.length) {
+    grid.innerHTML = '<div class="notice">No published exams found. Add them from the admin portal.</div>';
+    return;
+  }
+
+  grid.innerHTML = courses.map(course => {
+    const access = NISM_APP.findActiveAccess(accessRecords, course.id);
+    const active = Boolean(access);
+    const cta = active
+      ? `<a class="btn btn-primary" href="mock-center.html?course=${course.id}">Start Mock</a>`
+      : `<a class="btn btn-primary" href="checkout.html?course=${course.id}">Buy Access</a>`;
+    const badge = active
+      ? `<span class="status-pill ok">Active for ${NISM_APP.daysRemaining(access.access_until)} day(s)</span>`
+      : `<span class="pill warn">Not purchased</span>`;
+    const extra = active
+      ? `<p class="small">Access until ${NISM_APP.fmtDate(access.access_until)}</p>`
+      : `<p class="small">Price: ${NISM_APP.money(course.price || '329')} · Access: ${course.mock_duration_days || 15} days</p>`;
+    return `
+      <article class="card">
+        <div class="badge-row">${badge}</div>
+        <h3>${NISM_APP.escapeHtml(course.exam_name || course.title || 'Exam')}</h3>
+        <p class="muted">${NISM_APP.escapeHtml(course.description || 'Purchase access to unlock unlimited mock attempts.')}</p>
+        ${extra}
+        <div class="action-row">${cta}</div>
+      </article>`;
+  }).join('');
+})();
+</script>
+</body>
+</html>
