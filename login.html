@@ -23,38 +23,65 @@
     </div>
   </div>
 </header>
+
 <main class="auth-shell">
   <div class="container grid-2">
     <section class="card">
-      <span class="kicker">Student Access</span>
-      <h1 style="font-size:clamp(2rem,3vw,3rem);">Login with your email</h1>
-      <p class="muted">Students receive a magic link on email. After login, they can see exam names, make payment, and start unlimited mocks for 15 days after purchase.</p>
+      <span class="kicker">New Student</span>
+      <h1 style="font-size:clamp(2rem,3vw,3rem);">Create your account</h1>
+      <p class="muted">Enter your name, mobile number, and email. We will send a login link to your email. After the first signup, future logins use email only.</p>
+
+      <form id="signupForm" class="stack">
+        <label class="label">Full name
+          <input class="input" type="text" id="signupName" placeholder="Your full name" required>
+        </label>
+
+        <label class="label">Mobile number
+          <input class="input" type="tel" id="signupMobile" placeholder="10-digit mobile number" required>
+        </label>
+
+        <label class="label">Email address
+          <input class="input" type="email" id="signupEmail" placeholder="you@example.com" required>
+        </label>
+
+        <button class="btn btn-primary" type="submit">Create Account</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <span class="kicker">Returning Student</span>
+      <h2>Login with your email</h2>
+      <p class="muted">Returning students only need their email address. We will send a secure login link to that email.</p>
+
       <form id="loginForm" class="stack">
         <label class="label">Email address
           <input class="input" type="email" id="email" placeholder="you@example.com" required>
         </label>
         <button class="btn btn-primary" type="submit">Send Login Link</button>
       </form>
-      <div id="loginStatus" class="notice" style="margin-top:16px;">Waiting for your email login.</div>
-    </section>
 
-    <section class="card">
-      <span class="kicker">Account Shortcuts</span>
-      <h2>After login</h2>
-      <div id="authSummary" class="stack"></div>
-      <div id="loggedOutState" class="stack">
-        <div class="metric"><strong>15 Days</strong><span class="small">Unlimited mocks after successful payment.</span></div>
-        <div class="metric"><strong>Dashboard</strong><span class="small">Visible only after login.</span></div>
-        <div class="metric"><strong>Admin</strong><span class="small">Shown only for admin users.</span></div>
-      </div>
-      <div id="loggedInState" class="stack hidden">
-        <a class="btn btn-primary" href="dashboard.html">Open Dashboard</a>
-        <a class="btn btn-secondary hidden" id="adminPortalLink" href="admin.html">Open Admin Portal</a>
-        <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
+      <div id="loginStatus" class="notice" style="margin-top:16px;">Waiting for your signup or login request.</div>
+
+      <div style="margin-top:24px;">
+        <span class="kicker">Account Shortcuts</span>
+        <div id="authSummary" class="stack" style="margin-top:12px;"></div>
+
+        <div id="loggedOutState" class="stack">
+          <div class="metric"><strong>15 Days</strong><span class="small">Unlimited mocks after successful payment.</span></div>
+          <div class="metric"><strong>Dashboard</strong><span class="small">Visible only after login.</span></div>
+          <div class="metric"><strong>Admin</strong><span class="small">Shown only for admin users.</span></div>
+        </div>
+
+        <div id="loggedInState" class="stack hidden">
+          <a class="btn btn-primary" href="dashboard.html">Open Dashboard</a>
+          <a class="btn btn-secondary hidden" id="adminPortalLink" href="admin.html">Open Admin Portal</a>
+          <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
+        </div>
       </div>
     </section>
   </div>
 </main>
+
 <footer class="footer">
   <div class="container footer-grid">
     <div>
@@ -66,6 +93,7 @@
       <p class="small">1/3325 F/F Ramnagar Ext., Shahdara, Delhi 110032</p>
       <p class="small">Email: <a href="mailto:info@nismstudy.in">info@nismstudy.in</a></p>
     </div>
+
     <div>
       <h3>Quick Links</h3>
       <div class="footer-links">
@@ -75,6 +103,7 @@
         <a href="faq.html">FAQ</a>
       </div>
     </div>
+
     <div>
       <h3>Support</h3>
       <div class="support-links">
@@ -88,11 +117,13 @@
       </div>
     </div>
   </div>
+
   <div class="container">
     <hr class="sep">
     <p class="small">© 2026 NISMSTUDY. All rights reserved.</p>
   </div>
 </footer>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
@@ -116,7 +147,8 @@ window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
 <script src="app.js"></script>
 <script>
 (async function() {
-  const form = document.getElementById('loginForm');
+  const loginForm = document.getElementById('loginForm');
+  const signupForm = document.getElementById('signupForm');
   const status = document.getElementById('loginStatus');
   const authSummary = document.getElementById('authSummary');
   const loggedOutState = document.getElementById('loggedOutState');
@@ -125,30 +157,62 @@ window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
   const logoutBtn = document.getElementById('logoutBtn');
 
   const sessionInfo = await NISM_APP.getSession();
+
   if (!sessionInfo.client) {
     status.innerHTML = 'Set <code>window.NISM_APP_CONFIG</code> with your Supabase URL and anon key to enable email login.';
+    return;
   }
 
   if (sessionInfo.user) {
+    await NISM_APP.completePendingSignup(sessionInfo.user);
     await NISM_APP.upsertProfileFromUser(sessionInfo.user);
+
     const profile = await NISM_APP.getProfile(sessionInfo.user.id);
     NISM_APP.renderAuthSummary(authSummary, sessionInfo.user, profile);
+
     loggedOutState.classList.add('hidden');
     loggedInState.classList.remove('hidden');
-    status.innerHTML = 'Login successful. Use Dashboard to view exams and access.';
+    status.innerHTML = 'Login successful. Use Dashboard to continue.';
+
     if (NISM_APP.isAdmin(sessionInfo.user, profile)) {
       adminPortalLink.classList.remove('hidden');
     }
   }
 
-  form.addEventListener('submit', async (event) => {
+  signupForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+
+    const fullName = document.getElementById('signupName').value.trim();
+    const mobile = document.getElementById('signupMobile').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+
+    if (!fullName || !mobile || !email) return;
+
+    try {
+      status.innerHTML = 'Sending signup link...';
+      await NISM_APP.sendMagicLink(email, 'signup', {
+        full_name: fullName,
+        mobile
+      });
+      status.innerHTML = 'Signup link sent. Please open your email and click the login link.';
+      signupForm.reset();
+    } catch (error) {
+      console.error(error);
+      status.innerHTML = 'Unable to send signup link. Please check Supabase auth settings.';
+    }
+  });
+
+  loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
     const email = document.getElementById('email').value.trim();
     if (!email) return;
+
     try {
       status.innerHTML = 'Sending login link...';
-      await NISM_APP.sendMagicLink(email);
-      status.innerHTML = 'Magic link sent. Open your email and come back after login.';
+      await NISM_APP.sendMagicLink(email, 'login');
+      status.innerHTML = 'Login link sent. Please open your email and click the login link.';
+      loginForm.reset();
     } catch (error) {
       console.error(error);
       status.innerHTML = 'Unable to send login link. Please check Supabase auth settings.';
