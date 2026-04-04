@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Backend for NISMSTUDY.COM - NISM, NCFM, and Financial Planning exam preparation platform",
   "main": "server.js",
-  {
   "scripts": {
     "start": "node server.js",
     "start:prod": "NODE_ENV=production node server.production.js",
@@ -13,8 +12,7 @@
     "test": "node scripts/testAPI.js",
     "seed": "node scripts/seedData.js",
     "backup-db": "node scripts/backupDatabase.js"
-  }
-},
+  },
   "keywords": [
     "NISM",
     "NCFM",
@@ -47,4 +45,3 @@
     "nodemon": "^3.0.1"
   }
 }
-
