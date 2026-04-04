@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="NISMSTUDY.COM - Your premier destination for NISM, NCFM, and Financial Planning exam preparation. 79% pass rate with comprehensive courses and mock tests.">
+    <meta name="description" content="NISMSTUDY.COM - Your destination for NISM, NCFM, and Financial Planning exam preparation with comprehensive courses and mock tests.">
     <title>NISMSTUDY.COM - Master NISM, NCFM & Financial Planning Exams</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
@@ -44,16 +44,12 @@
                 <div class="hero-text">
                     <div class="badge">🏆 Trusted by 10,000+ Students</div>
                     <h1 class="hero-title">Master Your Financial Certification Journey</h1>
-                    <p class="hero-subtitle">Comprehensive study courses and premium mock tests for NISM, NCFM, and Financial Planning exams with an impressive <strong>79% pass rate</strong></p>
+                    <p class="hero-subtitle">Comprehensive study courses and premium mock tests for NISM, NCFM, and Financial Planning exams.</p>
                     <div class="hero-buttons">
                         <button class="btn btn-primary btn-large" onclick="showEnroll()">Start Learning Today</button>
                         <button class="btn btn-outline btn-large" onclick="scrollToSection('courses')">Explore Courses</button>
                     </div>
                     <div class="hero-stats">
-                        <div class="stat-item">
-                            <div class="stat-number">79%</div>
-                            <div class="stat-label">Pass Rate</div>
-                        </div>
                         <div class="stat-item">
                             <div class="stat-number">50+</div>
                             <div class="stat-label">Courses</div>
@@ -93,7 +89,7 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Why Choose NISMSTUDY.COM?</h2>
-                <p class="section-subtitle">Your success is our priority</p>
+                <p class="section-subtitle">Everything you need to prepare with confidence</p>
             </div>
             <div class="features-grid">
                 <div class="feature-card">
@@ -121,11 +117,6 @@
                     <h3>Expert Support</h3>
                     <p>Get your doubts cleared by experienced faculty</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💯</div>
-                    <h3>79% Success Rate</h3>
-                    <p>Proven track record with 79% students passing</p>
-                </div>
             </div>
         </div>
     </section>
@@ -140,18 +131,11 @@
                 <div class="portal-card" onclick="showLogin()">
                     <div class="portal-icon">🔐</div>
                     <h3>Student Login</h3>
-                    <p>Access your dashboard and enrolled courses</p>
+                    <p>Access your enrolled courses and account</p>
                     <span class="portal-link">Go to Login →</span>
                 </div>
-                
-                <div class="portal-card" onclick="showDashboard()">
-                    <div class="portal-icon">📊</div>
-                    <h3>My Dashboard</h3>
-                    <p>Track your progress and performance</p>
-                    <span class="portal-link">View Dashboard →</span>
-                </div>
-                
-                <div class="portal-card" onclick="scrollToSection('courses')">
+
+                <div class="portal-card" onclick="showMockTests()">
                     <div class="portal-icon">✍️</div>
                     <h3>Take Quiz</h3>
                     <p>Practice with premium mock tests</p>
@@ -164,8 +148,8 @@
                     <p>Download free study resources</p>
                     <span class="portal-link">Browse Materials →</span>
                 </div>
-                
-                <div class="portal-card" onclick="scrollToSection('courses')">
+
+                <div class="portal-card" onclick="window.location.href='/course-detail.html?slug=nism-series-v-a-mutual-fund-distributors'">
                     <div class="portal-icon">🎓</div>
                     <h3>Course Details</h3>
                     <p>Explore comprehensive course content</p>
@@ -178,674 +162,12 @@
     <section id="courses" class="courses">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Our Premium Courses</h2>
-                <p class="section-subtitle">Comprehensive study packages for all major financial certification exams</p>
-            </div>
-            
-            <div class="course-category">
-                <h3 class="category-title">NISM Certifications</h3>
-                <div class="courses-grid">
-                    <!-- Free Course -->
-                    <div class="course-card">
-                        <div class="course-badge">Free</div>
-                        <div class="course-icon">🎓</div>
-                        <h4>SEBI Investor Awareness Test</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">1 hr</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">Free</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">50</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">50%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Validity:</span>
-                                <span class="detail-value">2 years</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-
-                    <!-- NISM Series I -->
-                    <div class="course-card">
-                        <div class="course-badge">Popular</div>
-                        <div class="course-icon">💱</div>
-                        <h4>NISM Series I: Currency Derivatives</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">2 hrs</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">₹1,500</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">100</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">60%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Validity:</span>
-                                <span class="detail-value">3 years</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary btn-block" onclick="showCourseDetails('nism-series-i-currency-derivatives')">View Details</button>
-                    </div>
-
-                    <!-- NISM Series V-A -->
-                    <div class="course-card">
-                        <div class="course-badge">Best Seller</div>
-                        <div class="course-icon">📈</div>
-                        <h4>NISM Series V-A: Mutual Fund Distributors</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">2 hrs</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">₹1,500</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">100</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">50%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Validity:</span>
-                                <span class="detail-value">3 years</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary btn-block" onclick="showCourseDetails('nism-series-v-a-mutual-fund-distributors')">View Details</button>
-                    </div>
-
-                    <!-- NISM Series V-B -->
-                    <div class="course-card">
-                        <div class="course-icon">📊</div>
-                        <h4>NISM Series V-B: Mutual Fund Foundation</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">2 hrs</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">₹1,200</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">50</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">50%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Validity:</span>
-                                <span class="detail-value">3 years</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-
-                    <!-- NISM Series VIII -->
-                    <div class="course-card">
-                        <div class="course-badge">Trending</div>
-                        <div class="course-icon">💼</div>
-                        <h4>NISM Series VIII: Equity Derivatives</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">2 hrs</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">₹1,500</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">100</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">60%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Validity:</span>
-                                <span class="detail-value">3 years</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary btn-block" onclick="showCourseDetails('nism-series-viii-equity-derivatives')">View Details</button>
-                    </div>
-
-                    <!-- NISM Series X-A -->
-                    <div class="course-card">
-                        <div class="course-icon">🎯</div>
-                        <h4>NISM Series X-A: Investment Adviser (Level 1)</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">3 hrs</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">₹3,000</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">135</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">60%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Validity:</span>
-                                <span class="detail-value">3 years</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-
-                    <!-- NISM Series X-B -->
-                    <div class="course-card">
-                        <div class="course-icon">📊</div>
-                        <h4>NISM Series X-B: Investment Adviser (Level 2)</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">3 hrs</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">₹3,000</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">120</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">60%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Validity:</span>
-                                <span class="detail-value">3 years</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-
-                    <!-- NISM Series XII -->
-                    <div class="course-card">
-                        <div class="course-icon">🏦</div>
-                        <h4>NISM Series XII: Securities Markets Foundation</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">2 hrs</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">₹1,770</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">100</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">60%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Validity:</span>
-                                <span class="detail-value">3 years</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-
-                    <!-- NISM Series XV -->
-                    <div class="course-card">
-                        <div class="course-icon">💰</div>
-                        <h4>NISM Series XV: Research Analyst</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">2 hrs</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">₹1,500</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">100</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">60%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Validity:</span>
-                                <span class="detail-value">3 years</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-                </div>
-                
-                <!-- Show More Button -->
-                <div class="show-more-section" style="display: none;">
-                    <button class="btn btn-outline" onclick="toggleMoreNISM()" id="showMoreNISM">
-                        Show All NISM Courses (16 Total)
-                    </button>
-                </div>
-
-                <!-- Additional NISM Courses (Hidden by default) -->
-                <div class="additional-courses" id="additionalNISM" style="display: none;">
-                    <div class="courses-grid">
-                        <!-- NISM Series II-A -->
-                        <div class="course-card">
-                            <div class="course-icon">🏢</div>
-                            <h4>NISM Series II-A: Registrars to an Issue (Corporate)</h4>
-                            <div class="course-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Duration:</span>
-                                    <span class="detail-value">2 hrs</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Fees:</span>
-                                    <span class="detail-value">₹1,500</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Questions:</span>
-                                    <span class="detail-value">100</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Pass %:</span>
-                                    <span class="detail-value">50%</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                        </div>
-
-                        <!-- NISM Series II-B -->
-                        <div class="course-card">
-                            <div class="course-icon">🏦</div>
-                            <h4>NISM Series II-B: Registrars to an Issue (Mutual Fund)</h4>
-                            <div class="course-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Duration:</span>
-                                    <span class="detail-value">2 hrs</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Fees:</span>
-                                    <span class="detail-value">₹1,500</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Questions:</span>
-                                    <span class="detail-value">100</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Pass %:</span>
-                                    <span class="detail-value">50%</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                        </div>
-
-                        <!-- NISM Series III-A -->
-                        <div class="course-card">
-                            <div class="course-icon">⚖️</div>
-                            <h4>NISM Series III-A: Securities Intermediaries Compliance</h4>
-                            <div class="course-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Duration:</span>
-                                    <span class="detail-value">2 hrs</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Fees:</span>
-                                    <span class="detail-value">₹1,500</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Questions:</span>
-                                    <span class="detail-value">100</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Pass %:</span>
-                                    <span class="detail-value">60%</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                        </div>
-
-                        <!-- NISM Series IV -->
-                        <div class="course-card">
-                            <div class="course-icon">📈</div>
-                            <h4>NISM Series IV: Interest Rate Derivatives</h4>
-                            <div class="course-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Duration:</span>
-                                    <span class="detail-value">2 hrs</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Fees:</span>
-                                    <span class="detail-value">₹1,500</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Questions:</span>
-                                    <span class="detail-value">100</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Pass %:</span>
-                                    <span class="detail-value">60%</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                        </div>
-
-                        <!-- NISM Series VI -->
-                        <div class="course-card">
-                            <div class="course-icon">🏛️</div>
-                            <h4>NISM Series VI: Depository Operations</h4>
-                            <div class="course-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Duration:</span>
-                                    <span class="detail-value">2 hrs</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Fees:</span>
-                                    <span class="detail-value">₹1,500</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Questions:</span>
-                                    <span class="detail-value">100</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Pass %:</span>
-                                    <span class="detail-value">60%</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                        </div>
-
-                        <!-- NISM Series VII -->
-                        <div class="course-card">
-                            <div class="course-icon">🛡️</div>
-                            <h4>NISM Series VII: Securities Operations and Risk Management</h4>
-                            <div class="course-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Duration:</span>
-                                    <span class="detail-value">2 hrs</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Fees:</span>
-                                    <span class="detail-value">₹1,500</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Questions:</span>
-                                    <span class="detail-value">100</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Pass %:</span>
-                                    <span class="detail-value">50%</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                        </div>
-
-                        <!-- NISM Series IX -->
-                        <div class="course-card">
-                            <div class="course-icon">🏦</div>
-                            <h4>NISM Series IX: Merchant Banking</h4>
-                            <div class="course-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Duration:</span>
-                                    <span class="detail-value">2 hrs</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Fees:</span>
-                                    <span class="detail-value">₹1,500</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Questions:</span>
-                                    <span class="detail-value">100</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Pass %:</span>
-                                    <span class="detail-value">60%</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                        </div>
-
-                        <!-- NISM Series X-C -->
-                        <div class="course-card">
-                            <div class="course-icon">🔄</div>
-                            <h4>NISM Series X-C: Investment Adviser Certification (Renewal)</h4>
-                            <div class="course-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Duration:</span>
-                                    <span class="detail-value">1 hr</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Fees:</span>
-                                    <span class="detail-value">₹2,500</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Questions:</span>
-                                    <span class="detail-value">50</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Pass %:</span>
-                                    <span class="detail-value">50%</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                        </div>
-                    </div>
-                </div>
+                <h2 class="section-title">Popular Courses</h2>
+                <p class="section-subtitle">Loaded live from Supabase</p>
             </div>
 
-            <div class="course-category" style="display: none;">
-                <h3 class="category-title">NCFM Modules</h3>
-                <div class="courses-grid">
-                    <div class="course-card">
-                        <div class="course-badge">Best Seller</div>
-                        <div class="course-icon">📉</div>
-                        <h4>Financial Markets: Beginner's Module</h4>
-                        <p>Perfect starting point for your financial markets journey</p>
-                        <ul class="course-features">
-                            <li>✓ 60+ Video Lectures</li>
-                            <li>✓ 30+ Mock Tests</li>
-                            <li>✓ Interactive Content</li>
-                            <li>✓ Certification Support</li>
-                        </ul>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-
-                    <div class="course-card">
-                        <div class="course-icon">📋</div>
-                        <h4>Capital Markets Module</h4>
-                        <p>In-depth understanding of capital markets operations</p>
-                        <ul class="course-features">
-                            <li>✓ 85+ Video Lectures</li>
-                            <li>✓ 42+ Mock Tests</li>
-                            <li>✓ Real-world Examples</li>
-                            <li>✓ Expert Sessions</li>
-                        </ul>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-
-                    <div class="course-card">
-                        <div class="course-icon">⚖️</div>
-                        <h4>Derivatives Market Module</h4>
-                        <p>Master derivatives trading and risk management</p>
-                        <ul class="course-features">
-                            <li>✓ 95+ Video Lectures</li>
-                            <li>✓ 48+ Mock Tests</li>
-                            <li>✓ Trading Strategies</li>
-                            <li>✓ Risk Analysis</li>
-                        </ul>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="course-category" style="display: none;">
-                <h3 class="category-title">IBBI Valuation Examinations</h3>
-                <div class="courses-grid">
-                    <!-- IBBI Land and Building -->
-                    <div class="course-card">
-                        <div class="course-badge">Professional</div>
-                        <div class="course-icon">🏗️</div>
-                        <h4>IBBI: Valuation Examination - Land and Building</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">2 hrs</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">₹5,900</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">100</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">60%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Max Marks:</span>
-                                <span class="detail-value">90</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-
-                    <!-- IBBI Plant and Machinery -->
-                    <div class="course-card">
-                        <div class="course-icon">⚙️</div>
-                        <h4>IBBI: Valuation Examination - Plant and Machinery</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">2 hrs</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">₹5,900</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">100</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">60%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Max Marks:</span>
-                                <span class="detail-value">90</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-
-                    <!-- IBBI Securities -->
-                    <div class="course-card">
-                        <div class="course-icon">📊</div>
-                        <h4>IBBI: Valuation Examination - Securities or Financial Assets</h4>
-                        <div class="course-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">2 hrs</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Fees:</span>
-                                <span class="detail-value">₹5,900</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Questions:</span>
-                                <span class="detail-value">100</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Pass %:</span>
-                                <span class="detail-value">60%</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Max Marks:</span>
-                                <span class="detail-value">90</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="course-category" style="display: none;">
-                <h3 class="category-title">Financial Planning</h3>
-                <div class="courses-grid">
-                    <div class="course-card">
-                        <div class="course-badge">Comprehensive</div>
-                        <div class="course-icon">💡</div>
-                        <h4>Certified Financial Planner (CFP)</h4>
-                        <p>Complete CFP preparation with extensive study material</p>
-                        <ul class="course-features">
-                            <li>✓ 200+ Video Lectures</li>
-                            <li>✓ 100+ Mock Tests</li>
-                            <li>✓ Financial Planning Tools</li>
-                            <li>✓ Case Study Analysis</li>
-                        </ul>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-
-                    <div class="course-card">
-                        <div class="course-icon">🎓</div>
-                        <h4>Financial Planning Standards Board</h4>
-                        <p>Professional financial planning certification course</p>
-                        <ul class="course-features">
-                            <li>✓ 150+ Video Lectures</li>
-                            <li>✓ 75+ Mock Tests</li>
-                            <li>✓ Planning Frameworks</li>
-                            <li>✓ Mentorship Program</li>
-                        </ul>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-
-                    <div class="course-card">
-                        <div class="course-icon">📚</div>
-                        <h4>Retirement Planning Specialist</h4>
-                        <p>Specialized course in retirement and wealth planning</p>
-                        <ul class="course-features">
-                            <li>✓ 80+ Video Lectures</li>
-                            <li>✓ 40+ Mock Tests</li>
-                            <li>✓ Planning Software</li>
-                            <li>✓ Client Scenarios</li>
-                        </ul>
-                        <button class="btn btn-secondary btn-block" disabled>Coming Soon</button>
-                    </div>
-                </div>
-            </div>
+            <div id="homeCoursesState" class="section-subtitle" style="margin-bottom: 24px;">Loading popular courses…</div>
+            <div class="courses-grid" id="homePopularCoursesGrid"></div>
         </div>
     </section>
 
@@ -918,57 +240,7 @@
                                 <span class="cta-stat-label">Updated</span>
                             </div>
                         </div>
-                        <button class="btn btn-primary btn-large" onclick="scrollToSection('courses')">Access Mock Tests</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="success" class="success-rate">
-        <div class="container">
-            <div class="success-content">
-                <div class="success-text">
-                    <h2>Proven Success Rate: 79%</h2>
-                    <p class="success-description">Our students consistently achieve a 79% pass rate across NISM, NCFM, and Financial Planning exams</p>
-                    <div class="success-points">
-                        <div class="success-point">
-                            <div class="success-point-icon">✓</div>
-                            <div class="success-point-text">
-                                <h4>Structured Learning Path</h4>
-                                <p>Follow our proven methodology</p>
-                            </div>
-                        </div>
-                        <div class="success-point">
-                            <div class="success-point-icon">✓</div>
-                            <div class="success-point-text">
-                                <h4>Regular Assessments</h4>
-                                <p>Continuous evaluation ensures progress</p>
-                            </div>
-                        </div>
-                        <div class="success-point">
-                            <div class="success-point-icon">✓</div>
-                            <div class="success-point-text">
-                                <h4>Expert Mentorship</h4>
-                                <p>Personalized guidance from professionals</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="success-visual">
-                    <div class="success-chart">
-                        <div class="chart-bar">
-                            <div class="chart-value" style="height: 79%">
-                                <span class="chart-label">79%</span>
-                            </div>
-                            <span class="chart-name">NISMSTUDY.COM</span>
-                        </div>
-                        <div class="chart-bar">
-                            <div class="chart-value industry" style="height: 45%">
-                                <span class="chart-label">45%</span>
-                            </div>
-                            <span class="chart-name">Industry Average</span>
-                        </div>
+                        <button class="btn btn-primary btn-large" onclick="showMockTests()">Access Mock Tests</button>
                     </div>
                 </div>
             </div>
@@ -1044,7 +316,7 @@
 
                 <div class="testimonial-card">
                     <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
-                    <p class="testimonial-text">"Worth every penny! The 79% success rate claim is absolutely genuine based on my experience."</p>
+                    <p class="testimonial-text">"Worth every penny! The course flow and mock tests felt practical and easy to follow."</p>
                     <div class="testimonial-author">
                         <div class="author-avatar">NK</div>
                         <div class="author-info">
@@ -1060,8 +332,8 @@
     <section class="cta-section">
         <div class="container">
             <div class="cta-content">
-                <h2>Ready to Start Your Success Journey?</h2>
-                <p>Join thousands of successful students who trusted NISMSTUDY.COM</p>
+                <h2>Ready to Start Your Journey?</h2>
+                <p>Join thousands of students preparing with NISMSTUDY.COM</p>
                 <div class="cta-buttons">
                     <button class="btn btn-primary btn-large" onclick="showEnroll()">Enroll Now</button>
                     <button class="btn btn-outline-white btn-large" onclick="showContact()">Contact Us</button>
@@ -1135,12 +407,12 @@
                         <span class="logo-icon">📊</span>
                         <span class="logo-text">NISMSTUDY.COM</span>
                     </div>
-                    <p class="footer-description">Your trusted partner for NISM, NCFM, and Financial Planning exam preparation with a proven 79% success rate.</p>
+                    <p class="footer-description">Your trusted partner for NISM, NCFM, and Financial Planning exam preparation.</p>
                     <div class="social-links">
-                        <a href="#contact" class="social-link">Facebook</a>
-                        <a href="#contact" class="social-link">Twitter</a>
-                        <a href="#contact" class="social-link">LinkedIn</a>
-                        <a href="#contact" class="social-link">Instagram</a>
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">Twitter</a>
+                        <a href="#" class="social-link">LinkedIn</a>
+                        <a href="#" class="social-link">Instagram</a>
                     </div>
                 </div>
                 <div class="footer-section">
@@ -1150,31 +422,21 @@
                         <li><a href="#courses">Courses</a></li>
                         <li><a href="#mock-tests">Mock Tests</a></li>
                         <li><a href="/login.html">Login</a></li>
-                        <li><a href="/dashboard.html">Dashboard</a></li>
                         <li><a href="/free-materials.html">Free Materials</a></li>
-                        <li><a href="#courses">Take Quiz</a></li>
-                        <li><a href="#success">Success Rate</a></li>
+                        <li><a href="/quiz-interface.html">Take Quiz</a></li>
                         <li><a href="#testimonials">Testimonials</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Popular Courses</h4>
-                    <ul class="footer-links">
-                        <li><a href="/course-detail.html?slug=nism-series-i-currency-derivatives">NISM Series I</a></li>
-                        <li><a href="/course-detail.html?slug=nism-series-v-a-mutual-fund-distributors">NISM Series V-A</a></li>
-                        <li><a href="/course-detail.html?slug=nism-series-viii-equity-derivatives">NISM Series VIII</a></li>
+                    <ul class="footer-links" id="homePopularCourseLinks">
+                        <li><a href="#courses">Loading…</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Support</h4>
-                    <ul class="footer-links">
-                        <li><a href="#contact">Contact Us</a></li>
-                        <li><a href="/course-detail.html?slug=nism-series-v-a-mutual-fund-distributors">Course Details</a></li>
-                        <li><a href="/dashboard.html">Quiz Results</a></li>
-                        <li><a href="#contact">FAQ</a></li>
-                        <li><a href="#contact">Privacy Policy</a></li>
-                        <li><a href="#contact">Terms & Conditions</a></li>
-                        <li><a href="#contact">Refund Policy</a></li>
+                    <ul class="footer-links" id="homeSupportTeaserList">
+                        <li><a href="#contact">Loading…</a></li>
                     </ul>
                 </div>
             </div>
@@ -1223,10 +485,10 @@
             </div>
 
             <div class="chat-input">
-                <input 
-                    type="text" 
-                    id="chatInput" 
-                    placeholder="Type your question here..." 
+                <input
+                    type="text"
+                    id="chatInput"
+                    placeholder="Type your question here..."
                     autocomplete="off"
                 />
                 <button id="sendButton">
@@ -1240,7 +502,8 @@
 
     <link rel="stylesheet" href="/chatbot-styles.css">
     <script src="/chatbot.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/supabase-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
