@@ -3,50 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mock Tests - NISMSTUDY</title>
+  <title>Courses - NISMSTUDY</title>
   <link rel="stylesheet" href="/styles.css" />
   <style>
     body { background:#f8fafc; }
-    .page { max-width:1120px; margin:0 auto; padding:32px 20px 60px; }
-    .topbar { display:flex; justify-content:space-between; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:24px; }
+    .page { max-width:1180px; margin:0 auto; padding:32px 20px 60px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
     .btn { display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:12px; padding:12px 16px; font-weight:700; text-decoration:none; cursor:pointer; }
     .btn-primary { background:#2563eb; color:#fff; }
     .btn-secondary { background:#e2e8f0; color:#0f172a; }
-    .btn-disabled { background:#e5e7eb; color:#6b7280; cursor:not-allowed; }
-    .hero, .card { background:#fff; border-radius:24px; padding:24px; box-shadow:0 16px 40px rgba(15,23,42,.06); }
-    .lead, .muted { color:#64748b; }
-    .message { margin-top:16px; padding:14px 16px; border-radius:14px; font-size:14px; }
-    .message.info { background:#eff6ff; color:#1d4ed8; }
-    .message.warn { background:#fff7ed; color:#c2410c; }
-    .message.success { background:#ecfdf5; color:#047857; }
-    .quiz-grid { display:grid; gap:16px; margin-top:20px; }
-    .quiz-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:18px; display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center; }
-    .badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-    .badge { padding:6px 10px; border-radius:999px; background:#f1f5f9; font-size:13px; }
-    @media (max-width: 900px) { .quiz-card { grid-template-columns:1fr; } }
+    .hero { background:#fff; border-radius:24px; padding:28px; box-shadow:0 16px 40px rgba(15,23,42,.06); margin-bottom:24px; }
+    .lead { color:#475569; }
+    .grid { display:grid; gap:18px; }
+    .course-card { background:#fff; border:1px solid #e2e8f0; border-radius:20px; padding:22px; box-shadow:0 12px 32px rgba(15,23,42,.05); }
+    .card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+    .badge { display:inline-flex; padding:6px 10px; border-radius:999px; background:#eff6ff; color:#1d4ed8; font-size:13px; font-weight:700; }
+    .muted { color:#64748b; }
+    .price { font-weight:800; color:#0f172a; }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+    .more { margin-top:16px; border-top:1px solid #e2e8f0; padding-top:16px; display:none; }
+    .more.open { display:block; }
+    .detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .mini { background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:16px; }
+    .status { margin-bottom:16px; padding:14px 16px; border-radius:14px; font-size:14px; background:#eff6ff; color:#1d4ed8; }
+    .empty { background:#fff; border:1px dashed #cbd5e1; border-radius:18px; padding:20px; color:#64748b; }
+    @media (max-width: 900px) { .detail-grid { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
   <div class="page">
     <div class="topbar">
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="/courses.html" class="btn btn-secondary">← Courses</a>
-        <a href="/" class="btn btn-secondary">Home</a>
+        <a href="/" class="btn btn-secondary">← Home</a>
+        <a href="/login.html" class="btn btn-secondary">Login</a>
       </div>
-      <a href="/login.html" class="btn btn-secondary">Login</a>
+      <a href="/mock-tests.html" class="btn btn-primary">My Mock Tests</a>
     </div>
 
     <section class="hero">
-      <h1 id="pageTitle">Mock Tests</h1>
-      <p id="pageLead" class="lead">Login and active premium access are required.</p>
-      <div id="statusBox" class="message info">Checking your session…</div>
-      <div id="actionBox" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;"></div>
+      <div class="badge">Live Courses</div>
+      <h1>Browse all live NISM courses</h1>
+      <p class="lead">This page is dynamic. You can update titles, descriptions, prices, publish status, and PDF links in Supabase for up to 8 courses and beyond without editing HTML again.</p>
+      <div id="sessionStatus" class="status">Checking login status…</div>
     </section>
 
-    <section class="card" style="margin-top:20px;">
-      <h2>Available exams</h2>
-      <div id="quizGrid" class="quiz-grid"><div class="muted">Loading exam sequence…</div></div>
-    </section>
+    <div id="courseList" class="grid">
+      <div class="empty">Loading courses…</div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -55,8 +58,6 @@
     (function () {
       const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
       const $ = (id) => document.getElementById(id);
-      let session = null;
-      let course = null;
 
       function escapeHtml(value) {
         return String(value ?? '')
@@ -67,167 +68,144 @@
           .replaceAll("'", '&#39;');
       }
 
-      function qs(name) {
-        const url = new URL(window.location.href);
-        return url.searchParams.get(name);
+      function money(course) {
+        const raw = course.price_inr ?? course.price ?? 329;
+        return `Rs ${String(raw).replace(/^Rs\s*/i, '').trim()} + GST`;
       }
 
-      function fmtDate(value) {
-        const d = new Date(value);
-        return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      function normalizePublished(course) {
+        if (typeof course.is_published === 'boolean') return course.is_published;
+        if (course.status) return String(course.status).toLowerCase() === 'published';
+        return true;
       }
 
-      async function requireLogin() {
+      function findPdfUrl(course) {
+        const direct = course.workbook_pdf_url || course.pdf_url || course.material_url || course.study_material_url || '';
+        if (direct) return direct;
+        const localMap = {
+          'nism-series-iii-a-securities-intermediaries-compliance-non-fund': '/materials/NISM III-A Securities Intermediaries Compliance (Non-Fund).pdf',
+          'nism-series-v-a-mutual-fund-distributors': '/materials/NISM Series V-A Mutual Fund Distributors Certification Examination_August 2025 Final - 15092025.pdf',
+          'nism-series-xvi-commodity-derivatives': '/materials/NISM Series-XVI Commodity Derivatives Certification Examination_September 2025.pdf',
+          'nism-series-i-currency-derivatives': '/materials/NISM-SERIES-I--CURRENCY-DERIVATIVE-EXAM-WORKBOOK-IN-PDF.pdf',
+          'nism-series-vi-depository-operations': '/materials/NISM-SERIES-VI--DEPOSITORY-OPERATION-EXAM-WORKBOOK-IN-PDF.pdf',
+          'nism-series-vii-securities-operations-and-risk-management': '/materials/NISM-SERIES-VII--SECURITIES-OPERATIONS-AND-RISK-MANAGEMENT-EXAM-WORKBOOK-IN-PDF.pdf',
+          'nism-series-viii-equity-derivatives': '/materials/NISM-SERIES-VIII--EQUITY-DERIVATIVES-EXAM-WORKBOOK-IN-PDF.pdf',
+          'nism-series-x-a-investment-adviser-level-1': '/materials/NISM-SERIES-X-A--INVESTMENT-ADVISER-LEVEL-1-EXAM-WORKBOOK-IN-PDF.pdf',
+          'nism-series-xv-research-analyst': '/materials/NISM-SERIES-XV--RESEARCH-ANALYST-EXAM-WORKBOOK-IN-PDF.pdf'
+        };
+        return localMap[course.slug] || '';
+      }
+
+      async function getSession() {
         const { data } = await supabase.auth.getSession();
-        session = data.session || null;
-        if (!session) {
-          window.location.href = '/login.html';
-          throw new Error('Login required');
-        }
+        return data.session || null;
       }
 
-      async function loadCourse() {
-        const courseId = qs('course');
-        const slugParam = (window.COURSE_SLUG_MAP && window.COURSE_SLUG_MAP[qs('slug')]) || qs('slug');
-        let query = supabase.from('courses').select('*');
-        if (courseId) query = query.eq('id', courseId);
-        else if (slugParam) query = query.eq('slug', slugParam);
-        else throw new Error('Missing course reference. Open /mock-tests.html?course=<course_id>.');
-
-        const { data, error } = await query.single();
-        if (error || !data) throw new Error('Could not load the selected course.');
-        course = data;
-        $('pageTitle').textContent = `${course.title || 'Course'} · Mock Tests`;
-      }
-
-      async function loadAccess() {
+      async function getAccessMap(userId) {
+        if (!userId) return new Map();
         const { data, error } = await supabase
           .from('exam_access')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .eq('course_id', course.id)
-          .order('access_until', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (error) throw new Error('Could not verify premium access.');
-        return data && new Date(data.access_until).getTime() > Date.now() ? data : null;
-      }
-
-      async function fetchCompletedMockCount() {
-        const { data, error } = await supabase
-          .from('exam_attempts')
-          .select('quiz_id,status, quizzes!inner(course_id, exam_type)')
-          .eq('user_id', session.user.id)
-          .eq('quizzes.course_id', course.id)
-          .eq('quizzes.exam_type', 'mock')
-          .in('status', ['submitted', 'auto_submitted']);
-        if (error) return 0;
-        return new Set((data || []).map((row) => row.quiz_id)).size;
-      }
-
-      async function fetchInProgressAttemptMap() {
-        const { data, error } = await supabase
-          .from('exam_attempts')
-          .select('id, quiz_id, quizzes!inner(course_id)')
-          .eq('user_id', session.user.id)
-          .eq('quizzes.course_id', course.id)
-          .eq('status', 'in_progress')
-          .is('submitted_at', null);
+          .select('course_id, access_until')
+          .eq('user_id', userId);
         if (error) return new Map();
         const map = new Map();
-        (data || []).forEach((row) => { if (!map.has(row.quiz_id)) map.set(row.quiz_id, row.id); });
+        (data || []).forEach((row) => {
+          if (new Date(row.access_until).getTime() > Date.now()) map.set(row.course_id, row.access_until);
+        });
         return map;
       }
 
-      async function loadQuizzes() {
-        const { data, error } = await supabase
-          .from('quizzes')
-          .select('id,title,exam_type,exam_order,total_questions,max_marks,duration_minutes,required_completed_mocks,display_order')
-          .eq('course_id', course.id)
-          .order('exam_order', { ascending:true, nullsFirst:false })
-          .order('display_order', { ascending:true, nullsFirst:false });
-        if (error) throw new Error('Could not load quizzes for this course.');
-        return data || [];
-      }
-
-      function renderBlocked(access) {
-        const box = $('actionBox');
-        box.innerHTML = `
-          <a class="btn btn-primary" href="/checkout.html?course=${encodeURIComponent(course.id)}">Buy Premium Mock</a>
-          <a class="btn btn-secondary" href="/course-detail.html?slug=${encodeURIComponent(course.slug || '')}">Course Details</a>`;
-        $('statusBox').className = 'message warn';
-        $('statusBox').innerHTML = access
-          ? `Premium access expired on <strong>${escapeHtml(fmtDate(access.access_until))}</strong>. Renew payment to continue.`
-          : 'Premium access is not active for this course yet. Buy access to unlock all 10 exams.';
-      }
-
-      function renderReady(access, quizzes, completedMockCount, inProgressMap) {
-        const status = $('statusBox');
-        status.className = 'message success';
-        status.innerHTML = `Premium access is active until <strong>${escapeHtml(fmtDate(access.access_until))}</strong>. Strict timer and 5 screen/tab switches are enforced.`;
-        $('actionBox').innerHTML = `<a class="btn btn-secondary" href="/course-detail.html?slug=${encodeURIComponent(course.slug || '')}">Back to Course Details</a>`;
-
-        const grid = $('quizGrid');
-        if (!quizzes.length) {
-          grid.innerHTML = '<div class="muted">No quizzes found for this course.</div>';
-          return;
-        }
-
-        grid.innerHTML = quizzes.map((quiz) => {
-          const isFull = quiz.exam_type === 'full';
-          const locked = isFull && completedMockCount < (quiz.required_completed_mocks || 0);
-          const attemptId = inProgressMap.get(quiz.id);
-          let action = '<button class="btn btn-disabled" disabled>Unavailable</button>';
-          let note = 'Exam not available.';
-          if (locked) {
-            action = '<button class="btn btn-disabled" disabled>Locked</button>';
-            note = 'Complete all 8 mock tests to unlock this final exam.';
-          } else if (attemptId) {
-            action = `<a class="btn btn-primary" href="/quiz-interface.html?slug=${encodeURIComponent(course.slug || '')}&quizId=${encodeURIComponent(quiz.id)}&attemptId=${encodeURIComponent(attemptId)}">Resume Exam</a>`;
-            note = 'You have an unfinished attempt.';
-          } else {
-            action = `<a class="btn btn-primary" href="/quiz-interface.html?slug=${encodeURIComponent(course.slug || '')}&quizId=${encodeURIComponent(quiz.id)}">Start Exam</a>`;
-            note = 'Ready to start.';
-          }
-          return `
-            <article class="quiz-card">
+      function renderCard(course, activeUntil) {
+        const pdfUrl = findPdfUrl(course);
+        const moreId = `more-${course.id}`;
+        const cta = activeUntil
+          ? `<a class="btn btn-primary" href="/mock-tests.html?course=${encodeURIComponent(course.id)}">Start Mock Tests</a>`
+          : `<a class="btn btn-primary" href="/course-detail.html?slug=${encodeURIComponent(course.slug || '')}">Course Details</a>`;
+        const pdfBtn = pdfUrl
+          ? `<a class="btn btn-secondary" href="${escapeHtml(pdfUrl)}" target="_blank" rel="noopener">View PDF</a>`
+          : '';
+        return `
+          <article class="course-card">
+            <div class="card-head">
               <div>
-                <h3 style="margin:0 0 6px;">${escapeHtml(quiz.title || 'Exam')}</h3>
-                <div class="badges">
-                  <span class="badge">${escapeHtml(isFull ? 'Final Exam' : 'Mock Test')}</span>
-                  <span class="badge">${escapeHtml(quiz.total_questions ?? '—')} questions</span>
-                  <span class="badge">${escapeHtml(quiz.duration_minutes ?? '—')} minutes</span>
-                  <span class="badge">Order ${escapeHtml(quiz.exam_order ?? quiz.display_order ?? '—')}</span>
-                </div>
-                <div class="muted" style="margin-top:8px;">${escapeHtml(note)}</div>
+                <div class="badge">${escapeHtml(course.exam_name || course.slug || 'Course')}</div>
+                <h2 style="margin:10px 0 8px;">${escapeHtml(course.title || 'Untitled Course')}</h2>
+                <p class="muted">${escapeHtml(course.short_description || course.description || course.long_description || 'Workbook PDF and premium mock access available.')}</p>
               </div>
-              <div>${action}</div>
-            </article>`;
-        }).join('');
+              <div>
+                <div class="price">${escapeHtml(money(course))}</div>
+                <div class="muted" style="margin-top:6px;">${activeUntil ? `Active until ${escapeHtml(new Date(activeUntil).toLocaleDateString('en-IN'))}` : '15 days access after payment'}</div>
+              </div>
+            </div>
+            <div class="actions">
+              ${pdfBtn}
+              ${cta}
+              <button class="btn btn-secondary" type="button" data-toggle="${escapeHtml(moreId)}">Show More</button>
+            </div>
+            <div id="${escapeHtml(moreId)}" class="more">
+              <div class="detail-grid">
+                <div class="mini">
+                  <h3 style="margin-top:0;">Premium mock package</h3>
+                  <ul>
+                    <li>Study material included</li>
+                    <li>Claimed success rate: 89%</li>
+                    <li>Price: ${escapeHtml(money(course))}</li>
+                    <li>Validity: 15 days</li>
+                  </ul>
+                </div>
+                <div class="mini">
+                  <h3 style="margin-top:0;">Exam structure</h3>
+                  <ul>
+                    <li>Mock 1 to 8: 50 questions · 120 minutes</li>
+                    <li>Final Exam 9 and 10: 100 questions · 180 minutes</li>
+                    <li>Strict timer</li>
+                    <li>5 tab/screen switches, then auto-submit</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="actions">
+                <a class="btn btn-primary" href="/course-detail.html?slug=${encodeURIComponent(course.slug || '')}">Open Full Details</a>
+                <a class="btn btn-secondary" href="/checkout.html?course=${encodeURIComponent(course.id)}">Buy Premium Mock</a>
+              </div>
+            </div>
+          </article>`;
       }
 
       async function init() {
-        try {
-          await requireLogin();
-          await loadCourse();
-          const access = await loadAccess();
-          if (!access) {
-            renderBlocked(access);
-            $('quizGrid').innerHTML = '<div class="muted">Premium access is required before the exam cards become active.</div>';
-            return;
-          }
-          const [quizzes, completedMockCount, inProgressMap] = await Promise.all([
-            loadQuizzes(),
-            fetchCompletedMockCount(),
-            fetchInProgressAttemptMap()
-          ]);
-          renderReady(access, quizzes, completedMockCount, inProgressMap);
-        } catch (error) {
-          console.error(error);
-          $('statusBox').className = 'message warn';
-          $('statusBox').textContent = error.message || 'Could not load mock tests.';
-          $('quizGrid').innerHTML = '<div class="muted">Mock tests could not be loaded.</div>';
+        const session = await getSession();
+        const status = $('sessionStatus');
+        const accessMap = await getAccessMap(session?.user?.id);
+        status.textContent = session
+          ? `Logged in as ${session.user.email}. Active purchased courses are shown with Start Mock Tests.`
+          : 'You are browsing as a guest. Login is required before starting premium mock tests.';
+
+        const { data, error } = await supabase
+          .from('courses')
+          .select('*')
+          .order('display_order', { ascending: true, nullsFirst: false })
+          .order('created_at', { ascending: false, nullsFirst: false });
+
+        const list = $('courseList');
+        if (error) {
+          list.innerHTML = '<div class="empty">Could not load courses from Supabase.</div>';
+          return;
         }
+
+        const visible = (data || []).filter(normalizePublished);
+        if (!visible.length) {
+          list.innerHTML = '<div class="empty">No published courses found. Publish your 8 course rows in Supabase and they will appear here automatically.</div>';
+          return;
+        }
+
+        list.innerHTML = visible.map((course) => renderCard(course, accessMap.get(course.id))).join('');
+        document.querySelectorAll('[data-toggle]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const panel = document.getElementById(btn.getAttribute('data-toggle'));
+            if (!panel) return;
+            panel.classList.toggle('open');
+            btn.textContent = panel.classList.contains('open') ? 'Show Less' : 'Show More';
+          });
+        });
       }
 
       document.addEventListener('DOMContentLoaded', init);
