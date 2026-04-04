@@ -1,7 +1,6 @@
-window.SUPABASE_URL = 'https://yzmctktxzpzdfhdubwjs.supabase.co';
-window.SUPABASE_ANON_KEY = 'sb_publishable_BT1BJ5IKC7OArjTBdUBjkA_CjBZiFVf';
+window.SUPABASE_URL = 'YOUR_REAL_SUPABASE_URL';
+window.SUPABASE_ANON_KEY = 'YOUR_REAL_SUPABASE_ANON_KEY';
 
-// Common homepage IDs mapped to your real course slugs.
 window.COURSE_SLUG_MAP = {
   'series-i': 'nism-series-i-currency-derivatives',
   'nism-series-i': 'nism-series-i-currency-derivatives',
