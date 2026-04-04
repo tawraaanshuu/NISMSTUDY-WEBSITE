@@ -1,243 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NISMSTUDY - Courses</title>
-  <link rel="stylesheet" href="assets/app.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mock Tests - NISMSTUDY</title>
+  <link rel="stylesheet" href="/styles.css" />
   <style>
-    .course-summary { display:grid; gap:12px; }
-    .course-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:10px; }
-    .course-meta-list { display:grid; gap:10px; margin-top:16px; }
-    .course-meta-item { padding:14px 16px; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,.03); }
-    .course-expanded { margin-top:16px; display:grid; gap:16px; }
-    .course-expanded.hidden { display:none !important; }
-    .feature-box { border:1px solid var(--border); border-radius:18px; padding:18px; background:rgba(255,255,255,.03); }
-    .feature-box h4 { margin:0 0 8px; }
-    .price-strip { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; }
+    body { background:#f8fafc; }
+    .page { max-width:1120px; margin:0 auto; padding:32px 20px 60px; }
+    .topbar { display:flex; justify-content:space-between; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:24px; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:12px; padding:12px 16px; font-weight:700; text-decoration:none; cursor:pointer; }
+    .btn-primary { background:#2563eb; color:#fff; }
+    .btn-secondary { background:#e2e8f0; color:#0f172a; }
+    .btn-disabled { background:#e5e7eb; color:#6b7280; cursor:not-allowed; }
+    .hero, .card { background:#fff; border-radius:24px; padding:24px; box-shadow:0 16px 40px rgba(15,23,42,.06); }
+    .lead, .muted { color:#64748b; }
+    .message { margin-top:16px; padding:14px 16px; border-radius:14px; font-size:14px; }
+    .message.info { background:#eff6ff; color:#1d4ed8; }
+    .message.warn { background:#fff7ed; color:#c2410c; }
+    .message.success { background:#ecfdf5; color:#047857; }
+    .quiz-grid { display:grid; gap:16px; margin-top:20px; }
+    .quiz-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:18px; display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center; }
+    .badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .badge { padding:6px 10px; border-radius:999px; background:#f1f5f9; font-size:13px; }
+    @media (max-width: 900px) { .quiz-card { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
-<header class="header">
-  <div class="container nav">
-    <a class="brand" href="index.html">
-      <span class="brand-badge">NS</span>
-      <span>Courses</span>
-    </a>
-    <div class="nav-actions">
-      <a class="btn btn-secondary" href="index.html">Home</a>
-      <a class="btn btn-secondary" href="login.html" id="loginBtn">Login</a>
-      <a class="btn btn-secondary hidden" href="dashboard.html" id="dashboardBtn">Dashboard</a>
-      <button class="btn btn-ghost hidden" id="logoutBtn" type="button">Logout</button>
+  <div class="page">
+    <div class="topbar">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="/courses.html" class="btn btn-secondary">← Courses</a>
+        <a href="/" class="btn btn-secondary">Home</a>
+      </div>
+      <a href="/login.html" class="btn btn-secondary">Login</a>
     </div>
+
+    <section class="hero">
+      <h1 id="pageTitle">Mock Tests</h1>
+      <p id="pageLead" class="lead">Login and active premium access are required.</p>
+      <div id="statusBox" class="message info">Checking your session…</div>
+      <div id="actionBox" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;"></div>
+    </section>
+
+    <section class="card" style="margin-top:20px;">
+      <h2>Available exams</h2>
+      <div id="quizGrid" class="quiz-grid"><div class="muted">Loading exam sequence…</div></div>
+    </section>
   </div>
-</header>
-<main>
-  <section class="page-hero">
-    <div class="container">
-      <span class="kicker">Public course catalogue</span>
-      <h1>Explore NISM courses and premium mock packages</h1>
-      <p class="lead">Each exam shows the workbook PDF, the free intro mock structure, and the premium mock-test bundle. Click <strong>Show more</strong> on any course to see the full test pattern and purchase flow.</p>
-      <div id="catalogAuthSummary"></div>
-    </div>
-  </section>
 
-  <section class="section">
-    <div class="container grid-3">
-      <div class="metric"><strong id="metricCourses">0</strong><span class="small">Published courses</span></div>
-      <div class="metric"><strong>Rs 329 + GST</strong><span class="small">Premium mock + study material package</span></div>
-      <div class="metric"><strong>15 Days</strong><span class="small">Access after successful payment</span></div>
-    </div>
-  </section>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/supabase-config.js"></script>
+  <script>
+    (function () {
+      const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+      const $ = (id) => document.getElementById(id);
+      let session = null;
+      let course = null;
 
-  <section class="section">
-    <div class="container">
-      <div id="coursesGrid" class="grid-3"></div>
-    </div>
-  </section>
-</main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
-  supabaseUrl: '',
-  supabaseAnonKey: '',
-  accessDays: 15,
-  defaultPriceLabel: 'Rs 329',
-  adminEmails: ['info@nismstudy.in'],
-  tables: {
-    profiles: 'profiles',
-    courses: 'courses',
-    quizzes: 'quizzes',
-    examAccess: 'exam_access',
-    paymentRecords: 'payment_records',
-    mockAttempts: 'mock_attempts',
-    homeSupport: 'home_support_content'
-  }
-};
-</script>
-<script src="assets/config.js"></script>
-<script src="assets/app.js"></script>
-<script>
-(async function() {
-  const workbookMap = {
-    'nism iii-a securities intermediaries compliance (non-fund)': 'materials/NISM III-A Securities Intermediaries Compliance (Non-Fund).pdf',
-    'nism series v-a mutual fund distributors certification examination': 'materials/NISM Series V-A Mutual Fund Distributors Certification Examination_August 2025 Final - 15092025.pdf',
-    'nism series-xvi commodity derivatives certification examination': 'materials/NISM Series-XVI Commodity Derivatives Certification Examination_September 2025.pdf',
-    'nism series i currency derivative exam workbook': 'materials/NISM-SERIES-I--CURRENCY-DERIVATIVE-EXAM-WORKBOOK-IN-PDF.pdf',
-    'nism series vi depository operation exam workbook': 'materials/NISM-SERIES-VI--DEPOSITORY-OPERATION-EXAM-WORKBOOK-IN-PDF.pdf',
-    'nism series vii securities operations and risk management exam workbook': 'materials/NISM-SERIES-VII--SECURITIES-OPERATIONS-AND-RISK-MANAGEMENT-EXAM-WORKBOOK-IN-PDF.pdf',
-    'nism series viii equity derivatives exam workbook': 'materials/NISM-SERIES-VIII--EQUITY-DERIVATIVES-EXAM-WORKBOOK-IN-PDF.pdf',
-    'nism series x-a investment adviser level 1 exam workbook': 'materials/NISM-SERIES-X-A--INVESTMENT-ADVISER-LEVEL-1-EXAM-WORKBOOK-IN-PDF.pdf',
-    'nism series xv research analyst exam workbook': 'materials/NISM-SERIES-XV--RESEARCH-ANALYST-EXAM-WORKBOOK-IN-PDF.pdf'
-  };
-
-  const slugTarget = (NISM_APP.qs('slug') || '').trim().toLowerCase();
-  const courseTarget = (NISM_APP.qs('course') || '').trim().toLowerCase();
-
-  const logoutBtn = document.getElementById('logoutBtn');
-  const loginBtn = document.getElementById('loginBtn');
-  const dashboardBtn = document.getElementById('dashboardBtn');
-  const authSummary = document.getElementById('catalogAuthSummary');
-  const grid = document.getElementById('coursesGrid');
-
-  const sessionInfo = await NISM_APP.getSession();
-  const user = sessionInfo.user || null;
-  let accessRecords = [];
-
-  if (user) {
-    await NISM_APP.upsertProfileFromUser(user).catch(() => null);
-    const profile = await NISM_APP.getProfile(user.id).catch(() => null);
-    NISM_APP.renderAuthSummary(authSummary, user, profile);
-    accessRecords = await NISM_APP.fetchAccessRecords(user.id).catch(() => []);
-    logoutBtn.classList.remove('hidden');
-    dashboardBtn.classList.remove('hidden');
-    loginBtn.classList.add('hidden');
-    logoutBtn.addEventListener('click', () => NISM_APP.signOutUser());
-  }
-
-  const courses = await NISM_APP.fetchPublishedCourses().catch(() => []);
-  document.getElementById('metricCourses').textContent = String(courses.length);
-
-  if (!courses.length) {
-    grid.innerHTML = '<div class="notice">No published courses found. Publish them from Supabase admin first.</div>';
-    return;
-  }
-
-  grid.innerHTML = courses.map((course, index) => renderCourse(course, accessRecords, user, index)).join('');
-
-  document.querySelectorAll('[data-toggle-course]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const key = button.getAttribute('data-toggle-course');
-      const block = document.getElementById(`course-expanded-${key}`);
-      const isHidden = block.classList.contains('hidden');
-      block.classList.toggle('hidden', !isHidden);
-      button.textContent = isHidden ? 'Show less' : 'Show more';
-      if (isHidden) {
-        block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
       }
-    });
-  });
 
-  if (courseTarget || slugTarget) {
-    const matched = courses.find((course) => matchesTarget(course, courseTarget, slugTarget));
-    if (matched) {
-      const key = keyFor(matched);
-      const block = document.getElementById(`course-expanded-${key}`);
-      const button = document.querySelector(`[data-toggle-course="${key}"]`);
-      if (block && button) {
-        block.classList.remove('hidden');
-        button.textContent = 'Show less';
-        block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      function qs(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
       }
-    }
-  }
 
-  function renderCourse(course, accessRecords, user, index) {
-    const access = user ? NISM_APP.findActiveAccess(accessRecords, course.id) : null;
-    const pdfUrl = resolveWorkbook(course);
-    const key = keyFor(course) || `course-${index}`;
-    const activeText = access ? `Active until ${NISM_APP.fmtDate(access.access_until)}` : 'Premium not active yet';
-    const premiumCta = user
-      ? (access
-          ? `<a class="btn btn-primary" href="mock-tests.html?course=${course.id}">Open mock tests</a>`
-          : `<a class="btn btn-primary" href="checkout.html?course=${course.id}">Buy premium mock</a>`)
-      : `<a class="btn btn-primary" href="login.html">Login to unlock premium</a>`;
+      function fmtDate(value) {
+        const d = new Date(value);
+        return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      }
 
-    return `
-      <article class="card course-summary" id="catalog-${key}">
-        <div class="badge-row">
-          <span class="pill info">${NISM_APP.escapeHtml(course.exam_name || 'NISM')}</span>
-          <span class="tag">${NISM_APP.money(course.price || '329')} + GST</span>
-          <span class="status-pill ${access ? 'ok' : 'warn'}">${NISM_APP.escapeHtml(activeText)}</span>
-        </div>
-        <h2 style="margin:0;">${NISM_APP.escapeHtml(course.title || 'Course')}</h2>
-        <p class="muted" style="margin:0;">${NISM_APP.escapeHtml(course.description || 'Workbook PDF, premium mock tests, and exam-style practice for this NISM course.')}</p>
-        <div class="course-actions">
-          ${pdfUrl ? `<a class="btn btn-secondary" href="${NISM_APP.escapeHtml(pdfUrl)}" target="_blank" rel="noopener">View PDF</a>` : ''}
-          <button class="btn btn-secondary" type="button" data-toggle-course="${NISM_APP.escapeHtml(key)}">Show more</button>
-          ${premiumCta}
-        </div>
-        <div class="course-expanded hidden" id="course-expanded-${NISM_APP.escapeHtml(key)}">
-          <div class="grid-2">
-            <div class="feature-box">
-              <span class="pill info">Intro mock</span>
-              <h4>Mock Test</h4>
-              <p class="small">30 unique MCQs · 90 minutes · exam-style practice before buying premium access.</p>
-              <div class="course-meta-list">
-                <div class="course-meta-item">Strict timer: 1.5 hours to complete.</div>
-                <div class="course-meta-item">Same exam layout your learners will see later in premium tests.</div>
-              </div>
-            </div>
-            <div class="feature-box">
-              <span class="tag">Premium package</span>
-              <h4>Premium Mock Test + Study Material</h4>
-              <p class="small">Claimed success rate: <strong>89%</strong> for students who used the premium bundle.</p>
-              <div class="price-strip">
-                <div>
-                  <div class="price">${NISM_APP.money(course.price || '329')} + GST</div>
-                  <div class="small">15 days access after successful payment</div>
+      async function requireLogin() {
+        const { data } = await supabase.auth.getSession();
+        session = data.session || null;
+        if (!session) {
+          window.location.href = '/login.html';
+          throw new Error('Login required');
+        }
+      }
+
+      async function loadCourse() {
+        const courseId = qs('course');
+        const slugParam = (window.COURSE_SLUG_MAP && window.COURSE_SLUG_MAP[qs('slug')]) || qs('slug');
+        let query = supabase.from('courses').select('*');
+        if (courseId) query = query.eq('id', courseId);
+        else if (slugParam) query = query.eq('slug', slugParam);
+        else throw new Error('Missing course reference. Open /mock-tests.html?course=<course_id>.');
+
+        const { data, error } = await query.single();
+        if (error || !data) throw new Error('Could not load the selected course.');
+        course = data;
+        $('pageTitle').textContent = `${course.title || 'Course'} · Mock Tests`;
+      }
+
+      async function loadAccess() {
+        const { data, error } = await supabase
+          .from('exam_access')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .eq('course_id', course.id)
+          .order('access_until', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (error) throw new Error('Could not verify premium access.');
+        return data && new Date(data.access_until).getTime() > Date.now() ? data : null;
+      }
+
+      async function fetchCompletedMockCount() {
+        const { data, error } = await supabase
+          .from('exam_attempts')
+          .select('quiz_id,status, quizzes!inner(course_id, exam_type)')
+          .eq('user_id', session.user.id)
+          .eq('quizzes.course_id', course.id)
+          .eq('quizzes.exam_type', 'mock')
+          .in('status', ['submitted', 'auto_submitted']);
+        if (error) return 0;
+        return new Set((data || []).map((row) => row.quiz_id)).size;
+      }
+
+      async function fetchInProgressAttemptMap() {
+        const { data, error } = await supabase
+          .from('exam_attempts')
+          .select('id, quiz_id, quizzes!inner(course_id)')
+          .eq('user_id', session.user.id)
+          .eq('quizzes.course_id', course.id)
+          .eq('status', 'in_progress')
+          .is('submitted_at', null);
+        if (error) return new Map();
+        const map = new Map();
+        (data || []).forEach((row) => { if (!map.has(row.quiz_id)) map.set(row.quiz_id, row.id); });
+        return map;
+      }
+
+      async function loadQuizzes() {
+        const { data, error } = await supabase
+          .from('quizzes')
+          .select('id,title,exam_type,exam_order,total_questions,max_marks,duration_minutes,required_completed_mocks,display_order')
+          .eq('course_id', course.id)
+          .order('exam_order', { ascending:true, nullsFirst:false })
+          .order('display_order', { ascending:true, nullsFirst:false });
+        if (error) throw new Error('Could not load quizzes for this course.');
+        return data || [];
+      }
+
+      function renderBlocked(access) {
+        const box = $('actionBox');
+        box.innerHTML = `
+          <a class="btn btn-primary" href="/checkout.html?course=${encodeURIComponent(course.id)}">Buy Premium Mock</a>
+          <a class="btn btn-secondary" href="/course-detail.html?slug=${encodeURIComponent(course.slug || '')}">Course Details</a>`;
+        $('statusBox').className = 'message warn';
+        $('statusBox').innerHTML = access
+          ? `Premium access expired on <strong>${escapeHtml(fmtDate(access.access_until))}</strong>. Renew payment to continue.`
+          : 'Premium access is not active for this course yet. Buy access to unlock all 10 exams.';
+      }
+
+      function renderReady(access, quizzes, completedMockCount, inProgressMap) {
+        const status = $('statusBox');
+        status.className = 'message success';
+        status.innerHTML = `Premium access is active until <strong>${escapeHtml(fmtDate(access.access_until))}</strong>. Strict timer and 5 screen/tab switches are enforced.`;
+        $('actionBox').innerHTML = `<a class="btn btn-secondary" href="/course-detail.html?slug=${encodeURIComponent(course.slug || '')}">Back to Course Details</a>`;
+
+        const grid = $('quizGrid');
+        if (!quizzes.length) {
+          grid.innerHTML = '<div class="muted">No quizzes found for this course.</div>';
+          return;
+        }
+
+        grid.innerHTML = quizzes.map((quiz) => {
+          const isFull = quiz.exam_type === 'full';
+          const locked = isFull && completedMockCount < (quiz.required_completed_mocks || 0);
+          const attemptId = inProgressMap.get(quiz.id);
+          let action = '<button class="btn btn-disabled" disabled>Unavailable</button>';
+          let note = 'Exam not available.';
+          if (locked) {
+            action = '<button class="btn btn-disabled" disabled>Locked</button>';
+            note = 'Complete all 8 mock tests to unlock this final exam.';
+          } else if (attemptId) {
+            action = `<a class="btn btn-primary" href="/quiz-interface.html?slug=${encodeURIComponent(course.slug || '')}&quizId=${encodeURIComponent(quiz.id)}&attemptId=${encodeURIComponent(attemptId)}">Resume Exam</a>`;
+            note = 'You have an unfinished attempt.';
+          } else {
+            action = `<a class="btn btn-primary" href="/quiz-interface.html?slug=${encodeURIComponent(course.slug || '')}&quizId=${encodeURIComponent(quiz.id)}">Start Exam</a>`;
+            note = 'Ready to start.';
+          }
+          return `
+            <article class="quiz-card">
+              <div>
+                <h3 style="margin:0 0 6px;">${escapeHtml(quiz.title || 'Exam')}</h3>
+                <div class="badges">
+                  <span class="badge">${escapeHtml(isFull ? 'Final Exam' : 'Mock Test')}</span>
+                  <span class="badge">${escapeHtml(quiz.total_questions ?? '—')} questions</span>
+                  <span class="badge">${escapeHtml(quiz.duration_minutes ?? '—')} minutes</span>
+                  <span class="badge">Order ${escapeHtml(quiz.exam_order ?? quiz.display_order ?? '—')}</span>
                 </div>
-                ${premiumCta}
+                <div class="muted" style="margin-top:8px;">${escapeHtml(note)}</div>
               </div>
-            </div>
-          </div>
-          <div class="feature-box">
-            <span class="pill warn">Premium exam structure</span>
-            <div class="course-meta-list">
-              <div class="course-meta-item"><strong>Mock 1 to 8</strong><br><span class="small">50 questions each · 120 minutes per mock</span></div>
-              <div class="course-meta-item"><strong>Mock 9 and Mock 10 (Final Exams)</strong><br><span class="small">100 questions each · 180 minutes per final exam</span></div>
-              <div class="course-meta-item"><strong>Exam discipline</strong><br><span class="small">Strict timing. Screen change not allowed beyond 5 switches. A warning is shown on every switch and the test auto-submits on the 5th violation.</span></div>
-            </div>
-          </div>
-        </div>
-      </article>`;
-  }
+              <div>${action}</div>
+            </article>`;
+        }).join('');
+      }
 
-  function keyFor(course) {
-    return String(course.slug || course.id || course.exam_name || course.title || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-');
-  }
+      async function init() {
+        try {
+          await requireLogin();
+          await loadCourse();
+          const access = await loadAccess();
+          if (!access) {
+            renderBlocked(access);
+            $('quizGrid').innerHTML = '<div class="muted">Premium access is required before the exam cards become active.</div>';
+            return;
+          }
+          const [quizzes, completedMockCount, inProgressMap] = await Promise.all([
+            loadQuizzes(),
+            fetchCompletedMockCount(),
+            fetchInProgressAttemptMap()
+          ]);
+          renderReady(access, quizzes, completedMockCount, inProgressMap);
+        } catch (error) {
+          console.error(error);
+          $('statusBox').className = 'message warn';
+          $('statusBox').textContent = error.message || 'Could not load mock tests.';
+          $('quizGrid').innerHTML = '<div class="muted">Mock tests could not be loaded.</div>';
+        }
+      }
 
-  function normalize(value) {
-    return String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-  }
-
-  function matchesTarget(course, courseTarget, slugTarget) {
-    if (slugTarget && String(course.slug || '').trim().toLowerCase() === slugTarget) return true;
-    if (!courseTarget) return false;
-    const variants = [course.id, course.slug, course.exam_name, course.title].map(normalize);
-    return variants.includes(normalize(courseTarget));
-  }
-
-  function resolveWorkbook(course) {
-    if (course.workbook_pdf_url) return course.workbook_pdf_url;
-    const key = normalize(course.title || course.exam_name);
-    const mapped = workbookMap[key];
-    return mapped ? encodeURI(mapped) : '';
-  }
-})();
-</script>
+      document.addEventListener('DOMContentLoaded', init);
+    })();
+  </script>
 </body>
 </html>
