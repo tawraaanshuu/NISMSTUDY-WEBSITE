@@ -1,9 +1,9 @@
 window.NISM_APP_CONFIG = {
-  supabaseUrl: 'https://YOUR-PROJECT.supabase.co',
-  supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY',
+  supabaseUrl: 'https://yzmctktxzpzdfhdubwjs.supabase.co',
+  supabaseAnonKey: 'sb_publishable_BT1BJ5IKC7OArjTBdUBjkA_CjBZiFVf',
   accessDays: 15,
   defaultPriceLabel: 'Rs 329',
-  adminEmails: ['info@nismstudy.in'],
+  adminEmails: ['tawra.anshu@gmail.com'],
   tables: {
     profiles: 'profiles',
     courses: 'courses',
