@@ -1,40 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - NISMSTUDY.COM</title>
-  <link rel="stylesheet" href="/styles.css" />
-  <style>
-    body { background:#f7f9fc; }
-    .auth-wrap { max-width:420px; margin:60px auto; background:#fff; padding:32px; border-radius:18px; box-shadow:0 16px 40px rgba(15,23,42,.08); }
-    .auth-wrap h1 { margin-bottom:8px; }
-    .auth-wrap p { color:#64748b; margin-bottom:24px; }
-    .auth-wrap label { display:block; margin:14px 0 6px; font-weight:600; }
-    .auth-wrap input { width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:15px; }
-    .auth-wrap button { width:100%; margin-top:18px; padding:12px 14px; border:0; border-radius:10px; background:#2563eb; color:#fff; font-weight:700; cursor:pointer; }
-    .auth-wrap .muted { margin-top:14px; font-size:14px; }
-    .auth-wrap .error { color:#dc2626; min-height:22px; margin-top:12px; }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NISMSTUDY - Student Login</title>
+  <link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
-  <div class="auth-wrap">
-    <h1>Welcome Back</h1>
-    <p>Sign in with your Supabase account.</p>
-    <form id="loginForm">
-      <label for="email">Email</label>
-      <input id="email" type="email" required />
-      <label for="password">Password</label>
-      <input id="password" type="password" required />
-      <div id="authError" class="error"></div>
-      <button id="submitBtn" type="submit">Sign In</button>
-    </form>
-    <p class="muted">Don't have an account? <a href="/register.html">Create one</a></p>
-    <p class="muted"><a href="/">← Back to Website</a></p>
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="brand-badge">NS</span>
+      <span>NISMSTUDY</span>
+    </a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="contact-us.html">Contact</a>
+      <a href="faq.html">FAQ</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-secondary" href="login.html">Login</a>
+    </div>
   </div>
+</header>
+<main class="auth-shell">
+  <div class="container grid-2">
+    <section class="card">
+      <span class="kicker">Student Access</span>
+      <h1 style="font-size:clamp(2rem,3vw,3rem);">Login with your email</h1>
+      <p class="muted">Students receive a magic link on email. After login, they can see exam names, make payment, and start unlimited mocks for 15 days after purchase.</p>
+      <form id="loginForm" class="stack">
+        <label class="label">Email address
+          <input class="input" type="email" id="email" placeholder="you@example.com" required>
+        </label>
+        <button class="btn btn-primary" type="submit">Send Login Link</button>
+      </form>
+      <div id="loginStatus" class="notice" style="margin-top:16px;">Waiting for your email login.</div>
+    </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/supabase-config.js"></script>
-  <script src="/auth.js"></script>
+    <section class="card">
+      <span class="kicker">Account Shortcuts</span>
+      <h2>After login</h2>
+      <div id="authSummary" class="stack"></div>
+      <div id="loggedOutState" class="stack">
+        <div class="metric"><strong>15 Days</strong><span class="small">Unlimited mocks after successful payment.</span></div>
+        <div class="metric"><strong>Dashboard</strong><span class="small">Visible only after login.</span></div>
+        <div class="metric"><strong>Admin</strong><span class="small">Shown only for admin users.</span></div>
+      </div>
+      <div id="loggedInState" class="stack hidden">
+        <a class="btn btn-primary" href="dashboard.html">Open Dashboard</a>
+        <a class="btn btn-secondary hidden" id="adminPortalLink" href="admin.html">Open Admin Portal</a>
+        <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
+      </div>
+    </section>
+  </div>
+</main>
+<footer class="footer">
+  <div class="container footer-grid">
+    <div>
+      <div class="brand">
+        <span class="brand-badge">NS</span>
+        <span>NISMSTUDY</span>
+      </div>
+      <p class="small">Your trusted partner for NISM and financial market exam preparation.</p>
+      <p class="small">1/3325 F/F Ramnagar Ext., Shahdara, Delhi 110032</p>
+      <p class="small">Email: <a href="mailto:info@nismstudy.in">info@nismstudy.in</a></p>
+    </div>
+    <div>
+      <h3>Quick Links</h3>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="login.html">Login</a>
+        <a href="contact-us.html">Contact</a>
+        <a href="faq.html">FAQ</a>
+      </div>
+    </div>
+    <div>
+      <h3>Support</h3>
+      <div class="support-links">
+        <a href="contact-us.html">Contact Us</a>
+        <a href="careers.html">Careers</a>
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="refund-policy.html">Refund Policy</a>
+        <a href="terms-and-conditions.html">Terms &amp; Conditions</a>
+        <a href="cancellation-policy.html">Cancellation Policy</a>
+        <a href="faq.html">FAQ</a>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <hr class="sep">
+    <p class="small">© 2026 NISMSTUDY. All rights reserved.</p>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
+  supabaseUrl: '',
+  supabaseAnonKey: '',
+  accessDays: 15,
+  defaultPriceLabel: 'Rs 329',
+  adminEmails: ['info@nismstudy.in'],
+  tables: {
+    profiles: 'profiles',
+    courses: 'courses',
+    quizzes: 'quizzes',
+    examAccess: 'exam_access',
+    paymentRecords: 'payment_records',
+    mockAttempts: 'mock_attempts',
+    homeSupport: 'home_support_content'
+  }
+};
+</script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(async function() {
+  const form = document.getElementById('loginForm');
+  const status = document.getElementById('loginStatus');
+  const authSummary = document.getElementById('authSummary');
+  const loggedOutState = document.getElementById('loggedOutState');
+  const loggedInState = document.getElementById('loggedInState');
+  const adminPortalLink = document.getElementById('adminPortalLink');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  const sessionInfo = await NISM_APP.getSession();
+  if (!sessionInfo.client) {
+    status.innerHTML = 'Set <code>window.NISM_APP_CONFIG</code> with your Supabase URL and anon key to enable email login.';
+  }
+
+  if (sessionInfo.user) {
+    await NISM_APP.upsertProfileFromUser(sessionInfo.user);
+    const profile = await NISM_APP.getProfile(sessionInfo.user.id);
+    NISM_APP.renderAuthSummary(authSummary, sessionInfo.user, profile);
+    loggedOutState.classList.add('hidden');
+    loggedInState.classList.remove('hidden');
+    status.innerHTML = 'Login successful. Use Dashboard to view exams and access.';
+    if (NISM_APP.isAdmin(sessionInfo.user, profile)) {
+      adminPortalLink.classList.remove('hidden');
+    }
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    if (!email) return;
+    try {
+      status.innerHTML = 'Sending login link...';
+      await NISM_APP.sendMagicLink(email);
+      status.innerHTML = 'Magic link sent. Open your email and come back after login.';
+    } catch (error) {
+      console.error(error);
+      status.innerHTML = 'Unable to send login link. Please check Supabase auth settings.';
+    }
+  });
+
+  logoutBtn.addEventListener('click', () => NISM_APP.signOutUser());
+})();
+</script>
 </body>
 </html>
