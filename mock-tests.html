@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Mock Tests | NISMSTUDY</title>
+
+  <link rel="stylesheet" href="/styles.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <script src="/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="brand">NISMSTUDY</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/courses.html">Courses</a>
+        <a href="/mock-tests.html" class="active">Mock Tests</a>
+        <button id="logoutBtn" class="btn btn-secondary" type="button">Logout</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-hero">
+      <h1>My Mock Tests</h1>
+      <p>This page is visible only after login and only for active paid course access.</p>
+    </section>
+
+    <div id="mockState" class="page-state">Checking access...</div>
+    <section id="mockCourses" class="stack-list"></section>
+  </main>
+
+  <script>
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function quizRow(quiz) {
+      const title = escapeHtml(quiz.title);
+      const qCount = Number(quiz.question_count || 0);
+      const duration = Number(quiz.duration_minutes || 0);
+
+      return `
+        <li class="quiz-row">
+          <div>
+            <strong>${title}</strong>
+            <div class="muted">${qCount || '--'} questions · ${duration || '--'} mins</div>
+          </div>
+        </li>
+      `;
+    }
+
+    function courseBlock(course, quizzes, formatDate) {
+      const accessUntil = course.enrollment?.access_until
+        ? `Access until ${escapeHtml(formatDate(course.enrollment.access_until))}`
+        : 'Active access';
+
+      const quizHtml = quizzes.length
+        ? quizzes.map(quizRow).join('')
+        : `<li class="quiz-row"><div>No live quizzes are mapped to this course yet.</div></li>`;
+
+      return `
+        <article class="course-tests-card">
+          <div class="course-tests-card__header">
+            <div>
+              <h2>${escapeHtml(course.title)}</h2>
+              <p class="muted">${accessUntil}</p>
+            </div>
+            <a class="btn btn-primary" href="/course-detail.html?slug=${encodeURIComponent(course.slug)}">
+              Open course tests
+            </a>
+          </div>
+
+          <ul class="quiz-list">
+            ${quizHtml}
+          </ul>
+        </article>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const app = window.NISMApp;
+      const stateEl = document.getElementById('mockState');
+      const listEl = document.getElementById('mockCourses');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await app.signOut();
+        } catch (err) {
+          console.error(err);
+          alert('Unable to logout right now.');
+        }
+      });
+
+      try {
+        const user = await app.requireAuth();
+        if (!user) return;
+
+        await app.upsertProfile();
+
+        const courses = await app.getAccessibleCourses(user.id);
+
+        if (!courses.length) {
+          stateEl.innerHTML = `
+            <div class="empty-state">
+              <p>You do not have any active paid course access right now.</p>
+              <a class="btn btn-primary" href="/courses.html">Browse courses</a>
+            </div>
+          `;
+          listEl.innerHTML = '';
+          return;
+        }
+
+        const results = await Promise.all(
+          courses.map(async (course) => {
+            const quizzes = await app.getCourseQuizzes(course.id);
+            return { course, quizzes };
+          })
+        );
+
+        stateEl.textContent = '';
+        listEl.innerHTML = results
+          .map(({ course, quizzes }) => courseBlock(course, quizzes, app.formatDate))
+          .join('');
+      } catch (err) {
+        console.error(err);
+        stateEl.textContent = 'Unable to load your mock tests right now.';
+      }
+    });
+  </script>
+</body>
+</html>

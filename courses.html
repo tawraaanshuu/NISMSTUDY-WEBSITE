@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Courses | NISMSTUDY</title>
+
+  <link rel="stylesheet" href="/styles.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <script src="/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="brand">NISMSTUDY</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/courses.html" class="active">Courses</a>
+        <a href="/login.html">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-hero">
+      <h1>All NISM Courses</h1>
+      <p>Browse all live courses. Login is required only for dashboard, mock tests, and paid access.</p>
+    </section>
+
+    <div id="coursesState" class="page-state">Loading courses...</div>
+    <section id="coursesGrid" class="course-grid"></section>
+  </main>
+
+  <script>
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function courseCard(course) {
+      const slug = encodeURIComponent(course.slug);
+      const title = escapeHtml(course.title);
+      const desc = escapeHtml(course.short_description || 'Complete course with mock tests and exam preparation.');
+      const price = escapeHtml(course.price_label || 'Rs 329 + GST');
+
+      return `
+        <article class="course-card">
+          <div class="course-card__body">
+            <span class="badge">Live course</span>
+            <h3>${title}</h3>
+            <p>${desc}</p>
+
+            <div class="course-card__meta">
+              <span>${price}</span>
+            </div>
+
+            <div class="course-card__actions">
+              <a class="btn btn-primary" href="/course-detail.html?slug=${slug}">View details</a>
+              <a class="btn btn-secondary" href="/login.html?next=${encodeURIComponent('/course-detail.html?slug=' + course.slug)}">Login to continue</a>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const stateEl = document.getElementById('coursesState');
+      const gridEl = document.getElementById('coursesGrid');
+
+      try {
+        const courses = await window.NISMApp.getLiveCourses();
+
+        if (!courses.length) {
+          stateEl.textContent = 'No live courses available right now.';
+          gridEl.innerHTML = '';
+          return;
+        }
+
+        stateEl.textContent = '';
+        gridEl.innerHTML = courses.map(courseCard).join('');
+      } catch (err) {
+        console.error(err);
+        stateEl.textContent = 'Unable to load courses right now.';
+      }
+    });
+  </script>
+</body>
+</html>

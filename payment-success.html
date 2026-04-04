@@ -79,7 +79,7 @@ window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
       rawPayload: Object.fromEntries(new URLSearchParams(window.location.search).entries())
     });
     box.innerHTML = `Payment recorded for <strong>${NISM_APP.escapeHtml(course.exam_name || course.title || 'exam')}</strong>.<br>Unlimited mocks are active until <strong>${NISM_APP.fmtDate(access.access_until)}</strong>.`;
-    goMockBtn.href = `mock-center.html?course=${course.id}`;
+    goMockBtn.href = `mock-tests.html?course=${course.id}`;
     goMockBtn.classList.remove('hidden');
   } catch (error) {
     console.error(error);

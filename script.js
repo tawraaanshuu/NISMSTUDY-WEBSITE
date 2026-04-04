@@ -39,20 +39,10 @@ function showEnroll() {
     window.location.href = '/login.html';
 }
 
-const LIVE_COURSE_SLUGS = new Set([
-  'nism-series-i-currency-derivatives',
-  'nism-series-v-a-mutual-fund-distributors',
-  'nism-series-viii-equity-derivatives'
-]);
+const LIVE_COURSE_SLUGS = new Set();
 
 function showCourseDetails(slug) {
   const realSlug = (window.COURSE_SLUG_MAP && window.COURSE_SLUG_MAP[slug]) || slug;
-
-  if (LIVE_COURSE_SLUGS.size && !LIVE_COURSE_SLUGS.has(realSlug)) {
-    alert('This course is coming soon.');
-    return;
-  }
-
   window.location.href = '/course-detail.html?slug=' + encodeURIComponent(realSlug);
 }
 
