@@ -1,386 +1,332 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - NISMSTUDY.COM</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 1.5rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            font-size: 1.5rem;
-        }
-
-        .header-actions {
-            margin-top: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logout-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: none;
-            padding: 0.5rem 1.5rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .dashboard-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .stat-card h3 {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-card .value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #10b981;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid #e0e0e0;
-        }
-
-        .tab {
-            background: none;
-            border: none;
-            padding: 1rem 1.5rem;
-            cursor: pointer;
-            font-size: 1rem;
-            color: #666;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .tab.active {
-            color: #10b981;
-            border-bottom-color: #10b981;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .section {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-family: inherit;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #10b981;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: #10b981;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #059669;
-        }
-
-        .file-upload {
-            border: 2px dashed #10b981;
-            padding: 2rem;
-            text-align: center;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .file-upload:hover {
-            background: #f0fdf4;
-        }
-
-        .file-upload input {
-            display: none;
-        }
-
-        .success-message {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            display: none;
-        }
-
-        .error-message {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            display: none;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
-        }
-
-        .question-item {
-            border: 1px solid #e0e0e0;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 5px;
-        }
-
-        .quiz-instructions {
-            background: #f0fdf4;
-            padding: 1.5rem;
-            border-radius: 5px;
-            margin-bottom: 2rem;
-            border-left: 4px solid #10b981;
-        }
-
-        .quiz-instructions ul {
-            margin-left: 1.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .quiz-instructions li {
-            margin-bottom: 0.5rem;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NISMSTUDY - Admin Portal</title>
+  <link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
-    <div class="header">
-        <h1>📊 NISMSTUDY.COM - Admin Panel</h1>
-        <div class="header-actions">
-            <span id="adminName">Admin</span>
-            <button class="logout-btn" onclick="logout()">Logout</button>
-        </div>
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="admin.html">
+      <span class="brand-badge">NS</span>
+      <span>Admin Portal</span>
+    </a>
+    <div class="nav-actions">
+      <a class="btn btn-secondary" href="dashboard.html">Student Dashboard</a>
+      <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
     </div>
-
+  </div>
+</header>
+<main>
+  <section class="page-hero">
     <div class="container">
-        <div class="dashboard-stats">
-            <div class="stat-card">
-                <h3>Total Students</h3>
-                <div class="value" id="totalStudents">-</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total Courses</h3>
-                <div class="value" id="totalCourses">-</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total Quizzes</h3>
-                <div class="value" id="totalQuizzes">-</div>
-            </div>
-            <div class="stat-card">
-                <h3>Study Materials</h3>
-                <div class="value" id="totalMaterials">-</div>
-            </div>
-        </div>
-
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('upload')">Upload PDF</button>
-            <button class="tab" onclick="showTab('quiz')">Create Quiz</button>
-            <button class="tab" onclick="showTab('courses')">Manage Courses</button>
-        </div>
-
-        <div id="upload-tab" class="tab-content active">
-            <div class="section">
-                <h2>Upload Study Material (PDF)</h2>
-                <div id="upload-success" class="success-message"></div>
-                <div id="upload-error" class="error-message"></div>
-
-                <form id="uploadForm">
-                    <div class="form-group">
-                        <label>Select Course*</label>
-                        <select id="uploadCourse" required>
-                            <option value="">Loading courses...</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Material Title*</label>
-                        <input type="text" id="uploadTitle" required placeholder="e.g., Chapter 1: Introduction to Mutual Funds">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="uploadDescription" rows="3" placeholder="Brief description of the study material"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="isFree"> Make this material free (available to all users)
-                        </label>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Upload PDF File*</label>
-                        <div class="file-upload" onclick="document.getElementById('pdfFile').click()">
-                            <p>📄 Click to select PDF file (Max 10MB)</p>
-                            <p id="fileName" style="margin-top: 0.5rem; color: #10b981;"></p>
-                            <input type="file" id="pdfFile" accept=".pdf" required>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Upload Material</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="quiz-tab" class="tab-content">
-            <div class="section">
-                <h2>Create Quiz</h2>
-                <div class="quiz-instructions">
-                    <h3>📝 Quiz Requirements:</h3>
-                    <ul>
-                        <li><strong>Quizzes 1-8:</strong> Must have exactly <strong>50 questions</strong> (2 hours duration)</li>
-                        <li><strong>Quizzes 9-10:</strong> Must have exactly <strong>100 questions</strong> (3 hours duration)</li>
-                        <li>Passing percentage is set to <strong>60%</strong></li>
-                        <li>All questions must be multiple choice (4 options)</li>
-                    </ul>
-                </div>
-
-                <div id="quiz-success" class="success-message"></div>
-                <div id="quiz-error" class="error-message"></div>
-
-                <form id="quizForm">
-                    <div class="form-group">
-                        <label>Select Course*</label>
-                        <select id="quizCourse" required>
-                            <option value="">Loading courses...</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Quiz Number* (1-10)</label>
-                        <select id="quizNumber" required onchange="updateQuestionCount()">
-                            <option value="">Select quiz number</option>
-                            <option value="1">Quiz 1 (50 questions)</option>
-                            <option value="2">Quiz 2 (50 questions)</option>
-                            <option value="3">Quiz 3 (50 questions)</option>
-                            <option value="4">Quiz 4 (50 questions)</option>
-                            <option value="5">Quiz 5 (50 questions)</option>
-                            <option value="6">Quiz 6 (50 questions)</option>
-                            <option value="7">Quiz 7 (50 questions)</option>
-                            <option value="8">Quiz 8 (50 questions)</option>
-                            <option value="9">Quiz 9 (100 questions)</option>
-                            <option value="10">Quiz 10 (100 questions)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Quiz Title*</label>
-                        <input type="text" id="quizTitle" required placeholder="e.g., Mid-term Assessment">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="quizDescription" rows="3" placeholder="Brief description of the quiz"></textarea>
-                    </div>
-
-                    <div id="questionsContainer">
-                        <p style="color: #666;">Select a quiz number to start adding questions</p>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" id="submitQuiz" style="display: none;">Create Quiz</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="courses-tab" class="tab-content">
-            <div class="section">
-                <h2>Manage Courses</h2>
-                <p style="color: #666; margin-bottom: 1rem;">Course list and management features will be displayed here</p>
-                <div id="coursesLoading" class="loading">Loading courses...</div>
-                <div id="coursesList"></div>
-            </div>
-        </div>
+      <span class="kicker">Admin only</span>
+      <h1>Manage courses and quiz questions</h1>
+      <p class="lead">Admins can publish exams, change payment links, and update quiz questions from one page.</p>
+      <div id="adminSummary"></div>
     </div>
+  </section>
 
-    <script src="admin-script.js"></script>
+  <section class="section">
+    <div class="container grid-sidebar">
+      <aside class="sidebar-menu">
+        <a class="btn btn-secondary" href="#coursesSection">Courses</a>
+        <a class="btn btn-secondary" href="#quizzesSection">Quiz Questions</a>
+      </aside>
+      <div class="stack">
+        <section id="coursesSection" class="card">
+          <h2>Course Manager</h2>
+          <p class="muted">Add or edit exam name, price, payment link, access duration and publish status.</p>
+          <form id="courseForm" class="form-grid">
+            <input type="hidden" id="course_id">
+            <label class="label">Title<input class="input" id="course_title" required></label>
+            <label class="label">Exam Name<input class="input" id="course_exam_name" required></label>
+            <label class="label">Price<input class="input" id="course_price" placeholder="329"></label>
+            <label class="label">Display Order<input class="input" id="course_display_order" type="number" value="0"></label>
+            <label class="label">Payment URL<input class="input" id="course_payment_url" placeholder="https://your-payment-link"></label>
+            <label class="label">Access Days<input class="input" id="course_mock_duration_days" type="number" value="15"></label>
+            <label class="label" style="grid-column:1/-1;">Description<textarea id="course_description"></textarea></label>
+            <label class="label"><span>Published</span><select id="course_is_published"><option value="true">Yes</option><option value="false">No</option></select></label>
+            <div class="action-row" style="align-self:end;">
+              <button class="btn btn-primary" type="submit">Save Course</button>
+              <button class="btn btn-ghost" type="button" id="courseResetBtn">Reset</button>
+            </div>
+          </form>
+          <div id="courseStatus" class="notice" style="margin-top:16px;">Ready.</div>
+          <div class="table-wrap" style="margin-top:18px;">
+            <table>
+              <thead><tr><th>Exam</th><th>Price</th><th>Published</th><th>Access</th><th class="right">Actions</th></tr></thead>
+              <tbody id="courseTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="quizzesSection" class="card">
+          <h2>Quiz Manager</h2>
+          <p class="muted">Create or edit questions for each exam.</p>
+          <form id="quizForm" class="form-grid">
+            <input type="hidden" id="quiz_id">
+            <label class="label">Course<select id="quiz_course_id" required></select></label>
+            <label class="label">Display Order<input class="input" id="quiz_display_order" type="number" value="0"></label>
+            <label class="label" style="grid-column:1/-1;">Question<textarea id="quiz_question_text" required></textarea></label>
+            <label class="label">Option A<input class="input" id="quiz_option_a" required></label>
+            <label class="label">Option B<input class="input" id="quiz_option_b" required></label>
+            <label class="label">Option C<input class="input" id="quiz_option_c" required></label>
+            <label class="label">Option D<input class="input" id="quiz_option_d" required></label>
+            <label class="label">Correct Option<select id="quiz_correct_option"><option>A</option><option>B</option><option>C</option><option>D</option></select></label>
+            <label class="label">Active<select id="quiz_is_active"><option value="true">Yes</option><option value="false">No</option></select></label>
+            <label class="label" style="grid-column:1/-1;">Explanation<textarea id="quiz_explanation"></textarea></label>
+            <div class="action-row" style="align-self:end;">
+              <button class="btn btn-primary" type="submit">Save Question</button>
+              <button class="btn btn-ghost" type="button" id="quizResetBtn">Reset</button>
+            </div>
+          </form>
+          <div id="quizStatus" class="notice" style="margin-top:16px;">Ready.</div>
+          <div class="table-wrap" style="margin-top:18px;">
+            <table>
+              <thead><tr><th>Course</th><th>Question</th><th>Correct</th><th>Status</th><th class="right">Actions</th></tr></thead>
+              <tbody id="quizTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
+  supabaseUrl: '',
+  supabaseAnonKey: '',
+  accessDays: 15,
+  defaultPriceLabel: 'Rs 329',
+  adminEmails: ['info@nismstudy.in'],
+  tables: {
+    profiles: 'profiles',
+    courses: 'courses',
+    quizzes: 'quizzes',
+    examAccess: 'exam_access',
+    paymentRecords: 'payment_records',
+    mockAttempts: 'mock_attempts',
+    homeSupport: 'home_support_content'
+  }
+};
+</script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(async function() {
+  const auth = await NISM_APP.requireAuth('login.html');
+  if (!auth) return;
+  document.getElementById('logoutBtn').addEventListener('click', () => NISM_APP.signOutUser());
+  await NISM_APP.upsertProfileFromUser(auth.user);
+  const profile = await NISM_APP.getProfile(auth.user.id);
+  if (!NISM_APP.isAdmin(auth.user, profile)) {
+    document.body.innerHTML = '<main class="auth-shell"><div class="container"><div class="card center"><h1>Admin access only</h1><p class="muted">This page is restricted to admins.</p><a class="btn btn-primary" href="dashboard.html">Go to Dashboard</a></div></div></main>';
+    return;
+  }
+  NISM_APP.renderAuthSummary(document.getElementById('adminSummary'), auth.user, profile);
+
+  const courseForm = document.getElementById('courseForm');
+  const courseStatus = document.getElementById('courseStatus');
+  const courseTableBody = document.getElementById('courseTableBody');
+  const courseResetBtn = document.getElementById('courseResetBtn');
+  const quizForm = document.getElementById('quizForm');
+  const quizStatus = document.getElementById('quizStatus');
+  const quizTableBody = document.getElementById('quizTableBody');
+  const quizCourseSelect = document.getElementById('quiz_course_id');
+  const quizResetBtn = document.getElementById('quizResetBtn');
+
+  async function loadAll() {
+    const [courses, quizzes] = await Promise.all([
+      NISM_APP.fetchAllCourses(),
+      NISM_APP.fetchAllQuizzes()
+    ]);
+    renderCourses(courses);
+    renderCourseOptions(courses);
+    renderQuizzes(quizzes, courses);
+  }
+
+  function renderCourseOptions(courses) {
+    quizCourseSelect.innerHTML = courses.map(course => `<option value="${course.id}">${NISM_APP.escapeHtml(course.exam_name || course.title)}</option>`).join('');
+  }
+
+  function renderCourses(courses) {
+    courseTableBody.innerHTML = courses.length ? courses.map(course => `
+      <tr>
+        <td><strong>${NISM_APP.escapeHtml(course.exam_name || course.title || '')}</strong><br><span class="tiny">${NISM_APP.escapeHtml(course.title || '')}</span></td>
+        <td>${NISM_APP.money(course.price || '329')}</td>
+        <td>${course.is_published ? 'Yes' : 'No'}</td>
+        <td>${course.mock_duration_days || 15} days</td>
+        <td class="right">
+          <div class="action-row" style="justify-content:flex-end;">
+            <button class="btn btn-secondary" type="button" data-action="edit-course" data-id="${course.id}">Edit</button>
+            <button class="btn btn-danger" type="button" data-action="delete-course" data-id="${course.id}">Delete</button>
+          </div>
+        </td>
+      </tr>`).join('') : '<tr><td colspan="5">No courses yet.</td></tr>';
+  }
+
+  function renderQuizzes(quizzes, courses) {
+    const byId = Object.fromEntries(courses.map(course => [course.id, course]));
+    quizTableBody.innerHTML = quizzes.length ? quizzes.map(quiz => `
+      <tr>
+        <td>${NISM_APP.escapeHtml(byId[quiz.course_id]?.exam_name || byId[quiz.course_id]?.title || 'Unknown')}</td>
+        <td>${NISM_APP.escapeHtml((quiz.question_text || '').slice(0, 120))}</td>
+        <td>${NISM_APP.escapeHtml(quiz.correct_option || '')}</td>
+        <td>${quiz.is_active ? 'Active' : 'Inactive'}</td>
+        <td class="right">
+          <div class="action-row" style="justify-content:flex-end;">
+            <button class="btn btn-secondary" type="button" data-action="edit-quiz" data-id="${quiz.id}">Edit</button>
+            <button class="btn btn-danger" type="button" data-action="delete-quiz" data-id="${quiz.id}">Delete</button>
+          </div>
+        </td>
+      </tr>`).join('') : '<tr><td colspan="5">No questions yet.</td></tr>';
+
+    courseTableBody.querySelectorAll('[data-action="edit-course"]').forEach(btn => {
+      btn.addEventListener('click', () => editCourse(courses.find(item => item.id === btn.dataset.id)));
+    });
+    courseTableBody.querySelectorAll('[data-action="delete-course"]').forEach(btn => {
+      btn.addEventListener('click', () => removeCourse(btn.dataset.id));
+    });
+    quizTableBody.querySelectorAll('[data-action="edit-quiz"]').forEach(btn => {
+      btn.addEventListener('click', () => editQuiz(quizzes.find(item => item.id === btn.dataset.id)));
+    });
+    quizTableBody.querySelectorAll('[data-action="delete-quiz"]').forEach(btn => {
+      btn.addEventListener('click', () => removeQuiz(btn.dataset.id));
+    });
+  }
+
+  function editCourse(course) {
+    document.getElementById('course_id').value = course.id || '';
+    document.getElementById('course_title').value = course.title || '';
+    document.getElementById('course_exam_name').value = course.exam_name || '';
+    document.getElementById('course_price').value = course.price || '';
+    document.getElementById('course_display_order').value = course.display_order || 0;
+    document.getElementById('course_payment_url').value = course.payment_url || '';
+    document.getElementById('course_mock_duration_days').value = course.mock_duration_days || 15;
+    document.getElementById('course_description').value = course.description || '';
+    document.getElementById('course_is_published').value = String(Boolean(course.is_published));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function removeCourse(id) {
+    if (!confirm('Delete this course?')) return;
+    try {
+      await NISM_APP.deleteCourse(id);
+      courseStatus.innerHTML = 'Course deleted.';
+      await loadAll();
+    } catch (error) {
+      console.error(error);
+      courseStatus.innerHTML = 'Unable to delete course.';
+    }
+  }
+
+  function editQuiz(quiz) {
+    document.getElementById('quiz_id').value = quiz.id || '';
+    document.getElementById('quiz_course_id').value = quiz.course_id || '';
+    document.getElementById('quiz_display_order').value = quiz.display_order || 0;
+    document.getElementById('quiz_question_text').value = quiz.question_text || '';
+    document.getElementById('quiz_option_a').value = quiz.option_a || '';
+    document.getElementById('quiz_option_b').value = quiz.option_b || '';
+    document.getElementById('quiz_option_c').value = quiz.option_c || '';
+    document.getElementById('quiz_option_d').value = quiz.option_d || '';
+    document.getElementById('quiz_correct_option').value = quiz.correct_option || 'A';
+    document.getElementById('quiz_is_active').value = String(Boolean(quiz.is_active));
+    document.getElementById('quiz_explanation').value = quiz.explanation || '';
+    window.location.hash = '#quizzesSection';
+  }
+
+  async function removeQuiz(id) {
+    if (!confirm('Delete this question?')) return;
+    try {
+      await NISM_APP.deleteQuiz(id);
+      quizStatus.innerHTML = 'Question deleted.';
+      await loadAll();
+    } catch (error) {
+      console.error(error);
+      quizStatus.innerHTML = 'Unable to delete question.';
+    }
+  }
+
+  courseForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    try {
+      const payload = {
+        id: document.getElementById('course_id').value || undefined,
+        title: document.getElementById('course_title').value,
+        exam_name: document.getElementById('course_exam_name').value,
+        price: document.getElementById('course_price').value || '329',
+        display_order: Number(document.getElementById('course_display_order').value || 0),
+        payment_url: document.getElementById('course_payment_url').value,
+        mock_duration_days: Number(document.getElementById('course_mock_duration_days').value || 15),
+        description: document.getElementById('course_description').value,
+        is_published: document.getElementById('course_is_published').value === 'true'
+      };
+      await NISM_APP.saveCourse(payload);
+      courseStatus.innerHTML = 'Course saved.';
+      courseForm.reset();
+      document.getElementById('course_mock_duration_days').value = 15;
+      document.getElementById('course_display_order').value = 0;
+      document.getElementById('course_is_published').value = 'true';
+      document.getElementById('course_id').value = '';
+      await loadAll();
+    } catch (error) {
+      console.error(error);
+      courseStatus.innerHTML = 'Unable to save course.';
+    }
+  });
+
+  quizForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    try {
+      const payload = {
+        id: document.getElementById('quiz_id').value || undefined,
+        course_id: document.getElementById('quiz_course_id').value,
+        display_order: Number(document.getElementById('quiz_display_order').value || 0),
+        question_text: document.getElementById('quiz_question_text').value,
+        option_a: document.getElementById('quiz_option_a').value,
+        option_b: document.getElementById('quiz_option_b').value,
+        option_c: document.getElementById('quiz_option_c').value,
+        option_d: document.getElementById('quiz_option_d').value,
+        correct_option: document.getElementById('quiz_correct_option').value,
+        is_active: document.getElementById('quiz_is_active').value === 'true',
+        explanation: document.getElementById('quiz_explanation').value
+      };
+      await NISM_APP.saveQuiz(payload);
+      quizStatus.innerHTML = 'Question saved.';
+      quizForm.reset();
+      document.getElementById('quiz_display_order').value = 0;
+      document.getElementById('quiz_correct_option').value = 'A';
+      document.getElementById('quiz_is_active').value = 'true';
+      document.getElementById('quiz_id').value = '';
+      await loadAll();
+    } catch (error) {
+      console.error(error);
+      quizStatus.innerHTML = 'Unable to save question.';
+    }
+  });
+
+  courseResetBtn.addEventListener('click', () => {
+    courseForm.reset();
+    document.getElementById('course_id').value = '';
+    document.getElementById('course_mock_duration_days').value = 15;
+    document.getElementById('course_display_order').value = 0;
+    document.getElementById('course_is_published').value = 'true';
+  });
+
+  quizResetBtn.addEventListener('click', () => {
+    quizForm.reset();
+    document.getElementById('quiz_id').value = '';
+    document.getElementById('quiz_display_order').value = 0;
+    document.getElementById('quiz_correct_option').value = 'A';
+    document.getElementById('quiz_is_active').value = 'true';
+  });
+
+  await loadAll();
+})();
+</script>
 </body>
 </html>
-
