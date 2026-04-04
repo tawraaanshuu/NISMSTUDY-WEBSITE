@@ -46,7 +46,11 @@ window.NISM_APP = (() => {
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return value;
     return d.toLocaleString('en-IN', {
-      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   }
 
@@ -54,7 +58,11 @@ window.NISM_APP = (() => {
     if (!value) return '—';
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return value;
-    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
   }
 
   function daysRemaining(value) {
@@ -64,11 +72,44 @@ window.NISM_APP = (() => {
     return Math.max(0, Math.ceil((end - now) / (1000 * 60 * 60 * 24)));
   }
 
+  function getLoginPath() {
+    const configured = String(cfg().loginPath || '').trim();
+    if (configured) {
+      return configured.startsWith('/') ? configured : `/${configured}`;
+    }
+
+    const path = window.location.pathname || '';
+    if (/\/login(?:\.html)?$/.test(path)) return path;
+    return '/login';
+  }
+
+  function getLoginUrl() {
+    return `${window.location.origin}${getLoginPath()}`;
+  }
+
+  function getPendingSignup() {
+    try {
+      return JSON.parse(localStorage.getItem('nism_pending_signup') || 'null');
+    } catch {
+      return null;
+    }
+  }
+
+  function setPendingSignup(data) {
+    localStorage.setItem('nism_pending_signup', JSON.stringify(data || null));
+  }
+
+  function clearPendingSignup() {
+    localStorage.removeItem('nism_pending_signup');
+  }
+
   async function createClient() {
     if (_client) return _client;
     if (!window.supabase || !window.supabase.createClient) return null;
+
     const config = cfg();
     if (!config.supabaseUrl || !config.supabaseAnonKey) return null;
+
     _client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
       auth: {
         autoRefreshToken: true,
@@ -76,48 +117,78 @@ window.NISM_APP = (() => {
         detectSessionInUrl: true
       }
     });
+
     return _client;
   }
 
   async function getSession() {
     const client = await createClient();
     if (!client) return { client: null, session: null, user: null };
+
     const { data } = await client.auth.getSession();
-    return { client, session: data.session || null, user: data.session?.user || null };
+    return {
+      client,
+      session: data.session || null,
+      user: data.session?.user || null
+    };
   }
 
-  async function requireAuth(redirectTo = 'login.html') {
+  async function requireAuth(redirectTo = null) {
     const { client, session, user } = await getSession();
     if (!client || !session || !user) {
-      window.location.href = redirectTo;
+      window.location.href = redirectTo || getLoginPath();
       return null;
     }
     return { client, session, user };
   }
 
-  async function sendMagicLink(email) {
+  async function sendMagicLink(email, mode = 'login', signupData = null) {
     const client = await createClient();
     if (!client) throw new Error('Supabase config missing.');
-    const redirectTo = `${window.location.origin}${window.location.pathname.includes('/site/') ? '/site/' : '/'}login.html`;
+
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    if (!normalizedEmail) throw new Error('Email is required.');
+
+    if (mode === 'signup') {
+      setPendingSignup({
+        email: normalizedEmail,
+        full_name: String(signupData?.full_name || '').trim(),
+        mobile: String(signupData?.mobile || '').trim()
+      });
+    } else {
+      clearPendingSignup();
+    }
+
     const { error } = await client.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: redirectTo }
+      email: normalizedEmail,
+      options: {
+        emailRedirectTo: getLoginUrl()
+      }
     });
+
     if (error) throw error;
     return true;
   }
 
   async function signOutUser() {
     const client = await createClient();
-    if (!client) return;
-    await client.auth.signOut();
-    window.location.href = 'login.html';
+    if (client) {
+      await client.auth.signOut();
+    }
+    clearPendingSignup();
+    window.location.href = getLoginPath();
   }
 
   async function getProfile(userId) {
     const client = await createClient();
     if (!client || !userId) return null;
-    const { data } = await client.from(tables().profiles).select('*').eq('id', userId).maybeSingle();
+
+    const { data } = await client
+      .from(tables().profiles)
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+
     return data || null;
   }
 
@@ -130,20 +201,53 @@ window.NISM_APP = (() => {
   async function upsertProfileFromUser(user) {
     const client = await createClient();
     if (!client || !user) return;
+
+    const existing = await getProfile(user.id);
+
     const payload = {
       id: user.id,
       email: user.email,
-      full_name: user.user_metadata?.full_name || user.email,
+      full_name: existing?.full_name || user.user_metadata?.full_name || user.email,
+      mobile: existing?.mobile || null,
       updated_at: new Date().toISOString()
     };
-    await client.from(tables().profiles).upsert(payload);
+
+    const { error } = await client.from(tables().profiles).upsert(payload);
+    if (error) throw error;
   }
 
-  
+  async function completePendingSignup(user) {
+    const client = await createClient();
+    if (!client || !user) return null;
+
+    const pending = getPendingSignup();
+    if (!pending) return null;
+
+    if ((user.email || '').toLowerCase() !== (pending.email || '').toLowerCase()) {
+      return null;
+    }
+
+    const existing = await getProfile(user.id);
+
+    const payload = {
+      id: user.id,
+      email: user.email,
+      full_name: pending.full_name || existing?.full_name || user.email,
+      mobile: pending.mobile || existing?.mobile || null,
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await client.from(tables().profiles).upsert(payload);
+    if (error) throw error;
+
+    clearPendingSignup();
+    return payload;
+  }
 
   async function fetchHomeSupport() {
     const client = await createClient();
     if (!client) return null;
+
     const tableName = (cfg().tables || {}).homeSupport || 'home_support_content';
     const { data, error } = await client
       .from(tableName)
@@ -152,6 +256,7 @@ window.NISM_APP = (() => {
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle();
+
     if (error) throw error;
     return data || null;
   }
@@ -159,12 +264,14 @@ window.NISM_APP = (() => {
   async function fetchPublishedCourses() {
     const client = await createClient();
     if (!client) throw new Error('Supabase config missing.');
+
     const { data, error } = await client
       .from(tables().courses)
       .select('*')
       .eq('is_published', true)
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: false });
+
     if (error) throw error;
     return data || [];
   }
@@ -172,11 +279,13 @@ window.NISM_APP = (() => {
   async function fetchAllCourses() {
     const client = await createClient();
     if (!client) throw new Error('Supabase config missing.');
+
     const { data, error } = await client
       .from(tables().courses)
       .select('*')
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: false });
+
     if (error) throw error;
     return data || [];
   }
@@ -184,7 +293,13 @@ window.NISM_APP = (() => {
   async function fetchCourse(courseId) {
     const client = await createClient();
     if (!client || !courseId) return null;
-    const { data, error } = await client.from(tables().courses).select('*').eq('id', courseId).maybeSingle();
+
+    const { data, error } = await client
+      .from(tables().courses)
+      .select('*')
+      .eq('id', courseId)
+      .maybeSingle();
+
     if (error) throw error;
     return data || null;
   }
@@ -192,27 +307,33 @@ window.NISM_APP = (() => {
   async function fetchAccessRecords(userId) {
     const client = await createClient();
     if (!client || !userId) return [];
+
     const { data, error } = await client
       .from(tables().examAccess)
       .select('*, courses(*)')
       .eq('user_id', userId)
       .order('access_until', { ascending: false });
+
     if (error) throw error;
     return data || [];
   }
 
   function findActiveAccess(records, courseId) {
     const now = Date.now();
-    return (records || []).find(item => item.course_id === courseId && new Date(item.access_until).getTime() > now) || null;
+    return (records || []).find(item =>
+      item.course_id === courseId && new Date(item.access_until).getTime() > now
+    ) || null;
   }
 
   async function recordPaymentAndGrantAccess({ user, course, paymentRef, rawPayload }) {
     const client = await createClient();
     if (!client) throw new Error('Supabase config missing.');
     if (!user || !course) throw new Error('Missing user or course.');
+
     const days = Number(course.mock_duration_days || cfg().accessDays || 15);
     const now = new Date();
     const accessUntil = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
+
     const paymentPayload = {
       user_id: user.id,
       course_id: course.id,
@@ -237,7 +358,10 @@ window.NISM_APP = (() => {
       updated_at: now.toISOString()
     };
 
-    const { error: accessError } = await client.from(tables().examAccess).upsert(accessPayload, { onConflict: 'user_id,course_id' });
+    const { error: accessError } = await client
+      .from(tables().examAccess)
+      .upsert(accessPayload, { onConflict: 'user_id,course_id' });
+
     if (accessError) throw accessError;
 
     return accessPayload;
@@ -246,6 +370,7 @@ window.NISM_APP = (() => {
   async function fetchQuizzes(courseId) {
     const client = await createClient();
     if (!client || !courseId) return [];
+
     const { data, error } = await client
       .from(tables().quizzes)
       .select('*')
@@ -253,6 +378,7 @@ window.NISM_APP = (() => {
       .eq('is_active', true)
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: true });
+
     if (error) throw error;
     return data || [];
   }
@@ -260,7 +386,8 @@ window.NISM_APP = (() => {
   async function saveMockAttempt({ userId, courseId, score, totalQuestions, answers }) {
     const client = await createClient();
     if (!client || !userId || !courseId) return;
-    await client.from(tables().mockAttempts).insert({
+
+    const { error } = await client.from(tables().mockAttempts).insert({
       user_id: userId,
       course_id: courseId,
       score,
@@ -268,17 +395,21 @@ window.NISM_APP = (() => {
       answers,
       created_at: new Date().toISOString()
     });
+
+    if (error) throw error;
   }
 
   async function saveCourse(payload) {
     const client = await createClient();
     if (!client) throw new Error('Supabase config missing.');
+
     const record = {
       ...payload,
       updated_at: new Date().toISOString(),
       mock_duration_days: Number(payload.mock_duration_days || cfg().accessDays || 15),
       is_published: Boolean(payload.is_published)
     };
+
     const { error } = await client.from(tables().courses).upsert(record);
     if (error) throw error;
   }
@@ -286,6 +417,7 @@ window.NISM_APP = (() => {
   async function deleteCourse(id) {
     const client = await createClient();
     if (!client || !id) return;
+
     const { error } = await client.from(tables().courses).delete().eq('id', id);
     if (error) throw error;
   }
@@ -293,8 +425,15 @@ window.NISM_APP = (() => {
   async function fetchAllQuizzes(courseId = null) {
     const client = await createClient();
     if (!client) throw new Error('Supabase config missing.');
-    let query = client.from(tables().quizzes).select('*').order('display_order', { ascending: true }).order('created_at', { ascending: false });
+
+    let query = client
+      .from(tables().quizzes)
+      .select('*')
+      .order('display_order', { ascending: true })
+      .order('created_at', { ascending: false });
+
     if (courseId) query = query.eq('course_id', courseId);
+
     const { data, error } = await query;
     if (error) throw error;
     return data || [];
@@ -303,11 +442,13 @@ window.NISM_APP = (() => {
   async function saveQuiz(payload) {
     const client = await createClient();
     if (!client) throw new Error('Supabase config missing.');
+
     const record = {
       ...payload,
       updated_at: new Date().toISOString(),
       is_active: Boolean(payload.is_active)
     };
+
     const { error } = await client.from(tables().quizzes).upsert(record);
     if (error) throw error;
   }
@@ -315,6 +456,7 @@ window.NISM_APP = (() => {
   async function deleteQuiz(id) {
     const client = await createClient();
     if (!client || !id) return;
+
     const { error } = await client.from(tables().quizzes).delete().eq('id', id);
     if (error) throw error;
   }
@@ -322,6 +464,7 @@ window.NISM_APP = (() => {
   function renderAuthSummary(target, user, profile) {
     if (!target) return;
     const role = profile?.role ? `<span class="pill info">${escapeHtml(profile.role)}</span>` : '';
+
     target.innerHTML = `
       <div class="badge-row">
         <span class="pill info">Logged in as ${escapeHtml(user?.email || '')}</span>
@@ -345,6 +488,11 @@ window.NISM_APP = (() => {
     fmtShortDate,
     daysRemaining,
     escapeHtml,
+    getLoginPath,
+    getLoginUrl,
+    getPendingSignup,
+    setPendingSignup,
+    clearPendingSignup,
     createClient,
     getSession,
     requireAuth,
@@ -353,6 +501,7 @@ window.NISM_APP = (() => {
     getProfile,
     isAdmin,
     upsertProfileFromUser,
+    completePendingSignup,
     fetchHomeSupport,
     fetchPublishedCourses,
     fetchAllCourses,
