@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NISMSTUDY - Courses</title>
+  <link rel="stylesheet" href="assets/app.css">
+  <style>
+    .course-summary { display:grid; gap:12px; }
+    .course-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:10px; }
+    .course-meta-list { display:grid; gap:10px; margin-top:16px; }
+    .course-meta-item { padding:14px 16px; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,.03); }
+    .course-expanded { margin-top:16px; display:grid; gap:16px; }
+    .course-expanded.hidden { display:none !important; }
+    .feature-box { border:1px solid var(--border); border-radius:18px; padding:18px; background:rgba(255,255,255,.03); }
+    .feature-box h4 { margin:0 0 8px; }
+    .price-strip { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; }
+  </style>
+</head>
+<body>
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="brand-badge">NS</span>
+      <span>Courses</span>
+    </a>
+    <div class="nav-actions">
+      <a class="btn btn-secondary" href="index.html">Home</a>
+      <a class="btn btn-secondary" href="login.html" id="loginBtn">Login</a>
+      <a class="btn btn-secondary hidden" href="dashboard.html" id="dashboardBtn">Dashboard</a>
+      <button class="btn btn-ghost hidden" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </div>
+</header>
+<main>
+  <section class="page-hero">
+    <div class="container">
+      <span class="kicker">Public course catalogue</span>
+      <h1>Explore NISM courses and premium mock packages</h1>
+      <p class="lead">Each exam shows the workbook PDF, the free intro mock structure, and the premium mock-test bundle. Click <strong>Show more</strong> on any course to see the full test pattern and purchase flow.</p>
+      <div id="catalogAuthSummary"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container grid-3">
+      <div class="metric"><strong id="metricCourses">0</strong><span class="small">Published courses</span></div>
+      <div class="metric"><strong>Rs 329 + GST</strong><span class="small">Premium mock + study material package</span></div>
+      <div class="metric"><strong>15 Days</strong><span class="small">Access after successful payment</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div id="coursesGrid" class="grid-3"></div>
+    </div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
+  supabaseUrl: '',
+  supabaseAnonKey: '',
+  accessDays: 15,
+  defaultPriceLabel: 'Rs 329',
+  adminEmails: ['info@nismstudy.in'],
+  tables: {
+    profiles: 'profiles',
+    courses: 'courses',
+    quizzes: 'quizzes',
+    examAccess: 'exam_access',
+    paymentRecords: 'payment_records',
+    mockAttempts: 'mock_attempts',
+    homeSupport: 'home_support_content'
+  }
+};
+</script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(async function() {
+  const workbookMap = {
+    'nism iii-a securities intermediaries compliance (non-fund)': 'materials/NISM III-A Securities Intermediaries Compliance (Non-Fund).pdf',
+    'nism series v-a mutual fund distributors certification examination': 'materials/NISM Series V-A Mutual Fund Distributors Certification Examination_August 2025 Final - 15092025.pdf',
+    'nism series-xvi commodity derivatives certification examination': 'materials/NISM Series-XVI Commodity Derivatives Certification Examination_September 2025.pdf',
+    'nism series i currency derivative exam workbook': 'materials/NISM-SERIES-I--CURRENCY-DERIVATIVE-EXAM-WORKBOOK-IN-PDF.pdf',
+    'nism series vi depository operation exam workbook': 'materials/NISM-SERIES-VI--DEPOSITORY-OPERATION-EXAM-WORKBOOK-IN-PDF.pdf',
+    'nism series vii securities operations and risk management exam workbook': 'materials/NISM-SERIES-VII--SECURITIES-OPERATIONS-AND-RISK-MANAGEMENT-EXAM-WORKBOOK-IN-PDF.pdf',
+    'nism series viii equity derivatives exam workbook': 'materials/NISM-SERIES-VIII--EQUITY-DERIVATIVES-EXAM-WORKBOOK-IN-PDF.pdf',
+    'nism series x-a investment adviser level 1 exam workbook': 'materials/NISM-SERIES-X-A--INVESTMENT-ADVISER-LEVEL-1-EXAM-WORKBOOK-IN-PDF.pdf',
+    'nism series xv research analyst exam workbook': 'materials/NISM-SERIES-XV--RESEARCH-ANALYST-EXAM-WORKBOOK-IN-PDF.pdf'
+  };
+
+  const slugTarget = (NISM_APP.qs('slug') || '').trim().toLowerCase();
+  const courseTarget = (NISM_APP.qs('course') || '').trim().toLowerCase();
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loginBtn = document.getElementById('loginBtn');
+  const dashboardBtn = document.getElementById('dashboardBtn');
+  const authSummary = document.getElementById('catalogAuthSummary');
+  const grid = document.getElementById('coursesGrid');
+
+  const sessionInfo = await NISM_APP.getSession();
+  const user = sessionInfo.user || null;
+  let accessRecords = [];
+
+  if (user) {
+    await NISM_APP.upsertProfileFromUser(user).catch(() => null);
+    const profile = await NISM_APP.getProfile(user.id).catch(() => null);
+    NISM_APP.renderAuthSummary(authSummary, user, profile);
+    accessRecords = await NISM_APP.fetchAccessRecords(user.id).catch(() => []);
+    logoutBtn.classList.remove('hidden');
+    dashboardBtn.classList.remove('hidden');
+    loginBtn.classList.add('hidden');
+    logoutBtn.addEventListener('click', () => NISM_APP.signOutUser());
+  }
+
+  const courses = await NISM_APP.fetchPublishedCourses().catch(() => []);
+  document.getElementById('metricCourses').textContent = String(courses.length);
+
+  if (!courses.length) {
+    grid.innerHTML = '<div class="notice">No published courses found. Publish them from Supabase admin first.</div>';
+    return;
+  }
+
+  grid.innerHTML = courses.map((course, index) => renderCourse(course, accessRecords, user, index)).join('');
+
+  document.querySelectorAll('[data-toggle-course]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const key = button.getAttribute('data-toggle-course');
+      const block = document.getElementById(`course-expanded-${key}`);
+      const isHidden = block.classList.contains('hidden');
+      block.classList.toggle('hidden', !isHidden);
+      button.textContent = isHidden ? 'Show less' : 'Show more';
+      if (isHidden) {
+        block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  if (courseTarget || slugTarget) {
+    const matched = courses.find((course) => matchesTarget(course, courseTarget, slugTarget));
+    if (matched) {
+      const key = keyFor(matched);
+      const block = document.getElementById(`course-expanded-${key}`);
+      const button = document.querySelector(`[data-toggle-course="${key}"]`);
+      if (block && button) {
+        block.classList.remove('hidden');
+        button.textContent = 'Show less';
+        block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }
+
+  function renderCourse(course, accessRecords, user, index) {
+    const access = user ? NISM_APP.findActiveAccess(accessRecords, course.id) : null;
+    const pdfUrl = resolveWorkbook(course);
+    const key = keyFor(course) || `course-${index}`;
+    const activeText = access ? `Active until ${NISM_APP.fmtDate(access.access_until)}` : 'Premium not active yet';
+    const premiumCta = user
+      ? (access
+          ? `<a class="btn btn-primary" href="mock-tests.html?course=${course.id}">Open mock tests</a>`
+          : `<a class="btn btn-primary" href="checkout.html?course=${course.id}">Buy premium mock</a>`)
+      : `<a class="btn btn-primary" href="login.html">Login to unlock premium</a>`;
+
+    return `
+      <article class="card course-summary" id="catalog-${key}">
+        <div class="badge-row">
+          <span class="pill info">${NISM_APP.escapeHtml(course.exam_name || 'NISM')}</span>
+          <span class="tag">${NISM_APP.money(course.price || '329')} + GST</span>
+          <span class="status-pill ${access ? 'ok' : 'warn'}">${NISM_APP.escapeHtml(activeText)}</span>
+        </div>
+        <h2 style="margin:0;">${NISM_APP.escapeHtml(course.title || 'Course')}</h2>
+        <p class="muted" style="margin:0;">${NISM_APP.escapeHtml(course.description || 'Workbook PDF, premium mock tests, and exam-style practice for this NISM course.')}</p>
+        <div class="course-actions">
+          ${pdfUrl ? `<a class="btn btn-secondary" href="${NISM_APP.escapeHtml(pdfUrl)}" target="_blank" rel="noopener">View PDF</a>` : ''}
+          <button class="btn btn-secondary" type="button" data-toggle-course="${NISM_APP.escapeHtml(key)}">Show more</button>
+          ${premiumCta}
+        </div>
+        <div class="course-expanded hidden" id="course-expanded-${NISM_APP.escapeHtml(key)}">
+          <div class="grid-2">
+            <div class="feature-box">
+              <span class="pill info">Intro mock</span>
+              <h4>Mock Test</h4>
+              <p class="small">30 unique MCQs · 90 minutes · exam-style practice before buying premium access.</p>
+              <div class="course-meta-list">
+                <div class="course-meta-item">Strict timer: 1.5 hours to complete.</div>
+                <div class="course-meta-item">Same exam layout your learners will see later in premium tests.</div>
+              </div>
+            </div>
+            <div class="feature-box">
+              <span class="tag">Premium package</span>
+              <h4>Premium Mock Test + Study Material</h4>
+              <p class="small">Claimed success rate: <strong>89%</strong> for students who used the premium bundle.</p>
+              <div class="price-strip">
+                <div>
+                  <div class="price">${NISM_APP.money(course.price || '329')} + GST</div>
+                  <div class="small">15 days access after successful payment</div>
+                </div>
+                ${premiumCta}
+              </div>
+            </div>
+          </div>
+          <div class="feature-box">
+            <span class="pill warn">Premium exam structure</span>
+            <div class="course-meta-list">
+              <div class="course-meta-item"><strong>Mock 1 to 8</strong><br><span class="small">50 questions each · 120 minutes per mock</span></div>
+              <div class="course-meta-item"><strong>Mock 9 and Mock 10 (Final Exams)</strong><br><span class="small">100 questions each · 180 minutes per final exam</span></div>
+              <div class="course-meta-item"><strong>Exam discipline</strong><br><span class="small">Strict timing. Screen change not allowed beyond 5 switches. A warning is shown on every switch and the test auto-submits on the 5th violation.</span></div>
+            </div>
+          </div>
+        </div>
+      </article>`;
+  }
+
+  function keyFor(course) {
+    return String(course.slug || course.id || course.exam_name || course.title || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-');
+  }
+
+  function normalize(value) {
+    return String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+
+  function matchesTarget(course, courseTarget, slugTarget) {
+    if (slugTarget && String(course.slug || '').trim().toLowerCase() === slugTarget) return true;
+    if (!courseTarget) return false;
+    const variants = [course.id, course.slug, course.exam_name, course.title].map(normalize);
+    return variants.includes(normalize(courseTarget));
+  }
+
+  function resolveWorkbook(course) {
+    if (course.workbook_pdf_url) return course.workbook_pdf_url;
+    const key = normalize(course.title || course.exam_name);
+    const mapped = workbookMap[key];
+    return mapped ? encodeURI(mapped) : '';
+  }
+})();
+</script>
+</body>
+</html>

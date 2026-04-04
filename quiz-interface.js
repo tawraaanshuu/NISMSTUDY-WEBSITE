@@ -20,6 +20,7 @@
     const url = new URL(window.location.href);
     return {
       slug: url.searchParams.get('slug'),
+      courseId: url.searchParams.get('courseId'),
       quizId: url.searchParams.get('quizId'),
       attemptId: url.searchParams.get('attemptId')
     };
@@ -62,8 +63,12 @@
   }
 
   function updateBackLink() {
+    if (state.course?.id) {
+      $('backToCourse').href = `/mock-tests.html?course=${encodeURIComponent(state.course.id)}`;
+      return;
+    }
     if (state.course?.slug) {
-      $('backToCourse').href = `/course-detail.html?slug=${encodeURIComponent(state.course.slug)}`;
+      $('backToCourse').href = `/courses.html?slug=${encodeURIComponent(state.course.slug)}`;
     }
   }
 
@@ -138,17 +143,25 @@
     const { data: { session } } = await supabase.auth.getSession();
     state.session = session;
     if (!session) {
-      window.location.href = '/login.html';
+      window.location.href = '/login';
       throw new Error('Login required');
     }
   }
 
   async function loadCourseAndQuiz(params) {
-    const { data: course, error: courseError } = await supabase
+    let courseQuery = supabase
       .from('courses')
-      .select('*')
-      .eq('slug', params.slug)
-      .single();
+      .select('*');
+
+    if (params.slug) {
+      courseQuery = courseQuery.eq('slug', params.slug);
+    } else if (params.courseId) {
+      courseQuery = courseQuery.eq('id', params.courseId);
+    } else {
+      throw new Error('Missing course reference in the URL.');
+    }
+
+    const { data: course, error: courseError } = await courseQuery.single();
 
     if (courseError || !course) {
       throw new Error('Could not load the selected course.');
@@ -326,13 +339,13 @@
       .update({ violation_count: state.localViolationCount })
       .eq('id', state.attempt.id);
 
-    if (state.localViolationCount >= 3) {
-      setMessage('You switched away from the exam 3 times. The exam is being auto-submitted.', 'warn');
+    if (state.localViolationCount >= 5) {
+      setMessage('You switched away from the exam 5 times. The exam is being auto-submitted.', 'warn');
       await submitExam(true);
       return;
     }
 
-    const remaining = 3 - state.localViolationCount;
+    const remaining = 5 - state.localViolationCount;
     setMessage(`Warning: you switched away from the exam. ${remaining} warning${remaining === 1 ? '' : 's'} left before auto-submit.`, 'warn');
   }
 
@@ -442,8 +455,8 @@
   async function init() {
     try {
       const params = getParams();
-      if (!params.slug || !params.quizId) {
-        throw new Error('Missing slug or quizId in the URL.');
+      if ((!params.slug && !params.courseId) || !params.quizId) {
+        throw new Error('Missing course reference or quizId in the URL.');
       }
 
       await ensureLogin();

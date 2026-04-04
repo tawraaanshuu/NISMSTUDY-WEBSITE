@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NISMSTUDY - Mock Tests</title>
+  <link rel="stylesheet" href="assets/app.css">
+  <style>
+    .quiz-card { display:grid; gap:12px; }
+    .quiz-card h3 { margin:0; }
+    .quiz-card .small strong { color: var(--text); }
+  </style>
+</head>
+<body>
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="courses.html">
+      <span class="brand-badge">NS</span>
+      <span>Mock Tests</span>
+    </a>
+    <div class="nav-actions">
+      <a class="btn btn-secondary" href="courses.html">Courses</a>
+      <a class="btn btn-secondary" href="dashboard.html">Dashboard</a>
+      <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </div>
+</header>
+<main>
+  <section class="page-hero">
+    <div class="container">
+      <span class="kicker">Protected exam area</span>
+      <h1>Mock-test dashboard</h1>
+      <p class="lead">Only logged-in learners with active access can open these premium tests. Timers are strict and the exam auto-submits on the 5th screen switch.</p>
+      <div id="mockAuthSummary"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container grid-3">
+      <div class="metric"><strong id="courseNameMetric">—</strong><span class="small">Selected course</span></div>
+      <div class="metric"><strong id="accessMetric">—</strong><span class="small">Access validity</span></div>
+      <div class="metric"><strong>5 warnings</strong><span class="small">Screen switch limit before auto-submit</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div id="mockStateBox" class="card">Loading mock-test package...</div>
+      <div id="quizGrid" class="grid-3" style="margin-top:18px;"></div>
+    </div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
+  supabaseUrl: '',
+  supabaseAnonKey: '',
+  accessDays: 15,
+  defaultPriceLabel: 'Rs 329',
+  adminEmails: ['info@nismstudy.in'],
+  tables: {
+    profiles: 'profiles',
+    courses: 'courses',
+    quizzes: 'quizzes',
+    examAccess: 'exam_access',
+    paymentRecords: 'payment_records',
+    mockAttempts: 'mock_attempts',
+    homeSupport: 'home_support_content'
+  }
+};
+</script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(async function() {
+  const auth = await NISM_APP.requireAuth('login.html');
+  if (!auth) return;
+
+  document.getElementById('logoutBtn').addEventListener('click', () => NISM_APP.signOutUser());
+  await NISM_APP.upsertProfileFromUser(auth.user).catch(() => null);
+  const profile = await NISM_APP.getProfile(auth.user.id).catch(() => null);
+  NISM_APP.renderAuthSummary(document.getElementById('mockAuthSummary'), auth.user, profile);
+
+  const courseId = NISM_APP.qs('course');
+  const stateBox = document.getElementById('mockStateBox');
+  const quizGrid = document.getElementById('quizGrid');
+
+  if (!courseId) {
+    stateBox.innerHTML = '<div class="notice">No course selected. Open this page from <a class="muted-link" href="courses.html">courses.html</a>.</div>';
+    return;
+  }
+
+  try {
+    const [course, accessRecords] = await Promise.all([
+      NISM_APP.fetchCourse(courseId),
+      NISM_APP.fetchAccessRecords(auth.user.id)
+    ]);
+
+    const access = NISM_APP.findActiveAccess(accessRecords, courseId);
+    if (!course) {
+      stateBox.innerHTML = '<div class="notice">Selected course was not found.</div>';
+      return;
+    }
+
+    document.getElementById('courseNameMetric').textContent = course.exam_name || course.title || 'Course';
+
+    if (!access) {
+      document.getElementById('accessMetric').textContent = 'Inactive';
+      stateBox.innerHTML = `
+        <div class="badge-row">
+          <span class="pill danger">Access required</span>
+          <span class="pill info">${NISM_APP.escapeHtml(course.exam_name || course.title || 'Course')}</span>
+        </div>
+        <h3>${NISM_APP.escapeHtml(course.title || 'Premium mock package')}</h3>
+        <p class="muted">Your premium access for this course is not active right now. Buy access first and then return here to launch the tests.</p>
+        <div class="action-row" style="margin-top:14px;">
+          <a class="btn btn-primary" href="checkout.html?course=${course.id}">Buy premium mock</a>
+          <a class="btn btn-secondary" href="courses.html?course=${encodeURIComponent(course.id)}">Back to course</a>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('accessMetric').textContent = NISM_APP.fmtShortDate(access.access_until);
+    const quizzes = await NISM_APP.fetchQuizzes(courseId).catch(() => []);
+
+    stateBox.innerHTML = `
+      <div class="badge-row">
+        <span class="status-pill ok">Active until ${NISM_APP.fmtDate(access.access_until)}</span>
+        <span class="pill info">${quizzes.length} active test${quizzes.length === 1 ? '' : 's'}</span>
+        <span class="pill warn">Strict timer enabled</span>
+      </div>
+      <h3>${NISM_APP.escapeHtml(course.title || 'Premium package')}</h3>
+      <p class="muted">Mock Test: 30 questions in 90 minutes. Mocks 1-8: 50 questions in 120 minutes each. Final Exams 9-10: 100 questions in 180 minutes each. Switching tabs or screens 5 times triggers auto-submit.</p>`;
+
+    if (!quizzes.length) {
+      quizGrid.innerHTML = expectedTemplate();
+      return;
+    }
+
+    quizGrid.innerHTML = quizzes.map((quiz, index) => renderQuizCard(course, quiz, index)).join('');
+  } catch (error) {
+    console.error(error);
+    stateBox.innerHTML = '<div class="notice">Unable to load this mock-test package right now.</div>';
+  }
+
+  function renderQuizCard(course, quiz, index) {
+    const label = resolveLabel(quiz, index);
+    const isFinal = Number(quiz.total_questions || 0) >= 100 || String(quiz.exam_type || '').toLowerCase() === 'full';
+    const href = course.slug
+      ? `quiz-interface.html?slug=${encodeURIComponent(course.slug)}&quizId=${encodeURIComponent(quiz.id)}`
+      : `quiz-interface.html?courseId=${encodeURIComponent(course.id)}&quizId=${encodeURIComponent(quiz.id)}`;
+    const unlockNote = isFinal && Number(quiz.required_completed_mocks || 0) > 0
+      ? `<div class="small">Unlocks after completing ${quiz.required_completed_mocks} earlier mocks.</div>`
+      : '';
+
+    return `
+      <article class="card quiz-card">
+        <div class="badge-row">
+          <span class="pill info">${NISM_APP.escapeHtml(label)}</span>
+          <span class="pill ${isFinal ? 'warn' : 'info'}">${Number(quiz.total_questions || 0)} questions</span>
+          <span class="pill ${Number(quiz.duration_minutes || 0) >= 180 ? 'danger' : 'info'}">${Number(quiz.duration_minutes || 0)} minutes</span>
+        </div>
+        <h3>${NISM_APP.escapeHtml(quiz.title || label)}</h3>
+        <p class="small"><strong>Type:</strong> ${isFinal ? 'Final exam' : 'Mock test'}<br><strong>Marks:</strong> ${Number(quiz.max_marks || quiz.total_questions || 0)}<br><strong>Timer:</strong> strict countdown with auto-submit when time ends.</p>
+        ${unlockNote}
+        <div class="action-row">
+          <a class="btn btn-primary" href="${href}">Start test</a>
+        </div>
+      </article>`;
+  }
+
+  function resolveLabel(quiz, index) {
+    const title = String(quiz.title || '').toLowerCase();
+    if (Number(quiz.total_questions || 0) === 30 || title.includes('intro') || title === 'mock test') return 'Mock Test';
+    if (Number(quiz.total_questions || 0) >= 100 || String(quiz.exam_type || '').toLowerCase() === 'full') {
+      const number = Math.max(9, index + 1);
+      return `Final Exam ${number >= 10 ? '10' : '9'}`;
+    }
+    return `Mock ${index + 1}`;
+  }
+
+  function expectedTemplate() {
+    const rows = [
+      ['Mock Test', '30 questions', '90 minutes'],
+      ['Mock 1', '50 questions', '120 minutes'],
+      ['Mock 2', '50 questions', '120 minutes'],
+      ['Mock 3', '50 questions', '120 minutes'],
+      ['Mock 4', '50 questions', '120 minutes'],
+      ['Mock 5', '50 questions', '120 minutes'],
+      ['Mock 6', '50 questions', '120 minutes'],
+      ['Mock 7', '50 questions', '120 minutes'],
+      ['Mock 8', '50 questions', '120 minutes'],
+      ['Final Exam 9', '100 questions', '180 minutes'],
+      ['Final Exam 10', '100 questions', '180 minutes']
+    ];
+    return rows.map((row) => `
+      <article class="card quiz-card">
+        <div class="badge-row">
+          <span class="pill info">${row[0]}</span>
+          <span class="pill info">${row[1]}</span>
+          <span class="pill warn">${row[2]}</span>
+        </div>
+        <h3>${row[0]}</h3>
+        <p class="small">Create this quiz in Supabase to make it launchable from this page.</p>
+      </article>`).join('');
+  }
+})();
+</script>
+</body>
+</html>

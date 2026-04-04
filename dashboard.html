@@ -90,7 +90,7 @@ window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
     const access = NISM_APP.findActiveAccess(accessRecords, course.id);
     const active = Boolean(access);
     const cta = active
-      ? `<a class="btn btn-primary" href="mock-center.html?course=${course.id}">Start Mock</a>`
+      ? `<a class="btn btn-primary" href="mock-tests.html?course=${course.id}">Start Mock</a>`
       : `<a class="btn btn-primary" href="checkout.html?course=${course.id}">Buy Access</a>`;
     const badge = active
       ? `<span class="status-pill ok">Active for ${NISM_APP.daysRemaining(access.access_until)} day(s)</span>`

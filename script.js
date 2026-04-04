@@ -53,7 +53,7 @@ function showCourseDetails(slug) {
     return;
   }
 
-  window.location.href = '/course-detail.html?slug=' + encodeURIComponent(realSlug);
+  window.location.href = '/courses.html?slug=' + encodeURIComponent(realSlug);
 }
 
 function showMockTests() {
