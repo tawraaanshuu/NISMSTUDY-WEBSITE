@@ -1,215 +1,94 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Courses - NISMSTUDY</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Courses | NISMSTUDY</title>
+
   <link rel="stylesheet" href="/styles.css" />
-  <style>
-    body { background:#f8fafc; }
-    .page { max-width:1180px; margin:0 auto; padding:32px 20px 60px; }
-    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
-    .btn { display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:12px; padding:12px 16px; font-weight:700; text-decoration:none; cursor:pointer; }
-    .btn-primary { background:#2563eb; color:#fff; }
-    .btn-secondary { background:#e2e8f0; color:#0f172a; }
-    .hero { background:#fff; border-radius:24px; padding:28px; box-shadow:0 16px 40px rgba(15,23,42,.06); margin-bottom:24px; }
-    .lead { color:#475569; }
-    .grid { display:grid; gap:18px; }
-    .course-card { background:#fff; border:1px solid #e2e8f0; border-radius:20px; padding:22px; box-shadow:0 12px 32px rgba(15,23,42,.05); }
-    .card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
-    .badge { display:inline-flex; padding:6px 10px; border-radius:999px; background:#eff6ff; color:#1d4ed8; font-size:13px; font-weight:700; }
-    .muted { color:#64748b; }
-    .price { font-weight:800; color:#0f172a; }
-    .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
-    .more { margin-top:16px; border-top:1px solid #e2e8f0; padding-top:16px; display:none; }
-    .more.open { display:block; }
-    .detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
-    .mini { background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:16px; }
-    .status { margin-bottom:16px; padding:14px 16px; border-radius:14px; font-size:14px; background:#eff6ff; color:#1d4ed8; }
-    .empty { background:#fff; border:1px dashed #cbd5e1; border-radius:18px; padding:20px; color:#64748b; }
-    @media (max-width: 900px) { .detail-grid { grid-template-columns:1fr; } }
-  </style>
-</head>
-<body>
-  <div class="page">
-    <div class="topbar">
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="/" class="btn btn-secondary">← Home</a>
-        <a href="/login.html" class="btn btn-secondary">Login</a>
-      </div>
-      <a href="/mock-tests.html" class="btn btn-primary">My Mock Tests</a>
-    </div>
-
-    <section class="hero">
-      <div class="badge">Live Courses</div>
-      <h1>Browse all live NISM courses</h1>
-      <p class="lead">This page is dynamic. You can update titles, descriptions, prices, publish status, and PDF links in Supabase for up to 8 courses and beyond without editing HTML again.</p>
-      <div id="sessionStatus" class="status">Checking login status…</div>
-    </section>
-
-    <div id="courseList" class="grid">
-      <div class="empty">Loading courses…</div>
-    </div>
-  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/supabase-config.js"></script>
+  <script src="/config.js"></script>
+  <script src="/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="brand">NISMSTUDY</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/courses.html" class="active">Courses</a>
+        <a href="/login.html">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-hero">
+      <h1>All NISM Courses</h1>
+      <p>Browse all live courses. Login is required only for dashboard, mock tests, and paid access.</p>
+    </section>
+
+    <div id="coursesState" class="page-state">Loading courses...</div>
+    <section id="coursesGrid" class="course-grid"></section>
+  </main>
+
   <script>
-    (function () {
-      const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-      const $ = (id) => document.getElementById(id);
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
-      function escapeHtml(value) {
-        return String(value ?? '')
-          .replaceAll('&', '&amp;')
-          .replaceAll('<', '&lt;')
-          .replaceAll('>', '&gt;')
-          .replaceAll('"', '&quot;')
-          .replaceAll("'", '&#39;');
-      }
+    function courseCard(course) {
+      const slug = encodeURIComponent(course.slug);
+      const title = escapeHtml(course.title);
+      const desc = escapeHtml(course.short_description || 'Complete course with mock tests and exam preparation.');
+      const price = escapeHtml(course.price_label || 'Rs 329 + GST');
 
-      function money(course) {
-        const raw = course.price_inr ?? course.price ?? 329;
-        return `Rs ${String(raw).replace(/^Rs\s*/i, '').trim()} + GST`;
-      }
+      return `
+        <article class="course-card">
+          <div class="course-card__body">
+            <span class="badge">Live course</span>
+            <h3>${title}</h3>
+            <p>${desc}</p>
 
-      function normalizePublished(course) {
-        if (typeof course.is_published === 'boolean') return course.is_published;
-        if (course.status) return String(course.status).toLowerCase() === 'published';
-        return true;
-      }
-
-      function findPdfUrl(course) {
-        const direct = course.workbook_pdf_url || course.pdf_url || course.material_url || course.study_material_url || '';
-        if (direct) return direct;
-        const localMap = {
-          'nism-series-iii-a-securities-intermediaries-compliance-non-fund': '/materials/NISM III-A Securities Intermediaries Compliance (Non-Fund).pdf',
-          'nism-series-v-a-mutual-fund-distributors': '/materials/NISM Series V-A Mutual Fund Distributors Certification Examination_August 2025 Final - 15092025.pdf',
-          'nism-series-xvi-commodity-derivatives': '/materials/NISM Series-XVI Commodity Derivatives Certification Examination_September 2025.pdf',
-          'nism-series-i-currency-derivatives': '/materials/NISM-SERIES-I--CURRENCY-DERIVATIVE-EXAM-WORKBOOK-IN-PDF.pdf',
-          'nism-series-vi-depository-operations': '/materials/NISM-SERIES-VI--DEPOSITORY-OPERATION-EXAM-WORKBOOK-IN-PDF.pdf',
-          'nism-series-vii-securities-operations-and-risk-management': '/materials/NISM-SERIES-VII--SECURITIES-OPERATIONS-AND-RISK-MANAGEMENT-EXAM-WORKBOOK-IN-PDF.pdf',
-          'nism-series-viii-equity-derivatives': '/materials/NISM-SERIES-VIII--EQUITY-DERIVATIVES-EXAM-WORKBOOK-IN-PDF.pdf',
-          'nism-series-x-a-investment-adviser-level-1': '/materials/NISM-SERIES-X-A--INVESTMENT-ADVISER-LEVEL-1-EXAM-WORKBOOK-IN-PDF.pdf',
-          'nism-series-xv-research-analyst': '/materials/NISM-SERIES-XV--RESEARCH-ANALYST-EXAM-WORKBOOK-IN-PDF.pdf'
-        };
-        return localMap[course.slug] || '';
-      }
-
-      async function getSession() {
-        const { data } = await supabase.auth.getSession();
-        return data.session || null;
-      }
-
-      async function getAccessMap(userId) {
-        if (!userId) return new Map();
-        const { data, error } = await supabase
-          .from('exam_access')
-          .select('course_id, access_until')
-          .eq('user_id', userId);
-        if (error) return new Map();
-        const map = new Map();
-        (data || []).forEach((row) => {
-          if (new Date(row.access_until).getTime() > Date.now()) map.set(row.course_id, row.access_until);
-        });
-        return map;
-      }
-
-      function renderCard(course, activeUntil) {
-        const pdfUrl = findPdfUrl(course);
-        const moreId = `more-${course.id}`;
-        const cta = activeUntil
-          ? `<a class="btn btn-primary" href="/mock-tests.html?course=${encodeURIComponent(course.id)}">Start Mock Tests</a>`
-          : `<a class="btn btn-primary" href="/course-detail.html?slug=${encodeURIComponent(course.slug || '')}">Course Details</a>`;
-        const pdfBtn = pdfUrl
-          ? `<a class="btn btn-secondary" href="${escapeHtml(pdfUrl)}" target="_blank" rel="noopener">View PDF</a>`
-          : '';
-        return `
-          <article class="course-card">
-            <div class="card-head">
-              <div>
-                <div class="badge">${escapeHtml(course.exam_name || course.slug || 'Course')}</div>
-                <h2 style="margin:10px 0 8px;">${escapeHtml(course.title || 'Untitled Course')}</h2>
-                <p class="muted">${escapeHtml(course.short_description || course.description || course.long_description || 'Workbook PDF and premium mock access available.')}</p>
-              </div>
-              <div>
-                <div class="price">${escapeHtml(money(course))}</div>
-                <div class="muted" style="margin-top:6px;">${activeUntil ? `Active until ${escapeHtml(new Date(activeUntil).toLocaleDateString('en-IN'))}` : '15 days access after payment'}</div>
-              </div>
+            <div class="course-card__meta">
+              <span>${price}</span>
             </div>
-            <div class="actions">
-              ${pdfBtn}
-              ${cta}
-              <button class="btn btn-secondary" type="button" data-toggle="${escapeHtml(moreId)}">Show More</button>
+
+            <div class="course-card__actions">
+              <a class="btn btn-primary" href="/course-detail.html?slug=${slug}">View details</a>
+              <a class="btn btn-secondary" href="/login.html?next=${encodeURIComponent('/course-detail.html?slug=' + course.slug)}">Login to continue</a>
             </div>
-            <div id="${escapeHtml(moreId)}" class="more">
-              <div class="detail-grid">
-                <div class="mini">
-                  <h3 style="margin-top:0;">Premium mock package</h3>
-                  <ul>
-                    <li>Study material included</li>
-                    <li>Claimed success rate: 89%</li>
-                    <li>Price: ${escapeHtml(money(course))}</li>
-                    <li>Validity: 15 days</li>
-                  </ul>
-                </div>
-                <div class="mini">
-                  <h3 style="margin-top:0;">Exam structure</h3>
-                  <ul>
-                    <li>Mock 1 to 8: 50 questions · 120 minutes</li>
-                    <li>Final Exam 9 and 10: 100 questions · 180 minutes</li>
-                    <li>Strict timer</li>
-                    <li>5 tab/screen switches, then auto-submit</li>
-                  </ul>
-                </div>
-              </div>
-              <div class="actions">
-                <a class="btn btn-primary" href="/course-detail.html?slug=${encodeURIComponent(course.slug || '')}">Open Full Details</a>
-                <a class="btn btn-secondary" href="/checkout.html?course=${encodeURIComponent(course.id)}">Buy Premium Mock</a>
-              </div>
-            </div>
-          </article>`;
-      }
+          </div>
+        </article>
+      `;
+    }
 
-      async function init() {
-        const session = await getSession();
-        const status = $('sessionStatus');
-        const accessMap = await getAccessMap(session?.user?.id);
-        status.textContent = session
-          ? `Logged in as ${session.user.email}. Active purchased courses are shown with Start Mock Tests.`
-          : 'You are browsing as a guest. Login is required before starting premium mock tests.';
+    document.addEventListener('DOMContentLoaded', async () => {
+      const stateEl = document.getElementById('coursesState');
+      const gridEl = document.getElementById('coursesGrid');
 
-        const { data, error } = await supabase
-          .from('courses')
-          .select('*')
-          .order('display_order', { ascending: true, nullsFirst: false })
-          .order('created_at', { ascending: false, nullsFirst: false });
+      try {
+        const courses = await window.NISMApp.getLiveCourses();
 
-        const list = $('courseList');
-        if (error) {
-          list.innerHTML = '<div class="empty">Could not load courses from Supabase.</div>';
+        if (!courses.length) {
+          stateEl.textContent = 'No live courses available right now.';
+          gridEl.innerHTML = '';
           return;
         }
 
-        const visible = (data || []).filter(normalizePublished);
-        if (!visible.length) {
-          list.innerHTML = '<div class="empty">No published courses found. Publish your 8 course rows in Supabase and they will appear here automatically.</div>';
-          return;
-        }
-
-        list.innerHTML = visible.map((course) => renderCard(course, accessMap.get(course.id))).join('');
-        document.querySelectorAll('[data-toggle]').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const panel = document.getElementById(btn.getAttribute('data-toggle'));
-            if (!panel) return;
-            panel.classList.toggle('open');
-            btn.textContent = panel.classList.contains('open') ? 'Show Less' : 'Show More';
-          });
-        });
+        stateEl.textContent = '';
+        gridEl.innerHTML = courses.map(courseCard).join('');
+      } catch (err) {
+        console.error(err);
+        stateEl.textContent = 'Unable to load courses right now.';
       }
-
-      document.addEventListener('DOMContentLoaded', init);
-    })();
+    });
   </script>
 </body>
 </html>
