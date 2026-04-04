@@ -4,130 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NISMSTUDY - Home</title>
-  <meta name="description" content="NISMSTUDY static site pages">
-  <style>
-:root {
-  --bg: #0b1020;
-  --card: #121936;
-  --soft: #1a244d;
-  --accent: #4f8cff;
-  --accent-2: #6fd3ff;
-  --text: #eaf0ff;
-  --muted: #b8c2e0;
-  --border: rgba(255,255,255,0.1);
-  --ok: #27c281;
-  --shadow: 0 20px 40px rgba(0,0,0,.25);
-}
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  margin: 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: linear-gradient(180deg, #09101f 0%, #0d1430 100%);
-  color: var(--text);
-  line-height: 1.6;
-}
-a { color: inherit; text-decoration: none; }
-img { max-width: 100%; display: block; }
-.container { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
-.header {
-  position: sticky; top: 0; z-index: 40;
-  backdrop-filter: blur(14px);
-  background: rgba(7, 11, 23, 0.78);
-  border-bottom: 1px solid var(--border);
-}
-.nav {
-  display: flex; align-items: center; justify-content: space-between; gap: 20px;
-  min-height: 72px;
-}
-.brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: .3px; }
-.brand-badge {
-  width: 42px; height: 42px; border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  display: grid; place-items: center; color: white; font-weight: 900;
-  box-shadow: var(--shadow);
-}
-.nav-links, .nav-actions { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
-.nav-links a, .footer-links a, .support-links a { color: var(--muted); }
-.nav-links a:hover, .footer-links a:hover, .support-links a:hover { color: var(--text); }
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  border: 1px solid transparent; border-radius: 14px; padding: 12px 18px;
-  font-weight: 700; cursor: pointer; transition: .2s ease;
-}
-.btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; }
-.btn-secondary { background: rgba(255,255,255,.05); border-color: var(--border); color: var(--text); }
-.btn:hover { transform: translateY(-1px); }
-.hero {
-  padding: 72px 0 36px;
-}
-.hero-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 28px; align-items: center; }
-.kicker {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(79, 140, 255, 0.12);
-  color: #d9e7ff; border: 1px solid rgba(79, 140, 255, 0.3);
-  padding: 8px 12px; border-radius: 999px; font-size: .95rem;
-}
-.hero h1 { font-size: clamp(2.2rem, 4vw, 4rem); line-height: 1.06; margin: 14px 0 16px; }
-.hero p { color: var(--muted); font-size: 1.08rem; max-width: 62ch; }
-.card {
-  background: rgba(255,255,255,.04); border: 1px solid var(--border);
-  border-radius: 24px; padding: 24px; box-shadow: var(--shadow);
-}
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
-.section { padding: 28px 0 16px; }
-.section h2 { font-size: clamp(1.6rem, 2vw, 2.2rem); margin: 0 0 8px; }
-.section p.lead { color: var(--muted); margin-top: 0; }
-.feature h3, .course-card h3, .info-card h3 { margin-top: 0; }
-.muted { color: var(--muted); }
-.course-card {
-  display: flex; flex-direction: column; gap: 12px;
-}
-.tag {
-  display: inline-flex; width: fit-content; font-size: .82rem; font-weight: 700;
-  padding: 6px 10px; border-radius: 999px; background: rgba(39,194,129,.14); color: #8ef0c1;
-}
-.price { font-size: 1.4rem; font-weight: 800; }
-.inline-list { margin: 0; padding-left: 18px; color: var(--muted); }
-.footer {
-  margin-top: 40px; padding: 40px 0 24px; border-top: 1px solid var(--border);
-  background: rgba(4, 8, 18, .45);
-}
-.footer-grid { display: grid; grid-template-columns: 1.3fr .7fr .8fr; gap: 24px; }
-.footer-links, .support-links { display: grid; gap: 10px; }
-.small { font-size: .94rem; color: var(--muted); }
-.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-.input, textarea, input[type="file"] {
-  width: 100%; background: rgba(255,255,255,.05); border: 1px solid var(--border);
-  border-radius: 14px; color: var(--text); padding: 14px 16px; font: inherit;
-}
-textarea { min-height: 140px; resize: vertical; }
-.page-hero { padding: 54px 0 16px; }
-.page-hero h1 { margin: 0 0 10px; font-size: clamp(2rem, 3vw, 3rem); }
-.policy h2 { margin-top: 26px; }
-.note { border-left: 4px solid var(--accent); padding-left: 14px; color: var(--muted); }
-.empty-state {
-  border: 1px dashed rgba(255,255,255,.22); border-radius: 18px; padding: 20px;
-  color: var(--muted);
-}
-.status-pill {
-  display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px;
-  border: 1px solid rgba(39,194,129,.3); border-radius: 999px; color: #8ef0c1;
-  background: rgba(39,194,129,.12);
-}
-hr.sep { border: 0; height: 1px; background: var(--border); margin: 18px 0; }
-@media (max-width: 900px) {
-  .hero-grid, .footer-grid, .grid-3, .grid-2, .form-grid { grid-template-columns: 1fr; }
-  .nav { padding: 12px 0; align-items: flex-start; }
-  .nav, .nav-links, .nav-actions { flex-direction: column; align-items: flex-start; }
-}
-</style>
-  
+  <meta name="description" content="Student login, payment-linked exam access and mock test platform for NISMSTUDY.">
+  <link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
-
-
 <header class="header">
   <div class="container nav">
     <a class="brand" href="index.html">
@@ -136,70 +16,46 @@ hr.sep { border: 0; height: 1px; background: var(--border); margin: 18px 0; }
     </a>
     <nav class="nav-links">
       <a href="index.html">Home</a>
-      <a href="courses.html">Courses</a>
-      <a href="mock-tests.html">Mock Tests</a>
-      <a href="free-materials.html">Free Materials</a>
       <a href="contact-us.html">Contact</a>
+      <a href="faq.html">FAQ</a>
     </nav>
     <div class="nav-actions">
       <a class="btn btn-secondary" href="login.html">Login</a>
-      <a class="btn btn-primary" href="courses.html">Explore Courses</a>
     </div>
   </div>
 </header>
-
 <main>
   <section class="hero">
     <div class="container hero-grid">
       <div>
-        <span class="kicker">Trusted preparation for NISM, NCFM and finance exams</span>
-        <h1>Master your certification journey with focused study support.</h1>
-        <p>Updated learning resources, curated courses and guided support for candidates preparing for NISM and related market certifications.</p>
-        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;">
-          <a class="btn btn-primary" href="courses.html">Explore Courses</a>
-          <a class="btn btn-secondary" href="mock-tests.html">Browse Mock Tests</a>
+        <span class="kicker">Student login + exam access + mock tests</span>
+        <h1>Learn, pay, and take unlimited mocks for 15 days after purchase.</h1>
+        <p>Students log in with email, choose an exam, complete payment, and unlock unlimited mock attempts for the next 15 days. Dashboard stays protected until login.</p>
+        <div class="action-row" style="margin-top:20px;">
+          <a class="btn btn-primary" href="login.html">Student Login</a>
+          <a class="btn btn-secondary" href="#popular-courses">View Exams</a>
         </div>
       </div>
       <div class="card">
-        <h3>What changed on this homepage</h3>
-        <ul class="inline-list">
-          <li>No success-rate section or pass-rate claims on public home.</li>
-          <li>No public dashboard promo on home UI.</li>
-          <li>Popular Courses is Supabase-driven.</li>
-          <li>Support teaser is Supabase-driven.</li>
-          <li>Payment flows and important paths remain untouched.</li>
+        <h3>What this setup now supports</h3>
+        <ul class="small">
+          <li>Email-based student login.</li>
+          <li>Protected dashboard only after login.</li>
+          <li>Exam list rendered from Supabase.</li>
+          <li>Payment handoff using exam-level payment links.</li>
+          <li>Unlimited mocks for 15 days after successful payment.</li>
+          <li>Separate admin portal for courses and quiz updates.</li>
         </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <h2>Why learners choose NISMSTUDY</h2>
-      <p class="lead">A clean public homepage focused on course discovery and support.</p>
-      <div class="grid-3">
-        <article class="card feature">
-          <h3>Updated study resources</h3>
-          <p class="muted">Course content and practice material designed around current exam expectations.</p>
-        </article>
-        <article class="card feature">
-          <h3>Exam-focused preparation</h3>
-          <p class="muted">Structured modules, mock tests and concise revision support where it matters most.</p>
-        </article>
-        <article class="card feature">
-          <h3>Human support</h3>
-          <p class="muted">Get help with access, enrolment guidance and course selection through the support pages below.</p>
-        </article>
       </div>
     </div>
   </section>
 
   <section class="section" id="popular-courses">
     <div class="container">
-      <h2>Popular Courses</h2>
-      <p class="lead">This section is now ready to render directly from Supabase.</p>
-      <div id="popularCoursesList" class="grid-3">
-        <div class="card"><p class="muted">Loading popular courses...</p></div>
+      <h2>Exams</h2>
+      <p class="lead">These cards are backend-driven from Supabase. Students are prompted to log in before purchase.</p>
+      <div id="courseGrid" class="grid-3">
+        <div class="card">Loading exams...</div>
       </div>
     </div>
   </section>
@@ -207,14 +63,11 @@ hr.sep { border: 0; height: 1px; background: var(--border); margin: 18px 0; }
   <section class="section" id="support">
     <div class="container">
       <h2>Support</h2>
-      <p class="lead">Backend-driven teaser content for the public home page.</p>
-      <div id="homeSupportTeaser">
-        <div class="card"><p class="muted">Loading support content...</p></div>
-      </div>
+      <p class="lead">This teaser is backend-driven from Supabase and stays under Support only.</p>
+      <div id="supportTeaser" class="card">Loading support content...</div>
     </div>
   </section>
 </main>
-
 <footer class="footer">
   <div class="container footer-grid">
     <div>
@@ -222,7 +75,7 @@ hr.sep { border: 0; height: 1px; background: var(--border); margin: 18px 0; }
         <span class="brand-badge">NS</span>
         <span>NISMSTUDY</span>
       </div>
-      <p class="small">Your trusted partner for NISM, NCFM and financial market exam preparation.</p>
+      <p class="small">Your trusted partner for NISM and financial market exam preparation.</p>
       <p class="small">1/3325 F/F Ramnagar Ext., Shahdara, Delhi 110032</p>
       <p class="small">Email: <a href="mailto:info@nismstudy.in">info@nismstudy.in</a></p>
     </div>
@@ -230,22 +83,21 @@ hr.sep { border: 0; height: 1px; background: var(--border); margin: 18px 0; }
       <h3>Quick Links</h3>
       <div class="footer-links">
         <a href="index.html">Home</a>
-        <a href="courses.html">Courses</a>
-        <a href="mock-tests.html">Mock Tests</a>
-        <a href="free-materials.html">Free Materials</a>
         <a href="login.html">Login</a>
+        <a href="contact-us.html">Contact</a>
+        <a href="faq.html">FAQ</a>
       </div>
     </div>
     <div>
       <h3>Support</h3>
       <div class="support-links">
         <a href="contact-us.html">Contact Us</a>
-<a href="careers.html">Careers</a>
-<a href="privacy-policy.html">Privacy Policy</a>
-<a href="refund-policy.html">Refund Policy</a>
-<a href="terms-and-conditions.html">Terms &amp; Conditions</a>
-<a href="cancellation-policy.html">Cancellation Policy</a>
-<a href="faq.html">FAQ</a>
+        <a href="careers.html">Careers</a>
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="refund-policy.html">Refund Policy</a>
+        <a href="terms-and-conditions.html">Terms &amp; Conditions</a>
+        <a href="cancellation-policy.html">Cancellation Policy</a>
+        <a href="faq.html">FAQ</a>
       </div>
     </div>
   </div>
@@ -254,117 +106,71 @@ hr.sep { border: 0; height: 1px; background: var(--border); margin: 18px 0; }
     <p class="small">© 2026 NISMSTUDY. All rights reserved.</p>
   </div>
 </footer>
-
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  window.NISM_SUPABASE_CONFIG = window.NISM_SUPABASE_CONFIG || {
-    url: '',
-    anonKey: '',
-    coursesTable: 'popular_courses',
-    supportTable: 'home_support_content'
-  };
-
-  async function createSupabaseClient() {
-    const cfg = window.NISM_SUPABASE_CONFIG || {};
-    if (!cfg.url || !cfg.anonKey || !window.supabase || !window.supabase.createClient) {
-      return null;
-    }
-    return window.supabase.createClient(cfg.url, cfg.anonKey);
+window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
+  supabaseUrl: '',
+  supabaseAnonKey: '',
+  accessDays: 15,
+  defaultPriceLabel: 'Rs 329',
+  adminEmails: ['info@nismstudy.in'],
+  tables: {
+    profiles: 'profiles',
+    courses: 'courses',
+    quizzes: 'quizzes',
+    examAccess: 'exam_access',
+    paymentRecords: 'payment_records',
+    mockAttempts: 'mock_attempts',
+    homeSupport: 'home_support_content'
   }
-
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-  }
-
-  async function loadPopularCourses() {
-    const target = document.getElementById('popularCoursesList');
-    if (!target) return;
-
-    const client = await createSupabaseClient();
-    if (!client) {
-      target.innerHTML = '<div class="empty-state">Popular courses will load from Supabase once <code>window.NISM_SUPABASE_CONFIG</code> is set with your project URL, anon key and table names.</div>';
-      return;
-    }
-
-    const table = window.NISM_SUPABASE_CONFIG.coursesTable || 'popular_courses';
-    const { data, error } = await client
-      .from(table)
-      .select('title, price, description, href, badge, display_order')
-      .order('display_order', { ascending: true })
-      .limit(6);
-
-    if (error || !data || !data.length) {
-      target.innerHTML = '<div class="empty-state">Unable to load popular courses right now.</div>';
-      return;
-    }
-
-    target.innerHTML = data.map(item => `
-      <article class="card course-card">
-        <span class="tag">${escapeHtml(item.badge || 'Popular')}</span>
-        <h3>${escapeHtml(item.title)}</h3>
-        <p class="muted">${escapeHtml(item.description || 'Structured preparation with updated study material and practice support.')}</p>
-        <div class="price">${escapeHtml(item.price || '')}</div>
-        <a class="btn btn-secondary" href="${escapeHtml(item.href || 'courses.html')}">View details</a>
-      </article>
-    `).join('');
-  }
-
-  async function loadHomeSupport() {
-    const target = document.getElementById('homeSupportTeaser');
-    if (!target) return;
-
-    const client = await createSupabaseClient();
-    if (!client) {
-      target.innerHTML = '<div class="empty-state">Home support teaser is ready for Supabase. Configure <code>window.NISM_SUPABASE_CONFIG</code> to fetch live support content.</div>';
-      return;
-    }
-
-    const table = window.NISM_SUPABASE_CONFIG.supportTable || 'home_support_content';
-    const { data, error } = await client
-      .from(table)
-      .select('title, body, cta_text, cta_href, contact_email, phone, status_text')
-      .limit(1)
-      .maybeSingle();
-
-    if (error || !data) {
-      target.innerHTML = '<div class="empty-state">Unable to load support content right now.</div>';
-      return;
-    }
-
-    target.innerHTML = `
-      <div class="card info-card">
-        <span class="status-pill">${escapeHtml(data.status_text || 'Support available')}</span>
-        <h3>${escapeHtml(data.title || 'Need help choosing the right NISM course?')}</h3>
-        <p class="muted">${escapeHtml(data.body || 'Reach out to our team for guidance on course selection, access and learning support.')}</p>
-        <div class="grid-2">
-          <div class="card">
-            <h3>Email</h3>
-            <p class="muted"><a href="mailto:${escapeHtml(data.contact_email || 'info@nismstudy.in')}">${escapeHtml(data.contact_email || 'info@nismstudy.in')}</a></p>
-          </div>
-          <div class="card">
-            <h3>Phone</h3>
-            <p class="muted">${escapeHtml(data.phone || 'Share your active support number in Supabase')}</p>
-          </div>
-        </div>
-        <div style="margin-top:16px;">
-          <a class="btn btn-primary" href="${escapeHtml(data.cta_href || 'contact-us.html')}">${escapeHtml(data.cta_text || 'Contact Support')}</a>
-        </div>
-      </div>
-    `;
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    loadPopularCourses();
-    loadHomeSupport();
-  });
+};
 </script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(async function() {
+  const courseGrid = document.getElementById('courseGrid');
+  const supportTeaser = document.getElementById('supportTeaser');
+  try {
+    const client = await NISM_APP.createClient();
+    if (!client) {
+      courseGrid.innerHTML = '<div class="notice">Set <code>window.NISM_APP_CONFIG</code> with your Supabase URL and anon key to load exams.</div>';
+      supportTeaser.innerHTML = 'Set <code>window.NISM_APP_CONFIG</code> to load support teaser content.';
+      return;
+    }
+    const courses = await NISM_APP.fetchPublishedCourses();
+    courseGrid.innerHTML = courses.length ? courses.map(course => `
+      <article class="card">
+        <div class="badge-row">
+          <span class="tag">${NISM_APP.escapeHtml(course.exam_name || 'Exam')}</span>
+          <span class="pill info">${NISM_APP.money(course.price || '329')}</span>
+        </div>
+        <h3>${NISM_APP.escapeHtml(course.title || course.exam_name || 'Exam')}</h3>
+        <p class="muted">${NISM_APP.escapeHtml(course.description || 'Login to buy access and unlock unlimited mocks for 15 days after payment.')}</p>
+        <div class="action-row">
+          <a class="btn btn-primary" href="login.html">Login to Enroll</a>
+        </div>
+      </article>
+    `).join('') : '<div class="notice">No exams published yet.</div>';
 
-
+    const support = await NISM_APP.fetchHomeSupport().catch(() => null);
+    if (!support) {
+      supportTeaser.innerHTML = '<h3>Need help choosing the right exam?</h3><p class="muted">Email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a> and our team will guide you.</p><a class="btn btn-primary" href="contact-us.html">Contact Support</a>';
+      return;
+    }
+    supportTeaser.innerHTML = `
+      <div class="badge-row"><span class="status-pill ok">${NISM_APP.escapeHtml(support.status_text || 'Support available')}</span></div>
+      <h3>${NISM_APP.escapeHtml(support.title || 'Need help choosing the right exam?')}</h3>
+      <p class="muted">${NISM_APP.escapeHtml(support.body || 'Reach out to our team for course guidance and access help.')}</p>
+      <div class="action-row">
+        <a class="btn btn-primary" href="${NISM_APP.escapeHtml(support.cta_href || 'contact-us.html')}">${NISM_APP.escapeHtml(support.cta_text || 'Contact Support')}</a>
+      </div>`;
+  } catch (error) {
+    courseGrid.innerHTML = '<div class="notice">Unable to load exams right now.</div>';
+    supportTeaser.innerHTML = 'Unable to load support content right now.';
+    console.error(error);
+  }
+})();
+</script>
 </body>
 </html>
