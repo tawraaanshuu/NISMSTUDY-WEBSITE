@@ -1,5 +1,5 @@
-window.SUPABASE_URL = 'YOUR_REAL_SUPABASE_URL';
-window.SUPABASE_ANON_KEY = 'YOUR_REAL_SUPABASE_ANON_KEY';
+window.SUPABASE_URL = 'sb_secret_FEansPbj4TQwoNyNzWjEiw_1qT5y98Q';
+window.SUPABASE_ANON_KEY = 'sb_publishable_BT1BJ5IKC7OArjTBdUBjkA_CjBZiFVf';
 
 window.COURSE_SLUG_MAP = {
   'series-i': 'nism-series-i-currency-derivatives',
