@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact Us - NISMSTUDY.COM">
+    <title>Contact Us - NISMSTUDY.COM</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .page-wrap {
+            padding: 120px 0 60px;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+        .page-card {
+            max-width: 980px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            padding: 40px;
+        }
+        .page-card h1 {
+            margin: 0 0 12px;
+            font-size: 2.2rem;
+        }
+        .page-meta {
+            color: #64748b;
+            margin-bottom: 28px;
+            font-weight: 500;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 24px;
+            margin-top: 20px;
+        }
+        .info-card, .form-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 24px;
+            background: #fff;
+        }
+        .info-card h2, .form-card h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+        }
+        .info-row {
+            margin-bottom: 16px;
+            line-height: 1.7;
+            color: #334155;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font: inherit;
+        }
+        .form-textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+        .btn-primary {
+            border: none;
+            cursor: pointer;
+        }
+        .hidden-field {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+            .page-card {
+                padding: 24px;
+                border-radius: 16px;
+            }
+            .page-wrap {
+                padding-top: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="/" class="logo" style="text-decoration: none;">
+                    <span class="logo-icon">📊</span>
+                    <span class="logo-text">NISMSTUDY.COM</span>
+                </a>
+                <div class="nav-menu" id="navMenu">
+                    <a href="/index.html#home" class="nav-link">Home</a>
+                    <a href="/index.html#courses" class="nav-link">Courses</a>
+                    <a href="/index.html#mock-tests" class="nav-link">Mock Tests</a>
+                    <a href="/free-materials.html" class="nav-link">Free Materials</a>
+                    <a href="/faq.html" class="nav-link">FAQ</a>
+                </div>
+                <div class="nav-actions">
+                    <button class="btn btn-secondary" onclick="window.location.href='/login.html'">Login</button>
+                    <button class="btn btn-primary" onclick="window.location.href='/login.html'">Enroll Now</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-wrap">
+        <div class="container">
+            <article class="page-card">
+                <h1>Contact Us</h1>
+                <p class="page-meta"><strong>Address:</strong> 1/3325 F/F Ramnagar Ext., Shahdara, Delhi 110032</p>
+
+                <div class="contact-grid">
+                    <section class="info-card">
+                        <h2>Office Details</h2>
+                        <div class="info-row">
+                            <strong>Address</strong><br>
+                            1/3325 F/F Ramnagar Ext.<br>
+                            Shahdara, Delhi 110032
+                        </div>
+                        <div class="info-row">
+                            <strong>Email</strong><br>
+                            <a href="mailto:info@nismstudy.in">info@nismstudy.in</a>
+                        </div>
+                        <div class="info-row">
+                            <strong>Need help quickly?</strong><br>
+                            Use the form to send your question and your team can review submissions from Netlify Forms.
+                        </div>
+                    </section>
+
+                    <section class="form-card">
+                        <h2>Send Us a Message</h2>
+                        <form name="contact-us" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+                            <input type="hidden" name="form-name" value="contact-us">
+                            <p class="hidden-field">
+                                <label>Don’t fill this out if you're human: <input name="bot-field"></label>
+                            </p>
+
+                            <div class="form-group">
+                                <label for="contact-name">Name</label>
+                                <input id="contact-name" name="name" type="text" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="contact-email">Email</label>
+                                <input id="contact-email" name="email" type="email" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="contact-mobile">Mobile</label>
+                                <input id="contact-mobile" name="mobile" type="tel" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="contact-message">Message</label>
+                                <textarea id="contact-message" name="message" class="form-textarea" required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-large">Submit</button>
+                        </form>
+                    </section>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 NISMSTUDY.COM. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

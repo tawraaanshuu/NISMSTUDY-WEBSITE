@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Careers - NISMSTUDY.COM">
+    <title>Careers - NISMSTUDY.COM</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .page-wrap {
+            padding: 120px 0 60px;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+        .page-card {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            padding: 40px;
+        }
+        .page-card h1 {
+            margin: 0 0 12px;
+            font-size: 2.2rem;
+        }
+        .page-meta {
+            color: #64748b;
+            margin-bottom: 28px;
+            font-weight: 500;
+        }
+        .career-note {
+            padding: 16px 18px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 14px;
+            color: #1d4ed8;
+            margin-bottom: 24px;
+            line-height: 1.7;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .form-input, .form-textarea, .form-file {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font: inherit;
+            background: #fff;
+        }
+        .form-textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+        .btn-primary {
+            border: none;
+            cursor: pointer;
+        }
+        .hidden-field {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .page-card {
+                padding: 24px;
+                border-radius: 16px;
+            }
+            .page-wrap {
+                padding-top: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="/" class="logo" style="text-decoration: none;">
+                    <span class="logo-icon">📊</span>
+                    <span class="logo-text">NISMSTUDY.COM</span>
+                </a>
+                <div class="nav-menu" id="navMenu">
+                    <a href="/index.html#home" class="nav-link">Home</a>
+                    <a href="/index.html#courses" class="nav-link">Courses</a>
+                    <a href="/index.html#mock-tests" class="nav-link">Mock Tests</a>
+                    <a href="/contact-us.html" class="nav-link">Contact Us</a>
+                    <a href="/faq.html" class="nav-link">FAQ</a>
+                </div>
+                <div class="nav-actions">
+                    <button class="btn btn-secondary" onclick="window.location.href='/login.html'">Login</button>
+                    <button class="btn btn-primary" onclick="window.location.href='/login.html'">Enroll Now</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-wrap">
+        <div class="container">
+            <article class="page-card">
+                <h1>Careers</h1>
+                <p class="page-meta">Share your details and upload your resume to apply.</p>
+
+                <div class="career-note">
+                    This form is set up as a static Netlify Form pattern, including resume upload, so you can review submissions from your Netlify dashboard after deployment.
+                </div>
+
+                <form name="career-applications" method="POST" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data">
+                    <input type="hidden" name="form-name" value="career-applications">
+                    <p class="hidden-field">
+                        <label>Don’t fill this out if you're human: <input name="bot-field"></label>
+                    </p>
+
+                    <div class="form-group">
+                        <label for="career-name">Full Name</label>
+                        <input id="career-name" name="name" type="text" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="career-mobile">Mobile Number</label>
+                        <input id="career-mobile" name="mobile" type="tel" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="career-email">Email Address</label>
+                        <input id="career-email" name="email" type="email" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="career-resume">Resume Upload</label>
+                        <input id="career-resume" name="resume" type="file" class="form-file" accept=".pdf,.doc,.docx" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="career-message">Cover Note (Optional)</label>
+                        <textarea id="career-message" name="message" class="form-textarea" placeholder="Tell us briefly about yourself"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">Submit Application</button>
+                </form>
+            </article>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 NISMSTUDY.COM. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
