@@ -80,7 +80,7 @@ window.NISM_APP = (() => {
 
     const path = window.location.pathname || '';
     if (/\/login(?:\.html)?$/.test(path)) return path;
-    return '/login';
+    return '/login.html';
   }
 
   function getLoginUrl() {
