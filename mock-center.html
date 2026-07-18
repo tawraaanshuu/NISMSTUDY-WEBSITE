@@ -3,88 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NISMSTUDY - Mock Center</title>
-  <link rel="stylesheet" href="assets/app.css">
+  <title>Mock Test — NISMSTUDY</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234f8cff'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3ENS%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
 <header class="header">
   <div class="container nav">
-    <a class="brand" href="dashboard.html">
+    <a class="brand" href="index.html">
       <span class="brand-badge">NS</span>
-      <span>Mock Center</span>
+      <span>NISMSTUDY</span>
     </a>
+    <input type="checkbox" id="navToggle" class="nav-toggle-box">
+    <label for="navToggle" class="nav-toggle" aria-label="Toggle navigation">☰</label>
+    <nav class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="mock-tests.html">Mock Tests</a>
+    </nav>
     <div class="nav-actions">
-      <a class="btn btn-secondary" href="dashboard.html">Dashboard</a>
       <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
     </div>
   </div>
 </header>
-<main>
+
+<main id="main">
   <section class="page-hero">
     <div class="container">
-      <span class="kicker">Unlimited within access window</span>
+      <span class="kicker">Unlimited attempts in your access window</span>
       <h1>Take your mock test</h1>
-      <p class="lead">You can retake the mock as many times as you want while your paid access is active.</p>
+      <p>Answer every question, then submit to see your score instantly. Retake as many times as you like.</p>
     </div>
   </section>
+
   <section class="section">
     <div class="container">
-      <div id="mockMeta" class="card">Loading mock test...</div>
+      <div id="mockMeta" class="card">Loading mock test…</div>
       <form id="mockForm" class="stack" style="margin-top:18px;"></form>
       <div id="mockActions" class="action-row hidden" style="margin-top:18px;">
-        <button class="btn btn-primary" type="submit" form="mockForm">Submit Mock</button>
+        <button class="btn btn-primary btn-lg" type="submit" form="mockForm">Submit Mock</button>
         <button class="btn btn-secondary" type="button" id="retakeBtn">Retake</button>
       </div>
-      <div id="mockResult" class="notice hidden" style="margin-top:18px;"></div>
+      <div id="mockResult" class="notice ok hidden" style="margin-top:18px;"></div>
     </div>
   </section>
 </main>
+
+<footer class="footer">
+  <div class="container">
+    <p class="small center">© 2026 NISMSTUDY. All rights reserved. · <a href="contact-us.html">Contact</a> · <a href="faq.html">FAQ</a></p>
+  </div>
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
 <script>
-window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
-  supabaseUrl: '',
-  supabaseAnonKey: '',
-  accessDays: 15,
-  defaultPriceLabel: 'Rs 329',
-  adminEmails: ['info@nismstudy.in'],
-  tables: {
-    profiles: 'profiles',
-    courses: 'courses',
-    quizzes: 'quizzes',
-    examAccess: 'exam_access',
-    paymentRecords: 'payment_records',
-    mockAttempts: 'mock_attempts',
-    homeSupport: 'home_support_content'
-  }
-};
-</script>
-<script src="assets/config.js"></script>
-<script src="assets/app.js"></script>
-<script>
-(async function() {
-  const auth = await NISM_APP.requireAuth('login.html');
-  if (!auth) return;
+(async function () {
   document.getElementById('logoutBtn').addEventListener('click', () => NISM_APP.signOutUser());
-  const courseId = NISM_APP.qs('course');
+
   const meta = document.getElementById('mockMeta');
   const form = document.getElementById('mockForm');
   const actions = document.getElementById('mockActions');
   const result = document.getElementById('mockResult');
   const retakeBtn = document.getElementById('retakeBtn');
-  if (!courseId) {
-    meta.innerHTML = 'Missing course reference.';
-    return;
-  }
+
   try {
+    const auth = await NISM_APP.requireAuth('login.html');
+    if (!auth) return;
+
+    const courseId = NISM_APP.qs('course');
+    if (!courseId) {
+      meta.innerHTML = 'No exam selected. <a href="dashboard.html">Go back to the dashboard</a> and pick an exam.';
+      return;
+    }
+
     const [course, accessRecords] = await Promise.all([
       NISM_APP.fetchCourse(courseId),
       NISM_APP.fetchAccessRecords(auth.user.id)
     ]);
+
     const access = NISM_APP.findActiveAccess(accessRecords, courseId);
     if (!course || !access) {
-      meta.innerHTML = 'Access not active for this exam. Purchase it from the dashboard first.';
+      meta.innerHTML = 'Your access for this exam is not active. <a href="dashboard.html">Purchase it from the dashboard</a> first.';
       return;
     }
+
     const quizzes = await NISM_APP.fetchQuizzes(courseId);
     meta.innerHTML = `
       <div class="badge-row">
@@ -92,12 +99,15 @@ window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
         <span class="pill info">${quizzes.length} question(s)</span>
       </div>
       <h3>${NISM_APP.escapeHtml(course.exam_name || course.title || 'Mock Test')}</h3>
-      <p class="muted">Submit when finished. You can retake this mock any number of times before access ends.</p>`;
+      <p class="muted">Submit when finished. You can retake this mock any number of times before your access ends.</p>`;
+
     if (!quizzes.length) {
-      form.innerHTML = '<div class="notice">No quiz questions have been added for this exam yet.</div>';
+      form.innerHTML = '<div class="notice">No questions have been added for this exam yet. Please check back soon.</div>';
       return;
     }
+
     renderQuiz(quizzes);
+    actions.classList.remove('hidden');
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -110,18 +120,25 @@ window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
         if (correct) score += 1;
         answers.push({ question_id: quiz.id, answer, correct });
       });
+
+      const pct = Math.round((score / quizzes.length) * 100);
       result.classList.remove('hidden');
-      result.innerHTML = `You scored <strong>${score} / ${quizzes.length}</strong>. You can retake the mock again anytime before <strong>${NISM_APP.fmtDate(access.access_until)}</strong>.`;
-      await NISM_APP.saveMockAttempt({
-        userId: auth.user.id,
-        courseId,
-        score,
-        totalQuestions: quizzes.length,
-        answers
-      });
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      result.innerHTML = `You scored <strong>${score} / ${quizzes.length}</strong> (${pct}%). You can retake this mock anytime before <strong>${NISM_APP.fmtDate(access.access_until)}</strong>.`;
+
+      try {
+        await NISM_APP.saveMockAttempt({
+          userId: auth.user.id,
+          courseId,
+          score,
+          totalQuestions: quizzes.length,
+          answers
+        });
+      } catch (saveError) {
+        console.error(saveError);
+      }
+      result.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
-    actions.classList.remove('hidden');
+
     retakeBtn.addEventListener('click', () => {
       form.reset();
       result.classList.add('hidden');
@@ -129,7 +146,7 @@ window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
     });
   } catch (error) {
     console.error(error);
-    meta.innerHTML = 'Unable to load the mock test right now.';
+    meta.innerHTML = `<div class="notice warn">${NISM_APP.friendlyError(error, 'Unable to load the mock test right now. Please refresh to try again.')}</div>`;
   }
 
   function renderQuiz(quizzes) {
@@ -138,7 +155,7 @@ window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
         <div class="badge-row"><span class="pill info">Question ${index + 1}</span></div>
         <h3>${NISM_APP.escapeHtml(quiz.question_text)}</h3>
         <div class="option-list">
-          ${['A','B','C','D'].map(option => `
+          ${['A', 'B', 'C', 'D'].map(option => `
             <label class="option-item">
               <input type="radio" name="q_${quiz.id}" value="${option}">
               <span><strong>${option}.</strong> ${NISM_APP.escapeHtml(quiz['option_' + option.toLowerCase()] || '')}</span>

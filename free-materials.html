@@ -3,21 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NISMSTUDY - Free Materials</title>
-  <link rel="stylesheet" href="app.css">
+  <title>Free Study Materials — NISMSTUDY</title>
+  <meta name="description" content="Download free NISM exam workbooks in PDF — Currency Derivatives, Mutual Fund Distributors, Equity Derivatives, Research Analyst and more.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234f8cff'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3ENS%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
 <header class="header">
   <div class="container nav">
     <a class="brand" href="index.html">
       <span class="brand-badge">NS</span>
       <span>NISMSTUDY</span>
     </a>
+    <input type="checkbox" id="navToggle" class="nav-toggle-box">
+    <label for="navToggle" class="nav-toggle" aria-label="Toggle navigation">☰</label>
     <nav class="nav-links">
       <a href="index.html">Home</a>
       <a href="courses.html">Courses</a>
       <a href="mock-tests.html">Mock Tests</a>
-      <a href="free-materials.html">Free Materials</a>
+      <a href="free-materials.html" class="active">Free Materials</a>
+      <a href="faq.html">FAQ</a>
       <a href="contact-us.html">Contact</a>
     </nav>
     <div class="nav-actions">
@@ -26,76 +34,120 @@
   </div>
 </header>
 
-<main class="section">
-  <div class="container">
-    <span class="kicker">Study Resources</span>
-    <h1>Free Materials</h1>
-    <p class="muted">Download free NISM study materials, workbooks, and revision resources.</p>
+<main id="main">
+  <section class="page-hero">
+    <div class="container">
+      <span class="kicker">100% free downloads</span>
+      <h1>Free NISM exam workbooks</h1>
+      <p>Official-style exam workbooks in PDF for every major NISM series. No signup needed — click and read.</p>
+    </div>
+  </section>
 
-    <div class="grid-3" style="margin-top:24px;">
+  <section class="section">
+    <div class="container grid-3">
 
-      <article class="card">
-        <h3>NISM III-A Securities Intermediaries Compliance (Non-Fund)</h3>
-        <p class="small">Workbook PDF for Securities Intermediaries Compliance.</p>
-        <a class="btn btn-primary" href="materials/NISM%20III-A%20Securities%20Intermediaries%20Compliance%20%28Non-Fund%29.pdf" target="_blank" rel="noopener">View PDF</a>
+      <article class="card card-hover course-card">
+        <span class="tag">PDF workbook</span>
+        <h3>NISM Series I — Currency Derivatives</h3>
+        <p class="muted">Complete exam workbook covering the currency derivatives certification syllabus.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="materials/NISM-SERIES-I--CURRENCY-DERIVATIVE-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+        </div>
       </article>
 
-      <article class="card">
-        <h3>NISM Series V-A Mutual Fund Distributors Certification Examination</h3>
-        <p class="small">Workbook PDF for Mutual Fund Distributors exam preparation.</p>
-        <a class="btn btn-primary" href="materials/NISM%20Series%20V-A%20Mutual%20Fund%20Distributors%20Certification%20Examination.pdf" target="_blank" rel="noopener">View PDF</a>
+      <article class="card card-hover course-card">
+        <span class="tag">PDF workbook</span>
+        <h3>NISM Series III-A — Securities Intermediaries Compliance</h3>
+        <p class="muted">Compliance (non-fund) certification workbook for securities intermediaries.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="materials/NISM%20III-A%20Securities%20Intermediaries%20Compliance%20%28Non-Fund%29.pdf" target="_blank" rel="noopener">View PDF</a>
+        </div>
       </article>
 
-      <article class="card">
-        <h3>NISM Series-XVI Commodity Derivatives Certification Examination</h3>
-        <p class="small">Workbook PDF for Commodity Derivatives exam preparation.</p>
-        <a class="btn btn-primary" href="materials/NISM%20Series-XVI%20Commodity%20Derivatives%20Certification%20Examination.pdf" target="_blank" rel="noopener">View PDF</a>
+      <article class="card card-hover course-card">
+        <span class="tag">PDF workbook</span>
+        <h3>NISM Series V-A — Mutual Fund Distributors</h3>
+        <p class="muted">Latest edition of the mutual fund distributors certification exam workbook.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="materials/NISM%20Series%20V-A%20Mutual%20Fund%20Distributors%20Certification%20Examination_August%202025%20Final%20-%2015092025.pdf" target="_blank" rel="noopener">View PDF</a>
+        </div>
       </article>
 
-      <article class="card">
-        <h3>NISM Series I Currency Derivative Exam Workbook</h3>
-        <p class="small">Workbook PDF for Currency Derivative exam preparation.</p>
-        <a class="btn btn-primary" href="materials/NISM-SERIES-I--CURRENCY-DERIVATIVE-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+      <article class="card card-hover course-card">
+        <span class="tag">PDF workbook</span>
+        <h3>NISM Series VI — Depository Operations</h3>
+        <p class="muted">Depository operations certification exam workbook with full syllabus coverage.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="materials/NISM-SERIES-VI--DEPOSITORY-OPERATION-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+        </div>
       </article>
 
-      <article class="card">
-        <h3>NISM Series VI Depository Operation Exam Workbook</h3>
-        <p class="small">Workbook PDF for Depository Operation exam preparation.</p>
-        <a class="btn btn-primary" href="materials/NISM-SERIES-VI--DEPOSITORY-OPERATION-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+      <article class="card card-hover course-card">
+        <span class="tag">PDF workbook</span>
+        <h3>NISM Series VII — Securities Operations &amp; Risk Management</h3>
+        <p class="muted">Securities operations and risk management certification workbook.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="materials/NISM-SERIES-VII--SECURITIES-OPERATIONS-AND-RISK-MANAGEMENT-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+        </div>
       </article>
 
-      <article class="card">
-        <h3>NISM Series VII Securities Operations and Risk Management Exam Workbook</h3>
-        <p class="small">Workbook PDF for Securities Operations and Risk Management.</p>
-        <a class="btn btn-primary" href="materials/NISM-SERIES-VII--SECURITIES-OPERATIONS-AND-RISK-MANAGEMENT-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+      <article class="card card-hover course-card">
+        <span class="tag">PDF workbook</span>
+        <h3>NISM Series VIII — Equity Derivatives</h3>
+        <p class="muted">Equity derivatives certification exam workbook, the most popular NISM module.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="materials/NISM-SERIES-VIII--EQUITY-DERIVATIVES-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+        </div>
       </article>
 
-      <article class="card">
-        <h3>NISM Series VIII Equity Derivatives Exam Workbook</h3>
-        <p class="small">Workbook PDF for Equity Derivatives exam preparation.</p>
-        <a class="btn btn-primary" href="materials/NISM-SERIES-VIII--EQUITY-DERIVATIVES-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+      <article class="card card-hover course-card">
+        <span class="tag">PDF workbook</span>
+        <h3>NISM Series X-A — Investment Adviser (Level 1)</h3>
+        <p class="muted">Investment adviser level 1 certification exam workbook.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="materials/NISM-SERIES-X-A--INVESTMENT-ADVISER-LEVEL-1-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+        </div>
       </article>
 
-      <article class="card">
-        <h3>NISM Series X-A Investment Adviser Level 1 Exam Workbook</h3>
-        <p class="small">Workbook PDF for Investment Adviser Level 1.</p>
-        <a class="btn btn-primary" href="materials/NISM-SERIES-X-A--INVESTMENT-ADVISER-LEVEL-1-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+      <article class="card card-hover course-card">
+        <span class="tag">PDF workbook</span>
+        <h3>NISM Series X-B — Investment Adviser (Level 2)</h3>
+        <p class="muted">Investment adviser level 2 certification exam workbook.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="materials/NISM-SERIES-X-B--INVESTMENT-ADVISER-LEVEL-2-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+        </div>
       </article>
 
-      <article class="card">
-        <h3>NISM Series X-B Investment Adviser Level 2 Exam Workbook</h3>
-        <p class="small">Workbook PDF for Investment Adviser Level 2.</p>
-        <a class="btn btn-primary" href="materials/NISM-SERIES-X-B--INVESTMENT-ADVISER-LEVEL-2-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+      <article class="card card-hover course-card">
+        <span class="tag">PDF workbook</span>
+        <h3>NISM Series XV — Research Analyst</h3>
+        <p class="muted">Research analyst certification exam workbook with complete coverage.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="materials/NISM-SERIES-XV--RESEARCH-ANALYST-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+        </div>
       </article>
 
-      <article class="card">
-        <h3>NISM Series XV Research Analyst Exam Workbook</h3>
-        <p class="small">Workbook PDF for Research Analyst exam preparation.</p>
-        <a class="btn btn-primary" href="materials/NISM-SERIES-XV--RESEARCH-ANALYST-EXAM-WORKBOOK-IN-PDF.pdf" target="_blank" rel="noopener">View PDF</a>
+      <article class="card card-hover course-card">
+        <span class="tag">PDF workbook</span>
+        <h3>NISM Series XVI — Commodity Derivatives</h3>
+        <p class="muted">Latest commodity derivatives certification examination workbook.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="materials/NISM%20Series-XVI%20Commodity%20Derivatives%20Certification%20Examination_September%202025.pdf" target="_blank" rel="noopener">View PDF</a>
+        </div>
       </article>
 
     </div>
-  </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="card center" style="padding:36px 26px;">
+        <h2 style="margin-top:0;">Want exam-ready practice questions too?</h2>
+        <p class="muted" style="max-width:52ch;margin:8px auto 20px;">Workbooks teach the theory — our mock tests make sure you can apply it under exam conditions.</p>
+        <a class="btn btn-primary btn-lg" href="courses.html">Explore Courses</a>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer class="footer">
@@ -105,39 +157,38 @@
         <span class="brand-badge">NS</span>
         <span>NISMSTUDY</span>
       </div>
-      <p class="small">Your trusted partner for NISM and financial market exam preparation.</p>
+      <p class="small">Your trusted partner for NISM, NCFM and financial market exam preparation.</p>
       <p class="small">1/3325 F/F Ramnagar Ext., Shahdara, Delhi 110032</p>
       <p class="small">Email: <a href="mailto:info@nismstudy.in">info@nismstudy.in</a></p>
     </div>
-
     <div>
       <h3>Quick Links</h3>
       <div class="footer-links">
         <a href="index.html">Home</a>
+        <a href="courses.html">Courses</a>
+        <a href="mock-tests.html">Mock Tests</a>
+        <a href="free-materials.html">Free Materials</a>
         <a href="login.html">Login</a>
-        <a href="contact-us.html">Contact</a>
-        <a href="faq.html">FAQ</a>
       </div>
     </div>
-
     <div>
       <h3>Support</h3>
       <div class="support-links">
         <a href="contact-us.html">Contact Us</a>
         <a href="careers.html">Careers</a>
+        <a href="faq.html">FAQ</a>
         <a href="privacy-policy.html">Privacy Policy</a>
         <a href="refund-policy.html">Refund Policy</a>
         <a href="terms-and-conditions.html">Terms &amp; Conditions</a>
         <a href="cancellation-policy.html">Cancellation Policy</a>
-        <a href="faq.html">FAQ</a>
       </div>
     </div>
   </div>
-
   <div class="container">
     <hr class="sep">
     <p class="small">© 2026 NISMSTUDY. All rights reserved.</p>
   </div>
 </footer>
+
 </body>
 </html>

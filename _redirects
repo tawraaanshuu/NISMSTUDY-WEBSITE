@@ -1,0 +1,8 @@
+# Clean-URL rewrites (app.js uses /login as the auth redirect path)
+/login       /login.html        200
+/dashboard   /dashboard.html    200
+/courses     /courses.html      200
+/mock-tests  /mock-tests.html   200
+/materials   /free-materials.html 301
+/free-material.html /free-materials.html 301
+/register.html /login.html 301

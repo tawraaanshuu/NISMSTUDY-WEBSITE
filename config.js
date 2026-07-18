@@ -3,7 +3,7 @@ window.NISM_APP_CONFIG = {
   supabaseAnonKey: 'sb_publishable_BT1BJ5IKC7OArjTBdUBjkA_CjBZiFVf',
   accessDays: 15,
   defaultPriceLabel: 'Rs 329',
-  adminEmails: ['tawra.anshu@gmail.com'],
+  adminEmails: ['tawra.anshu@gmail.com', 'info@nismstudy.in'],
   tables: {
     profiles: 'profiles',
     courses: 'courses',

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mock Tests — NISMSTUDY</title>
+  <meta name="description" content="Take unlimited NISM mock tests for your purchased exams. Realistic exam-style practice with instant scoring.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234f8cff'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3ENS%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="brand-badge">NS</span>
+      <span>NISMSTUDY</span>
+    </a>
+    <input type="checkbox" id="navToggle" class="nav-toggle-box">
+    <label for="navToggle" class="nav-toggle" aria-label="Toggle navigation">☰</label>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="courses.html">Courses</a>
+      <a href="mock-tests.html" class="active">Mock Tests</a>
+      <a href="free-materials.html">Free Materials</a>
+      <a href="faq.html">FAQ</a>
+      <a href="contact-us.html">Contact</a>
+    </nav>
+    <div class="nav-actions" id="navActions">
+      <a class="btn btn-secondary" href="login.html">Login</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="page-hero">
+    <div class="container">
+      <span class="kicker">Practice zone</span>
+      <h1>My mock tests</h1>
+      <p>Your purchased exams and mock tests appear here. Attempts are unlimited while your access is active.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div id="mockState"><div class="card"><p class="muted">Checking your access…</p></div></div>
+      <div id="mockList" class="stack" style="margin-top:14px;"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container footer-grid">
+    <div>
+      <div class="brand">
+        <span class="brand-badge">NS</span>
+        <span>NISMSTUDY</span>
+      </div>
+      <p class="small">Your trusted partner for NISM, NCFM and financial market exam preparation.</p>
+      <p class="small">1/3325 F/F Ramnagar Ext., Shahdara, Delhi 110032</p>
+      <p class="small">Email: <a href="mailto:info@nismstudy.in">info@nismstudy.in</a></p>
+    </div>
+    <div>
+      <h3>Quick Links</h3>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="courses.html">Courses</a>
+        <a href="mock-tests.html">Mock Tests</a>
+        <a href="free-materials.html">Free Materials</a>
+        <a href="login.html">Login</a>
+      </div>
+    </div>
+    <div>
+      <h3>Support</h3>
+      <div class="support-links">
+        <a href="contact-us.html">Contact Us</a>
+        <a href="careers.html">Careers</a>
+        <a href="faq.html">FAQ</a>
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="refund-policy.html">Refund Policy</a>
+        <a href="terms-and-conditions.html">Terms &amp; Conditions</a>
+        <a href="cancellation-policy.html">Cancellation Policy</a>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <hr class="sep">
+    <p class="small">© 2026 NISMSTUDY. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+(async function () {
+  const stateEl = document.getElementById('mockState');
+  const listEl = document.getElementById('mockList');
+  const navActions = document.getElementById('navActions');
+
+  function loggedOutView() {
+    stateEl.innerHTML = `
+      <div class="grid-2">
+        <div class="card">
+          <h3>Login to see your mock tests</h3>
+          <p class="muted">Mock tests are unlocked per exam after purchase. Login with your email to see your active exams and start practising.</p>
+          <div class="action-row" style="margin-top:14px;">
+            <a class="btn btn-primary" href="login.html">Login</a>
+            <a class="btn btn-secondary" href="courses.html">Browse Courses</a>
+          </div>
+        </div>
+        <div class="card">
+          <h3>What you get</h3>
+          <ul class="inline-list">
+            <li>Full-length mocks matching the real exam pattern</li>
+            <li>Unlimited attempts during your access window</li>
+            <li>Instant scoring after every attempt</li>
+            <li>All NISM series at a flat Rs 329</li>
+          </ul>
+        </div>
+      </div>`;
+  }
+
+  try {
+    const { client, user } = await NISM_APP.getSession();
+    if (!client || !user) {
+      loggedOutView();
+      return;
+    }
+
+    navActions.innerHTML = `
+      <a class="btn btn-secondary" href="dashboard.html">Dashboard</a>
+      <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>`;
+    document.getElementById('logoutBtn').addEventListener('click', () => NISM_APP.signOutUser());
+
+    const records = await NISM_APP.fetchAccessRecords(user.id);
+    const now = Date.now();
+    const active = records.filter(r => new Date(r.access_until).getTime() > now);
+
+    if (!active.length) {
+      stateEl.innerHTML = `
+        <div class="empty-state">
+          <p>You don't have any active exam access right now.</p>
+          <a class="btn btn-primary" href="courses.html">Browse courses</a>
+        </div>`;
+      return;
+    }
+
+    stateEl.innerHTML = '';
+    listEl.innerHTML = active.map(record => {
+      const course = record.courses || {};
+      const title = NISM_APP.escapeHtml(course.exam_name || course.title || 'NISM Exam');
+      const until = NISM_APP.fmtDate(record.access_until);
+      const daysLeft = NISM_APP.daysRemaining(record.access_until);
+      return `
+        <article class="card card-hover">
+          <div class="badge-row">
+            <span class="status-pill ok">Active — ${daysLeft} day(s) left</span>
+          </div>
+          <h3>${title}</h3>
+          <p class="muted">Unlimited attempts until <strong>${until}</strong>.</p>
+          <div class="action-row" style="margin-top:12px;">
+            <a class="btn btn-primary" href="mock-center.html?course=${record.course_id}">Start Mock Test</a>
+          </div>
+        </article>`;
+    }).join('');
+  } catch (error) {
+    console.error(error);
+    stateEl.innerHTML = `<div class="notice warn">${NISM_APP.friendlyError(error, 'Unable to load your mock tests right now. Please try again shortly.')}</div>`;
+  }
+})();
+</script>
+</body>
+</html>

@@ -479,6 +479,14 @@ window.NISM_APP = (() => {
     target.innerHTML = message;
   }
 
+  function friendlyError(error, fallback = 'Something went wrong. Please try again.') {
+    const msg = String(error?.message || error || '');
+    if (/failed to fetch|networkerror|name_not_resolved|load failed|fetch/i.test(msg)) {
+      return 'Our servers are temporarily unavailable for maintenance. Please try again shortly, or email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a> for help.';
+    }
+    return fallback;
+  }
+
   return {
     cfg,
     tables,
@@ -517,6 +525,7 @@ window.NISM_APP = (() => {
     saveQuiz,
     deleteQuiz,
     renderAuthSummary,
-    setStatus
+    setStatus,
+    friendlyError
   };
 })();

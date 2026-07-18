@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /mock-center.html
+Disallow: /checkout.html
+Disallow: /payment-success.html
+Disallow: /admin.html
+
+Sitemap: https://nismstudy.in/sitemap.xml
