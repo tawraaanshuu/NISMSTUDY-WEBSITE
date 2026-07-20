@@ -199,7 +199,11 @@
     el('beginBtn').addEventListener('click', begin);
 
     async function begin() {
-      try { attemptId = await NISM_APP.startAttempt({ userId: auth.user.id, paperId: paper.id }); }
+      try {
+        attemptId = await NISM_APP.startAttempt({
+          userId: auth.user.id, paperId: paper.id, durationMinutes: paper.duration_minutes
+        });
+      }
       catch (e) { console.error('Could not open an attempt record:', e); }
 
       startedAt = Date.now();

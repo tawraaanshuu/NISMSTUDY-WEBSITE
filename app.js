@@ -452,14 +452,21 @@ window.NISM_APP = (() => {
 
   /* -------------------------------------------------------------- attempts */
 
-  async function startAttempt({ userId, paperId }) {
+  async function startAttempt({ userId, paperId, durationMinutes }) {
     const client = await createClient();
     if (!client || !userId || !paperId) return null;
+
+    // expires_at is NOT NULL in the database — an attempt must carry its own
+    // deadline, so the server can reject a submission that arrives late.
+    const startedAt = new Date();
+    const minutes = Number(durationMinutes) > 0 ? Number(durationMinutes) : 180;
+    const expiresAt = new Date(startedAt.getTime() + minutes * 60000);
 
     const { data, error } = await client.from(tables().attempts).insert({
       user_id: userId,
       quiz_id: paperId,
-      started_at: new Date().toISOString(),
+      started_at: startedAt.toISOString(),
+      expires_at: expiresAt.toISOString(),
       status: 'in_progress'
     }).select('id').maybeSingle();
 
