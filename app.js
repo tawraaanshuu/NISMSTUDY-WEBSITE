@@ -74,17 +74,16 @@ window.NISM_APP = (() => {
 
   function getLoginPath() {
     const configured = String(cfg().loginPath || '').trim();
-    if (configured) {
-      return configured.startsWith('/') ? configured : `/${configured}`;
-    }
+    if (configured) return configured;
 
     const path = window.location.pathname || '';
     if (/\/login(?:\.html)?$/.test(path)) return path;
-    return '/login.html';
+    // Relative, so the site works both at a domain root and in a project subfolder.
+    return 'login.html';
   }
 
   function getLoginUrl() {
-    return `${window.location.origin}${getLoginPath()}`;
+    return new URL(getLoginPath(), window.location.href).href;
   }
 
   function getPendingSignup() {
