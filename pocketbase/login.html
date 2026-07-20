@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — NISMSTUDY</title>
+  <meta name="description" content="Login or create your NISMSTUDY account. We email you a one-time code — no password needed.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23059669'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3ENS%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="brand-badge">NS</span>
+      <span>NISMSTUDY</span>
+    </a>
+    <input type="checkbox" id="navToggle" class="nav-toggle-box">
+    <label for="navToggle" class="nav-toggle" aria-label="Toggle navigation">☰</label>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="courses.html">Courses</a>
+      <a href="mock-tests.html">Mock Tests</a>
+      <a href="free-materials.html">Free Materials</a>
+      <a href="faq.html">FAQ</a>
+      <a href="contact-us.html">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-primary" href="courses.html">Explore Courses</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="auth-shell">
+  <div class="container grid-2">
+    <section class="card">
+      <span class="kicker">New student</span>
+      <h1 style="font-size:clamp(1.7rem,2.6vw,2.3rem);margin:14px 0 8px;">Create your account</h1>
+      <p class="muted">Enter your details and we'll email you a one-time code to finish signing up. No password to remember.</p>
+
+      <form id="signupForm" class="stack" style="margin-top:18px;">
+        <label class="label">Full name
+          <input class="input" type="text" id="signupName" placeholder="Your full name" autocomplete="name" required>
+        </label>
+        <label class="label">Mobile number
+          <input class="input" type="tel" id="signupMobile" placeholder="10-digit mobile number" autocomplete="tel" pattern="[0-9]{10}" required>
+        </label>
+        <label class="label">Email address
+          <input class="input" type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email" required>
+        </label>
+        <button class="btn btn-primary btn-lg" type="submit">Create Account</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <span class="kicker">Returning student</span>
+      <h2 style="margin:14px 0 8px;">Login with your email</h2>
+      <p class="muted">We'll email you a one-time code to sign in.</p>
+
+      <form id="loginForm" class="stack" style="margin-top:18px;">
+        <label class="label">Email address
+          <input class="input" type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+        </label>
+        <button class="btn btn-primary btn-lg" type="submit">Email Me a Code</button>
+      </form>
+
+      <!-- Shown once a code has been sent. -->
+      <form id="otpForm" class="stack hidden" style="margin-top:18px;">
+        <label class="label">Enter the code from your email
+          <input class="input" type="text" id="otpCode" placeholder="8-digit code"
+                 inputmode="numeric" autocomplete="one-time-code" required
+                 style="letter-spacing:.25em;font-size:1.1rem;">
+        </label>
+        <button class="btn btn-primary btn-lg" type="submit">Verify &amp; Login</button>
+        <button class="btn btn-ghost" type="button" id="otpCancel">Use a different email</button>
+      </form>
+
+      <div id="loginStatus" class="notice" style="margin-top:16px;">Enter your email to receive a login code.</div>
+
+      <div style="margin-top:24px;">
+        <div id="authSummary" class="stack" style="margin-bottom:12px;"></div>
+
+        <div id="loggedOutState" class="stack">
+          <div class="metric"><strong>15 days</strong><span class="small">Unlimited mock tests after payment.</span></div>
+          <div class="metric"><strong>No passwords</strong><span class="small">Secure one-time codes by email.</span></div>
+        </div>
+
+        <div id="loggedInState" class="stack hidden">
+          <a class="btn btn-primary" href="dashboard.html">Open Dashboard</a>
+          <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container footer-grid">
+    <div>
+      <div class="brand">
+        <span class="brand-badge">NS</span>
+        <span>NISMSTUDY</span>
+      </div>
+      <p class="small">Your trusted partner for NISM, NCFM and financial market exam preparation.</p>
+      <p class="small">Email: <a href="mailto:info@nismstudy.in">info@nismstudy.in</a></p>
+    </div>
+    <div>
+      <h3>Quick Links</h3>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="courses.html">Courses</a>
+        <a href="mock-tests.html">Mock Tests</a>
+        <a href="free-materials.html">Free Materials</a>
+        <a href="login.html">Login</a>
+      </div>
+    </div>
+    <div>
+      <h3>Support</h3>
+      <div class="support-links">
+        <a href="contact-us.html">Contact Us</a>
+        <a href="careers.html">Careers</a>
+        <a href="faq.html">FAQ</a>
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="refund-policy.html">Refund Policy</a>
+        <a href="terms-and-conditions.html">Terms &amp; Conditions</a>
+        <a href="cancellation-policy.html">Cancellation Policy</a>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <hr class="sep">
+    <p class="small">© 2026 NISMSTUDY. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+(async function () {
+  const signupForm = document.getElementById('signupForm');
+  const loginForm = document.getElementById('loginForm');
+  const otpForm = document.getElementById('otpForm');
+  const otpCancel = document.getElementById('otpCancel');
+  const status = document.getElementById('loginStatus');
+  const authSummary = document.getElementById('authSummary');
+  const loggedOutState = document.getElementById('loggedOutState');
+  const loggedInState = document.getElementById('loggedInState');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  function showCodeStep(on) {
+    otpForm.classList.toggle('hidden', !on);
+    loginForm.classList.toggle('hidden', on);
+    signupForm.closest('section').classList.toggle('hidden', on);
+  }
+
+  async function showLoggedIn(user) {
+    await NISM_APP.completePendingSignup(user);
+    const profile = await NISM_APP.getProfile(user.id);
+    NISM_APP.renderAuthSummary(authSummary, user, profile || user);
+    loggedOutState.classList.add('hidden');
+    loggedInState.classList.remove('hidden');
+    showCodeStep(false);
+    NISM_APP.setStatus(status, 'You are logged in. Open the dashboard to continue.', 'ok');
+  }
+
+  try {
+    const session = await NISM_APP.getSession();
+    if (!session.client) {
+      NISM_APP.setStatus(status, 'Login is temporarily unavailable. Please try again shortly or email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a>.', 'warn');
+      return;
+    }
+    if (session.user) {
+      await showLoggedIn(session.user);
+    } else if (NISM_APP.hasPendingOtp()) {
+      // Reloaded mid-login: go straight back to the code step.
+      showCodeStep(true);
+      NISM_APP.setStatus(status, 'Enter the code we emailed you.', 'info');
+    }
+  } catch (error) {
+    console.error(error);
+    NISM_APP.setStatus(status, NISM_APP.friendlyError(error), 'warn');
+  }
+
+  signupForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const full_name = document.getElementById('signupName').value.trim();
+    const mobile = document.getElementById('signupMobile').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    if (!full_name || !mobile || !email) return;
+
+    try {
+      NISM_APP.setStatus(status, 'Creating your account…');
+      await NISM_APP.sendMagicLink(email, 'signup', { full_name, mobile });
+      showCodeStep(true);
+      NISM_APP.setStatus(status, `We emailed a code to <strong>${NISM_APP.escapeHtml(email)}</strong>. Enter it to finish signing up.`, 'ok');
+    } catch (error) {
+      console.error(error);
+      NISM_APP.setStatus(status, NISM_APP.friendlyError(error, 'Unable to create your account. Please check the details and try again.'), 'error');
+    }
+  });
+
+  loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    if (!email) return;
+
+    try {
+      NISM_APP.setStatus(status, 'Sending your login code…');
+      await NISM_APP.sendMagicLink(email, 'login');
+      showCodeStep(true);
+      NISM_APP.setStatus(status, `We emailed a code to <strong>${NISM_APP.escapeHtml(email)}</strong>. It is valid for 15 minutes.`, 'ok');
+    } catch (error) {
+      console.error(error);
+      NISM_APP.setStatus(status, NISM_APP.friendlyError(error, 'Unable to send the login code. Please check the email address and try again.'), 'error');
+    }
+  });
+
+  otpForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const code = document.getElementById('otpCode').value.trim();
+    if (!code) return;
+
+    try {
+      NISM_APP.setStatus(status, 'Verifying…');
+      const user = await NISM_APP.verifyOtp(code);
+      await showLoggedIn(user);
+      window.location.href = 'dashboard.html';
+    } catch (error) {
+      console.error(error);
+      NISM_APP.setStatus(status, NISM_APP.friendlyError(error, 'That code was not correct or has expired. Request a new one.'), 'error');
+    }
+  });
+
+  otpCancel.addEventListener('click', () => {
+    localStorage.removeItem('nism_pb_otp');
+    showCodeStep(false);
+    NISM_APP.setStatus(status, 'Enter your email to receive a login code.');
+  });
+
+  logoutBtn.addEventListener('click', () => NISM_APP.signOutUser());
+})();
+</script>
+</body>
+</html>

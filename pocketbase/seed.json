@@ -1,0 +1,210 @@
+{
+  "courses": [
+    {
+      "name": "NISM Series VIII: Equity Derivatives",
+      "description": "Full question bank for the equity derivatives certification, covering futures, options, trading mechanics, clearing and settlement.",
+      "order": 1,
+      "questions": [
+        [
+          "Which body regulates the securities market in India?",
+          "RBI",
+          "SEBI",
+          "IRDAI",
+          "PFRDA",
+          "B",
+          "The Securities and Exchange Board of India (SEBI) is the regulator for the Indian securities market."
+        ],
+        [
+          "A call option gives the buyer the right, but not the obligation, to:",
+          "Sell the underlying at the strike price",
+          "Buy the underlying at the strike price",
+          "Buy the underlying at the market price",
+          "Sell the underlying at the market price",
+          "B",
+          "A call option confers the right to BUY the underlying at the strike price."
+        ],
+        [
+          "A put option gives the buyer the right to:",
+          "Buy the underlying at the strike price",
+          "Sell the underlying at the strike price",
+          "Receive a dividend",
+          "Convert the option into a future",
+          "B",
+          "A put option confers the right to SELL the underlying at the strike price."
+        ],
+        [
+          "What is the maximum loss for the buyer of an option?",
+          "Unlimited",
+          "The strike price",
+          "The premium paid",
+          "The margin deposited",
+          "C",
+          "An option buyer can lose at most the premium paid, since exercising is optional."
+        ],
+        [
+          "In a futures contract, the obligation to perform rests with:",
+          "Only the buyer",
+          "Only the seller",
+          "Both buyer and seller",
+          "Neither party",
+          "C",
+          "Unlike options, a futures contract obliges BOTH parties to settle."
+        ],
+        [
+          "The intrinsic value of a call option is:",
+          "Strike price minus spot price, floored at zero",
+          "Spot price minus strike price, floored at zero",
+          "Always equal to the premium",
+          "Always zero before expiry",
+          "B",
+          "Call intrinsic value = max(Spot - Strike, 0); it can never be negative."
+        ],
+        [
+          "Mark-to-market (MTM) settlement in futures is carried out:",
+          "Only at expiry",
+          "Daily",
+          "Weekly",
+          "Only when the position is closed",
+          "B",
+          "Futures positions are marked to market and settled daily against the closing price."
+        ],
+        [
+          "Who guarantees settlement of trades executed on a recognised stock exchange?",
+          "The broker",
+          "The clearing corporation",
+          "The depository",
+          "The individual counterparty",
+          "B",
+          "The clearing corporation acts as central counterparty and guarantees settlement."
+        ]
+      ]
+    },
+    {
+      "name": "NISM Series V-A: Mutual Fund Distributors",
+      "description": "Practice questions on mutual fund structures, NAV, scheme types, distribution regulations and investor services.",
+      "order": 2,
+      "questions": [
+        [
+          "Net Asset Value (NAV) of a mutual fund scheme is calculated as:",
+          "Total assets divided by total investors",
+          "Net assets divided by number of units outstanding",
+          "Total income divided by expenses",
+          "Market price divided by face value",
+          "B",
+          "NAV = (Assets - Liabilities) / number of outstanding units."
+        ],
+        [
+          "Which registration is mandatory to distribute mutual funds in India?",
+          "ARN from AMFI",
+          "PAN from Income Tax Department",
+          "DIN from MCA",
+          "CIN from ROC",
+          "A",
+          "Distributors must obtain an AMFI Registration Number (ARN)."
+        ],
+        [
+          "An open-ended mutual fund scheme allows investors to:",
+          "Buy and redeem units on an ongoing basis",
+          "Buy units only during the NFO",
+          "Redeem units only at maturity",
+          "Trade units only on an exchange",
+          "A",
+          "Open-ended schemes offer continuous purchase and redemption at NAV-based prices."
+        ],
+        [
+          "A Systematic Investment Plan (SIP) allows an investor to:",
+          "Invest a lump sum once",
+          "Invest a fixed amount at regular intervals",
+          "Withdraw a fixed amount regularly",
+          "Switch between schemes automatically",
+          "B",
+          "An SIP invests a fixed sum at regular intervals, averaging cost over time."
+        ],
+        [
+          "Exit load in a mutual fund scheme is charged:",
+          "At the time of purchase",
+          "At the time of redemption",
+          "Annually",
+          "Only on dividend payout",
+          "B",
+          "Exit load is deducted from redemption proceeds when units are sold within the specified period."
+        ],
+        [
+          "The trustees of a mutual fund primarily act in the interest of:",
+          "The AMC",
+          "The sponsor",
+          "The unit holders",
+          "The distributors",
+          "C",
+          "Trustees hold the fund property in trust and are accountable to unit holders."
+        ]
+      ]
+    },
+    {
+      "name": "NISM Series I: Currency Derivatives",
+      "description": "Question bank covering currency markets, exchange-traded currency futures and options, and settlement mechanics.",
+      "order": 3,
+      "questions": [
+        [
+          "In the currency pair USD/INR, the base currency is:",
+          "INR",
+          "USD",
+          "Both",
+          "Neither",
+          "B",
+          "In a quotation the FIRST currency is the base currency - here, USD."
+        ],
+        [
+          "Exchange-traded currency futures in India are settled in:",
+          "US Dollars",
+          "Indian Rupees",
+          "The currency of the buyer's choice",
+          "Gold",
+          "B",
+          "Exchange-traded currency derivatives in India are cash settled in Indian Rupees."
+        ],
+        [
+          "If the INR depreciates against the USD, then:",
+          "More rupees are needed to buy one dollar",
+          "Fewer rupees are needed to buy one dollar",
+          "The exchange rate is unchanged",
+          "The dollar has weakened",
+          "A",
+          "Depreciation of the rupee means each dollar costs more rupees."
+        ],
+        [
+          "Hedging with currency futures is primarily done to:",
+          "Maximise speculative profit",
+          "Reduce the risk of adverse exchange rate movement",
+          "Avoid paying margins",
+          "Guarantee a profit",
+          "B",
+          "Hedging reduces exposure to unfavourable currency movements."
+        ],
+        [
+          "Initial margin in currency futures is collected to:",
+          "Pay brokerage",
+          "Cover potential losses from price movement",
+          "Pay exchange listing fees",
+          "Fund the settlement guarantee dividend",
+          "B",
+          "Initial margin covers the potential one-day loss and secures performance."
+        ],
+        [
+          "Which institution manages India's foreign exchange reserves?",
+          "SEBI",
+          "RBI",
+          "Ministry of Corporate Affairs",
+          "NSE",
+          "B",
+          "The Reserve Bank of India manages foreign exchange reserves and FEMA regulations."
+        ]
+      ]
+    }
+  ],
+  "support": {
+    "title": "Need help choosing an exam?",
+    "body": "Email info@nismstudy.in and we will help you pick the right NISM module and get started.",
+    "is_active": true
+  }
+}
