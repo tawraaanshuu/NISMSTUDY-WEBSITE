@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login — NISMSTUDY</title>
-  <meta name="description" content="Login or create your NISMSTUDY account. We send a secure login link to your email — no password needed.">
+  <meta name="description" content="Login or create your NISMSTUDY account to access mock tests and study material.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23059669'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3ENS%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -36,10 +36,11 @@
 
 <main id="main" class="auth-shell">
   <div class="container grid-2">
+
     <section class="card">
       <span class="kicker">New student</span>
       <h1 style="font-size:clamp(1.7rem,2.6vw,2.3rem);margin:14px 0 8px;">Create your account</h1>
-      <p class="muted">Enter your name, mobile number and email. We'll send a secure login link to your email — no password needed. Future logins use email only.</p>
+      <p class="muted">Takes a few seconds. You'll use this email and password to sign in from then on.</p>
 
       <form id="signupForm" class="stack" style="margin-top:18px;">
         <label class="label">Full name
@@ -51,39 +52,53 @@
         <label class="label">Email address
           <input class="input" type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email" required>
         </label>
+        <label class="label">Choose a password
+          <input class="input" type="password" id="signupPassword" placeholder="At least 8 characters"
+                 autocomplete="new-password" minlength="8" required>
+        </label>
         <button class="btn btn-primary btn-lg" type="submit">Create Account</button>
       </form>
     </section>
 
     <section class="card">
       <span class="kicker">Returning student</span>
-      <h2 style="margin:14px 0 8px;">Login with your email</h2>
-      <p class="muted">We'll send a secure login link to your registered email address.</p>
+      <h2 style="margin:14px 0 8px;">Login</h2>
+      <p class="muted">Sign in with the email and password you registered with.</p>
 
       <form id="loginForm" class="stack" style="margin-top:18px;">
         <label class="label">Email address
           <input class="input" type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
         </label>
-        <button class="btn btn-primary btn-lg" type="submit">Send Login Link</button>
+        <label class="label">Password
+          <input class="input" type="password" id="password" placeholder="Your password" autocomplete="current-password" required>
+        </label>
+        <button class="btn btn-primary btn-lg" type="submit">Login</button>
       </form>
 
-      <div id="loginStatus" class="notice" style="margin-top:16px;">Enter your email to receive a login link.</div>
+      <div class="action-row" style="margin-top:12px;">
+        <button class="btn btn-ghost" type="button" id="magicLinkBtn">Email me a login link instead</button>
+        <button class="btn btn-ghost" type="button" id="forgotBtn">Forgot password</button>
+      </div>
+
+      <div id="loginStatus" class="notice" style="margin-top:16px;">Enter your details to sign in.</div>
 
       <div style="margin-top:24px;">
         <div id="authSummary" class="stack" style="margin-bottom:12px;"></div>
 
         <div id="loggedOutState" class="stack">
           <div class="metric"><strong>15 days</strong><span class="small">Unlimited mock tests after payment.</span></div>
-          <div class="metric"><strong>No passwords</strong><span class="small">Secure one-click login links via email.</span></div>
+          <div class="metric"><strong>Instant access</strong><span class="small">Start practising as soon as you pay.</span></div>
         </div>
 
         <div id="loggedInState" class="stack hidden">
           <a class="btn btn-primary" href="dashboard.html">Open Dashboard</a>
+          <a class="btn btn-secondary" href="mock-tests.html">Go to Mock Tests</a>
           <a class="btn btn-secondary hidden" id="adminPortalLink" href="admin.html">Open Admin Portal</a>
           <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
         </div>
       </div>
     </section>
+
   </div>
 </main>
 
@@ -132,37 +147,35 @@
 <script src="app.js"></script>
 <script>
 (async function () {
-  const loginForm = document.getElementById('loginForm');
-  const signupForm = document.getElementById('signupForm');
-  const status = document.getElementById('loginStatus');
-  const authSummary = document.getElementById('authSummary');
-  const loggedOutState = document.getElementById('loggedOutState');
-  const loggedInState = document.getElementById('loggedInState');
-  const adminPortalLink = document.getElementById('adminPortalLink');
-  const logoutBtn = document.getElementById('logoutBtn');
+  const el = (id) => document.getElementById(id);
+  const status = el('loginStatus');
+  const signupForm = el('signupForm');
+  const loginForm = el('loginForm');
+
+  const next = NISM_APP.qs('next') || 'dashboard.html';
+
+  async function showLoggedIn(user) {
+    const profile = await NISM_APP.getProfile(user.id);
+    NISM_APP.renderAuthSummary(el('authSummary'), user, profile);
+    el('loggedOutState').classList.add('hidden');
+    el('loggedInState').classList.remove('hidden');
+    signupForm.closest('section').classList.add('hidden');
+    loginForm.classList.add('hidden');
+    if (NISM_APP.isAdmin(user, profile)) el('adminPortalLink').classList.remove('hidden');
+    NISM_APP.setStatus(status, 'You are logged in.', 'ok');
+  }
 
   try {
-    const sessionInfo = await NISM_APP.getSession();
-
-    if (!sessionInfo.client) {
-      NISM_APP.setStatus(status, 'Login is temporarily unavailable. Please try again shortly or email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a>.', 'warn');
+    const session = await NISM_APP.getSession();
+    if (!session.client) {
+      NISM_APP.setStatus(status, 'Login is temporarily unavailable. Please email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a>.', 'warn');
       return;
     }
-
-    if (sessionInfo.user) {
-      await NISM_APP.completePendingSignup(sessionInfo.user);
-      await NISM_APP.upsertProfileFromUser(sessionInfo.user);
-
-      const profile = await NISM_APP.getProfile(sessionInfo.user.id);
-      NISM_APP.renderAuthSummary(authSummary, sessionInfo.user, profile);
-
-      loggedOutState.classList.add('hidden');
-      loggedInState.classList.remove('hidden');
-      NISM_APP.setStatus(status, 'You are logged in. Open the dashboard to continue.', 'ok');
-
-      if (NISM_APP.isAdmin(sessionInfo.user, profile)) {
-        adminPortalLink.classList.remove('hidden');
-      }
+    if (session.user) {
+      // Arrived back from a magic link or already signed in.
+      await NISM_APP.completePendingSignup(session.user).catch(() => {});
+      await NISM_APP.upsertProfileFromUser(session.user).catch(() => {});
+      await showLoggedIn(session.user);
     }
   } catch (error) {
     console.error(error);
@@ -171,41 +184,88 @@
 
   signupForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-
-    const fullName = document.getElementById('signupName').value.trim();
-    const mobile = document.getElementById('signupMobile').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    if (!fullName || !mobile || !email) return;
+    const full_name = el('signupName').value.trim();
+    const mobile = el('signupMobile').value.trim();
+    const email = el('signupEmail').value.trim();
+    const password = el('signupPassword').value;
 
     try {
-      NISM_APP.setStatus(status, 'Sending signup link…');
-      await NISM_APP.sendMagicLink(email, 'signup', { full_name: fullName, mobile });
-      NISM_APP.setStatus(status, 'Signup link sent! Open your email and click the link to finish creating your account.', 'ok');
-      signupForm.reset();
+      NISM_APP.setStatus(status, 'Creating your account…');
+      const res = await NISM_APP.signUpWithPassword(email, password, { full_name, mobile });
+
+      if (res.needsConfirmation) {
+        NISM_APP.setStatus(status, 'Account created. Please check your email and confirm your address, then log in.', 'ok');
+        return;
+      }
+      NISM_APP.setStatus(status, 'Account created. Taking you to your dashboard…', 'ok');
+      window.location.href = next;
     } catch (error) {
       console.error(error);
-      NISM_APP.setStatus(status, NISM_APP.friendlyError(error, 'Unable to send the signup link. Please check the email address and try again.'), 'error');
+      const msg = String(error?.message || '');
+      if (/already registered|already exists/i.test(msg)) {
+        NISM_APP.setStatus(status, 'That email is already registered. Please log in on the right instead.', 'warn');
+      } else {
+        NISM_APP.setStatus(status, NISM_APP.friendlyError(error, NISM_APP.escapeHtml(msg) || 'Could not create your account. Please try again.'), 'error');
+      }
     }
   });
 
   loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-
-    const email = document.getElementById('email').value.trim();
-    if (!email) return;
+    const email = el('email').value.trim();
+    const password = el('password').value;
 
     try {
-      NISM_APP.setStatus(status, 'Sending login link…');
-      await NISM_APP.sendMagicLink(email, 'login');
-      NISM_APP.setStatus(status, 'Login link sent! Open your email and click the link to login.', 'ok');
-      loginForm.reset();
+      NISM_APP.setStatus(status, 'Signing you in…');
+      await NISM_APP.signInWithPassword(email, password);
+      window.location.href = next;
     } catch (error) {
       console.error(error);
-      NISM_APP.setStatus(status, NISM_APP.friendlyError(error, 'Unable to send the login link. Please check the email address and try again.'), 'error');
+      const msg = String(error?.message || '');
+      if (/invalid login credentials/i.test(msg)) {
+        NISM_APP.setStatus(status, 'That email and password did not match. Try again, or use "Forgot password".', 'error');
+      } else if (/email not confirmed/i.test(msg)) {
+        NISM_APP.setStatus(status, 'Please confirm your email address first — check your inbox for the confirmation link.', 'warn');
+      } else {
+        NISM_APP.setStatus(status, NISM_APP.friendlyError(error, 'Could not sign you in. Please try again.'), 'error');
+      }
     }
   });
 
-  logoutBtn.addEventListener('click', () => NISM_APP.signOutUser());
+  // Magic link kept as a fallback for anyone who cannot remember a password.
+  el('magicLinkBtn').addEventListener('click', async () => {
+    const email = el('email').value.trim();
+    if (!email) {
+      NISM_APP.setStatus(status, 'Enter your email address first, then request a link.', 'warn');
+      return;
+    }
+    try {
+      NISM_APP.setStatus(status, 'Sending your login link…');
+      await NISM_APP.sendMagicLink(email, 'login');
+      NISM_APP.setStatus(status, 'Login link sent. Open your email and click the link to sign in.', 'ok');
+    } catch (error) {
+      console.error(error);
+      NISM_APP.setStatus(status, NISM_APP.friendlyError(error, 'Could not send the login link. Please use your password instead.'), 'error');
+    }
+  });
+
+  el('forgotBtn').addEventListener('click', async () => {
+    const email = el('email').value.trim();
+    if (!email) {
+      NISM_APP.setStatus(status, 'Enter your email address first, then choose "Forgot password".', 'warn');
+      return;
+    }
+    try {
+      NISM_APP.setStatus(status, 'Sending a reset link…');
+      await NISM_APP.sendPasswordReset(email);
+      NISM_APP.setStatus(status, 'Password reset link sent. Please check your email.', 'ok');
+    } catch (error) {
+      console.error(error);
+      NISM_APP.setStatus(status, NISM_APP.friendlyError(error, 'Could not send a reset link right now.'), 'error');
+    }
+  });
+
+  el('logoutBtn').addEventListener('click', () => NISM_APP.signOutUser());
 })();
 </script>
 <script src="chat-widget.js" defer></script>

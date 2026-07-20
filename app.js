@@ -174,6 +174,68 @@ window.NISM_APP = (() => {
     return true;
   }
 
+  // Password auth. Magic links depend on an email actually being delivered,
+  // which the mail provider throttles; passwords remove that dependency.
+  async function signUpWithPassword(email, password, profile = {}) {
+    const client = await createClient();
+    if (!client) throw new Error('Supabase config missing.');
+
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    if (!normalizedEmail) throw new Error('Email is required.');
+    if (String(password || '').length < 8) throw new Error('Password must be at least 8 characters.');
+
+    const { data, error } = await client.auth.signUp({
+      email: normalizedEmail,
+      password,
+      options: {
+        data: {
+          full_name: String(profile.full_name || '').trim(),
+          mobile: String(profile.mobile || '').trim()
+        },
+        emailRedirectTo: getLoginUrl()
+      }
+    });
+    if (error) throw error;
+
+    // With "Confirm email" off, Supabase returns a session immediately.
+    // With it on, there is no session until the student clicks the email.
+    if (data?.session && data?.user) {
+      setPendingSignup({
+        email: normalizedEmail,
+        full_name: String(profile.full_name || '').trim(),
+        mobile: String(profile.mobile || '').trim()
+      });
+      await completePendingSignup(data.user).catch(() => {});
+      return { user: data.user, session: data.session, needsConfirmation: false };
+    }
+    return { user: data?.user || null, session: null, needsConfirmation: true };
+  }
+
+  async function signInWithPassword(email, password) {
+    const client = await createClient();
+    if (!client) throw new Error('Supabase config missing.');
+
+    const { data, error } = await client.auth.signInWithPassword({
+      email: String(email || '').trim().toLowerCase(),
+      password
+    });
+    if (error) throw error;
+
+    if (data?.user) await upsertProfileFromUser(data.user).catch(() => {});
+    return data?.user || null;
+  }
+
+  async function sendPasswordReset(email) {
+    const client = await createClient();
+    if (!client) throw new Error('Supabase config missing.');
+    const { error } = await client.auth.resetPasswordForEmail(
+      String(email || '').trim().toLowerCase(),
+      { redirectTo: getLoginUrl() }
+    );
+    if (error) throw error;
+    return true;
+  }
+
   async function signOutUser() {
     const client = await createClient();
     if (client) await client.auth.signOut();
@@ -521,6 +583,7 @@ window.NISM_APP = (() => {
     getLoginPath, getLoginUrl,
     getPendingSignup, setPendingSignup, clearPendingSignup,
     createClient, getSession, requireAuth, sendMagicLink, signOutUser,
+    signUpWithPassword, signInWithPassword, sendPasswordReset,
     getProfile, isAdmin, upsertProfileFromUser, completePendingSignup,
     fetchHomeSupport, fetchPublishedCourses, fetchAllCourses, fetchCourse,
     fetchAccessRecords, findActiveAccess, recordPaymentAndGrantAccess,
