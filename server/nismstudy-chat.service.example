@@ -1,0 +1,25 @@
+[Unit]
+Description=NISMSTUDY Ollama Chat API
+After=network-online.target ollama.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/nismstudy/server
+Environment=PORT=8787
+Environment=OLLAMA_BASE_URL=http://127.0.0.1:11434
+Environment=OLLAMA_MODEL=qwen3:14b
+Environment=ALLOWED_ORIGINS=https://nismstudy.in,https://www.nismstudy.in
+ExecStart=/usr/bin/node /opt/nismstudy/server/index.js
+Restart=always
+RestartSec=5
+User=nismstudy
+Group=nismstudy
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/nismstudy/server
+
+[Install]
+WantedBy=multi-user.target

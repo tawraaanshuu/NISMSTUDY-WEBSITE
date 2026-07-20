@@ -149,28 +149,56 @@
     }
 
     stateEl.innerHTML = '';
-    listEl.innerHTML = active.map(record => {
+
+    // Each course holds several papers, so list them rather than guessing one.
+    const blocks = await Promise.all(active.map(async (record) => {
       const course = record.courses || {};
       const title = NISM_APP.escapeHtml(course.exam_name || course.title || 'NISM Exam');
       const until = NISM_APP.fmtDate(record.access_until);
       const daysLeft = NISM_APP.daysRemaining(record.access_until);
+
+      let papers = [];
+      try {
+        papers = await NISM_APP.fetchPapers(record.course_id);
+      } catch (err) {
+        console.error(err);
+      }
+
+      const papersHtml = papers.length
+        ? `<div class="grid-3" style="margin-top:14px;">` + papers.map(p => {
+            const type = (p.exam_type || 'mock') === 'full' ? 'Full length' : 'Mock';
+            return `
+              <article class="card card-compact card-hover">
+                <div class="badge-row"><span class="pill info">${type}</span></div>
+                <h4 style="margin:2px 0 6px;">${NISM_APP.escapeHtml(p.title || 'Mock Test')}</h4>
+                <p class="small" style="margin:0 0 12px;">
+                  ${p.total_questions || '—'} questions · ${p.duration_minutes || '—'} min${
+                    Number(p.negative_marks_per_wrong) > 0 ? ` · -${p.negative_marks_per_wrong} negative` : ''}
+                </p>
+                <a class="btn btn-primary btn-block" href="mock-center.html?paper=${p.id}">Start</a>
+              </article>`;
+          }).join('') + `</div>`
+        : `<div class="empty-state" style="margin-top:14px;">No mock tests have been published for this course yet.</div>`;
+
       return `
-        <article class="card card-hover">
+        <article class="card">
           <div class="badge-row">
             <span class="status-pill ok">Active — ${daysLeft} day(s) left</span>
+            <span class="pill">${papers.length} test${papers.length === 1 ? '' : 's'}</span>
           </div>
-          <h3>${title}</h3>
-          <p class="muted">Unlimited attempts until <strong>${until}</strong>.</p>
-          <div class="action-row" style="margin-top:12px;">
-            <a class="btn btn-primary" href="mock-center.html?course=${record.course_id}">Start Mock Test</a>
-          </div>
+          <h3 style="margin-bottom:4px;">${title}</h3>
+          <p class="muted" style="margin:0;">Unlimited attempts until <strong>${until}</strong>.</p>
+          ${papersHtml}
         </article>`;
-    }).join('');
+    }));
+
+    listEl.innerHTML = blocks.join('');
   } catch (error) {
     console.error(error);
     stateEl.innerHTML = `<div class="notice warn">${NISM_APP.friendlyError(error, 'Unable to load your mock tests right now. Please try again shortly.')}</div>`;
   }
 })();
 </script>
+<script src="chat-widget.js" defer></script>
 </body>
 </html>

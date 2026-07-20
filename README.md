@@ -34,3 +34,12 @@ All runtime config lives in `config.js`. Only the **publishable** Supabase key b
 ## Deployment
 
 Push to `main`; Cloudflare Pages deploys automatically. Verify the Pages project's production branch is set to `main`.
+
+
+## Ollama Chat Assistant
+
+The static site includes `chat-widget.js`, which calls `https://api.nismstudy.in/api/chat` by default. The API implementation lives in `server/` and calls Ollama locally with `qwen3:14b`.
+
+Production requirement: host the API on a VPS or server where Ollama is installed. Keep Ollama bound to `127.0.0.1`; expose only the Node API through HTTPS on `api.nismstudy.in`.
+
+The assistant's base knowledge lives in `server/knowledge/nismstudy.md`. Add more `.md` or `.txt` files there when you want the model to answer from more provided material.

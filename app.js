@@ -8,11 +8,12 @@ window.NISM_APP_CONFIG = window.NISM_APP_CONFIG || {
   tables: {
     profiles: 'profiles',
     courses: 'courses',
-    quizzes: 'quizzes',
-    examAccess: 'exam_access',
-    paymentRecords: 'payment_records',
-    mockAttempts: 'mock_attempts',
-    homeSupport: 'home_support_content'
+    papers: 'quizzes',          // a row in `quizzes` is a mock test PAPER
+    questions: 'questions',     // the actual questions, keyed by quiz_id
+    enrollments: 'enrollments', // course access
+    attempts: 'exam_attempts',
+    answers: 'exam_answers',
+    payments: 'payments'
   }
 };
 
@@ -21,6 +22,8 @@ window.NISM_APP = (() => {
 
   const cfg = () => window.NISM_APP_CONFIG || {};
   const tables = () => (cfg().tables || {});
+
+  /* ---------------------------------------------------------------- utils */
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -32,8 +35,7 @@ window.NISM_APP = (() => {
   }
 
   function qs(name) {
-    const url = new URL(window.location.href);
-    return url.searchParams.get(name);
+    return new URL(window.location.href).searchParams.get(name);
   }
 
   function money(value) {
@@ -46,11 +48,7 @@ window.NISM_APP = (() => {
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return value;
     return d.toLocaleString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
     });
   }
 
@@ -58,27 +56,51 @@ window.NISM_APP = (() => {
     if (!value) return '—';
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return value;
-    return d.toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   function daysRemaining(value) {
     if (!value) return 0;
-    const end = new Date(value).getTime();
-    const now = Date.now();
-    return Math.max(0, Math.ceil((end - now) / (1000 * 60 * 60 * 24)));
+    return Math.max(0, Math.ceil((new Date(value).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
   }
+
+  function fmtDuration(totalSeconds) {
+    const s = Math.max(0, Math.floor(totalSeconds));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
+  }
+
+  /* ------------------------------------------------------------ normalise */
+
+  // The database uses title / short_description / price_inr / access_days.
+  // Pages were written against exam_name / description / price /
+  // mock_duration_days, so expose both rather than editing every page.
+  function normaliseCourse(row) {
+    if (!row) return null;
+    return {
+      ...row,
+      exam_name: row.exam_name ?? row.title,
+      description: row.description ?? row.short_description ?? row.long_description,
+      price: row.price ?? row.price_inr,
+      mock_duration_days: row.mock_duration_days ?? row.access_days
+    };
+  }
+
+  function normaliseEnrollment(row) {
+    if (!row) return null;
+    return { ...row, courses: normaliseCourse(row.courses) };
+  }
+
+  /* -------------------------------------------------------------- session */
 
   function getLoginPath() {
     const configured = String(cfg().loginPath || '').trim();
     if (configured) return configured;
-
     const path = window.location.pathname || '';
     if (/\/login(?:\.html)?$/.test(path)) return path;
-    // Relative, so the site works both at a domain root and in a project subfolder.
     return 'login.html';
   }
 
@@ -87,17 +109,12 @@ window.NISM_APP = (() => {
   }
 
   function getPendingSignup() {
-    try {
-      return JSON.parse(localStorage.getItem('nism_pending_signup') || 'null');
-    } catch {
-      return null;
-    }
+    try { return JSON.parse(localStorage.getItem('nism_pending_signup') || 'null'); }
+    catch { return null; }
   }
-
   function setPendingSignup(data) {
     localStorage.setItem('nism_pending_signup', JSON.stringify(data || null));
   }
-
   function clearPendingSignup() {
     localStorage.removeItem('nism_pending_signup');
   }
@@ -110,13 +127,8 @@ window.NISM_APP = (() => {
     if (!config.supabaseUrl || !config.supabaseAnonKey) return null;
 
     _client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true
-      }
+      auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
     });
-
     return _client;
   }
 
@@ -125,11 +137,7 @@ window.NISM_APP = (() => {
     if (!client) return { client: null, session: null, user: null };
 
     const { data } = await client.auth.getSession();
-    return {
-      client,
-      session: data.session || null,
-      user: data.session?.user || null
-    };
+    return { client, session: data.session || null, user: data.session?.user || null };
   }
 
   async function requireAuth(redirectTo = null) {
@@ -160,34 +168,25 @@ window.NISM_APP = (() => {
 
     const { error } = await client.auth.signInWithOtp({
       email: normalizedEmail,
-      options: {
-        emailRedirectTo: getLoginUrl()
-      }
+      options: { emailRedirectTo: getLoginUrl() }
     });
-
     if (error) throw error;
     return true;
   }
 
   async function signOutUser() {
     const client = await createClient();
-    if (client) {
-      await client.auth.signOut();
-    }
+    if (client) await client.auth.signOut();
     clearPendingSignup();
     window.location.href = getLoginPath();
   }
 
+  /* -------------------------------------------------------------- profile */
+
   async function getProfile(userId) {
     const client = await createClient();
     if (!client || !userId) return null;
-
-    const { data } = await client
-      .from(tables().profiles)
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-
+    const { data } = await client.from(tables().profiles).select('*').eq('id', userId).maybeSingle();
     return data || null;
   }
 
@@ -202,14 +201,15 @@ window.NISM_APP = (() => {
     if (!client || !user) return;
 
     const existing = await getProfile(user.id);
-
     const payload = {
       id: user.id,
       email: user.email,
-      full_name: existing?.full_name || user.user_metadata?.full_name || user.email,
-      mobile: existing?.mobile || null,
-      updated_at: new Date().toISOString()
+      full_name: existing?.full_name || user.user_metadata?.full_name || user.email
     };
+    // Only send optional columns when we actually have a value, so a missing
+    // column in the table cannot break signup.
+    const mobile = existing?.mobile || user.user_metadata?.mobile;
+    if (mobile) payload.mobile = mobile;
 
     const { error } = await client.from(tables().profiles).upsert(payload);
     if (error) throw error;
@@ -221,20 +221,15 @@ window.NISM_APP = (() => {
 
     const pending = getPendingSignup();
     if (!pending) return null;
-
-    if ((user.email || '').toLowerCase() !== (pending.email || '').toLowerCase()) {
-      return null;
-    }
+    if ((user.email || '').toLowerCase() !== (pending.email || '').toLowerCase()) return null;
 
     const existing = await getProfile(user.id);
-
     const payload = {
       id: user.id,
       email: user.email,
-      full_name: pending.full_name || existing?.full_name || user.email,
-      mobile: pending.mobile || existing?.mobile || null,
-      updated_at: new Date().toISOString()
+      full_name: pending.full_name || existing?.full_name || user.email
     };
+    if (pending.mobile || existing?.mobile) payload.mobile = pending.mobile || existing.mobile;
 
     const { error } = await client.from(tables().profiles).upsert(payload);
     if (error) throw error;
@@ -243,22 +238,7 @@ window.NISM_APP = (() => {
     return payload;
   }
 
-  async function fetchHomeSupport() {
-    const client = await createClient();
-    if (!client) return null;
-
-    const tableName = (cfg().tables || {}).homeSupport || 'home_support_content';
-    const { data, error } = await client
-      .from(tableName)
-      .select('*')
-      .eq('is_active', true)
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error) throw error;
-    return data || null;
-  }
+  /* -------------------------------------------------------------- courses */
 
   async function fetchPublishedCourses() {
     const client = await createClient();
@@ -268,58 +248,47 @@ window.NISM_APP = (() => {
       .from(tables().courses)
       .select('*')
       .eq('is_published', true)
-      .order('display_order', { ascending: true })
-      .order('created_at', { ascending: false });
+      .order('title', { ascending: true });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(normaliseCourse);
   }
 
   async function fetchAllCourses() {
     const client = await createClient();
     if (!client) throw new Error('Supabase config missing.');
-
-    const { data, error } = await client
-      .from(tables().courses)
-      .select('*')
-      .order('display_order', { ascending: true })
-      .order('created_at', { ascending: false });
-
+    const { data, error } = await client.from(tables().courses).select('*').order('title');
     if (error) throw error;
-    return data || [];
+    return (data || []).map(normaliseCourse);
   }
 
   async function fetchCourse(courseId) {
     const client = await createClient();
     if (!client || !courseId) return null;
-
-    const { data, error } = await client
-      .from(tables().courses)
-      .select('*')
-      .eq('id', courseId)
-      .maybeSingle();
-
+    const { data, error } = await client.from(tables().courses).select('*').eq('id', courseId).maybeSingle();
     if (error) throw error;
-    return data || null;
+    return normaliseCourse(data);
   }
+
+  /* --------------------------------------------------------------- access */
 
   async function fetchAccessRecords(userId) {
     const client = await createClient();
     if (!client || !userId) return [];
 
     const { data, error } = await client
-      .from(tables().examAccess)
+      .from(tables().enrollments)
       .select('*, courses(*)')
       .eq('user_id', userId)
       .order('access_until', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(normaliseEnrollment);
   }
 
-  function findActiveAccess(records, courseId) {
+  function findActiveAccess(recordsList, courseId) {
     const now = Date.now();
-    return (records || []).find(item =>
+    return (recordsList || []).find(item =>
       item.course_id === courseId && new Date(item.access_until).getTime() > now
     ) || null;
   }
@@ -332,144 +301,191 @@ window.NISM_APP = (() => {
     const days = Number(course.mock_duration_days || cfg().accessDays || 15);
     const now = new Date();
     const accessUntil = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
+    const ref = paymentRef || `manual-${Date.now()}`;
 
-    const paymentPayload = {
+    const { error: paymentError } = await client.from(tables().payments).insert({
       user_id: user.id,
       course_id: course.id,
-      payment_ref: paymentRef || `manual-${Date.now()}`,
-      amount_label: money(course.price),
+      amount_inr: Number(course.price_inr ?? course.price ?? 329),
       status: 'paid',
-      raw_payload: rawPayload || {},
-      created_at: now.toISOString()
-    };
-
-    const { error: paymentError } = await client.from(tables().paymentRecords).insert(paymentPayload);
+      order_id: ref,
+      provider: 'web',
+      raw_payload: rawPayload || {}
+    });
+    // A duplicate callback must not stop access being granted.
     if (paymentError && !String(paymentError.message || '').toLowerCase().includes('duplicate')) {
       throw paymentError;
     }
 
-    const accessPayload = {
-      user_id: user.id,
-      course_id: course.id,
-      access_from: now.toISOString(),
-      access_until: accessUntil,
-      payment_ref: paymentPayload.payment_ref,
-      updated_at: now.toISOString()
-    };
+    // enrollments has no onConflict target we can rely on, so read-then-write.
+    const { data: existing } = await client
+      .from(tables().enrollments)
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('course_id', course.id)
+      .maybeSingle();
 
-    const { error: accessError } = await client
-      .from(tables().examAccess)
-      .upsert(accessPayload, { onConflict: 'user_id,course_id' });
+    if (existing?.id) {
+      const { error } = await client.from(tables().enrollments)
+        .update({ access_until: accessUntil }).eq('id', existing.id);
+      if (error) throw error;
+    } else {
+      const { error } = await client.from(tables().enrollments)
+        .insert({ user_id: user.id, course_id: course.id, access_until: accessUntil });
+      if (error) throw error;
+    }
 
-    if (accessError) throw accessError;
-
-    return accessPayload;
+    return { user_id: user.id, course_id: course.id, access_until: accessUntil, payment_ref: ref };
   }
 
-  async function fetchQuizzes(courseId) {
+  /* ------------------------------------------------- papers and questions */
+
+  // A "paper" is a row in `quizzes` — one mock test with its own timer,
+  // marking scheme and question set.
+  async function fetchPapers(courseId) {
     const client = await createClient();
     if (!client || !courseId) return [];
 
     const { data, error } = await client
-      .from(tables().quizzes)
+      .from(tables().papers)
       .select('*')
       .eq('course_id', courseId)
       .eq('is_active', true)
-      .order('display_order', { ascending: true })
-      .order('created_at', { ascending: true });
+      .order('exam_order', { ascending: true });
 
     if (error) throw error;
     return data || [];
   }
 
-  async function saveMockAttempt({ userId, courseId, score, totalQuestions, answers }) {
+  async function fetchPaper(paperId) {
     const client = await createClient();
-    if (!client || !userId || !courseId) return;
+    if (!client || !paperId) return null;
+    const { data, error } = await client.from(tables().papers).select('*, courses(*)').eq('id', paperId).maybeSingle();
+    if (error) throw error;
+    if (data && data.courses) data.courses = normaliseCourse(data.courses);
+    return data || null;
+  }
 
-    const { error } = await client.from(tables().mockAttempts).insert({
+  async function fetchQuestions(paperId) {
+    const client = await createClient();
+    if (!client || !paperId) return [];
+
+    const { data, error } = await client
+      .from(tables().questions)
+      .select('*')
+      .eq('quiz_id', paperId)
+      .order('id', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  // Kept so older callers still work: returns the questions of a course's
+  // first paper rather than throwing.
+  async function fetchQuizzes(courseId) {
+    const papers = await fetchPapers(courseId);
+    if (!papers.length) return [];
+    return fetchQuestions(papers[0].id);
+  }
+
+  /* -------------------------------------------------------------- attempts */
+
+  async function startAttempt({ userId, paperId }) {
+    const client = await createClient();
+    if (!client || !userId || !paperId) return null;
+
+    const { data, error } = await client.from(tables().attempts).insert({
       user_id: userId,
-      course_id: courseId,
-      score,
-      total_questions: totalQuestions,
-      answers,
-      created_at: new Date().toISOString()
+      quiz_id: paperId,
+      started_at: new Date().toISOString(),
+      status: 'in_progress'
+    }).select('id').maybeSingle();
+
+    if (error) throw error;
+    return data?.id || null;
+  }
+
+  // Marks a paper using its own scheme, saves the attempt and the per-question
+  // answers, and returns the breakdown for the results screen.
+  async function submitAttempt({ attemptId, paper, questions, selections }) {
+    const client = await createClient();
+    if (!client) throw new Error('Supabase config missing.');
+
+    const perCorrect = Number(paper?.marks_per_question ?? 1) || 1;
+    const perWrong = Number(paper?.negative_marks_per_wrong ?? 0) || 0;
+
+    let correct = 0, wrong = 0, skipped = 0;
+    const answerRows = [];
+
+    (questions || []).forEach((q) => {
+      const chosen = selections?.[q.id] || '';
+      if (!chosen) {
+        skipped += 1;
+      } else if (String(chosen).toUpperCase() === String(q.correct_option || '').toUpperCase()) {
+        correct += 1;
+      } else {
+        wrong += 1;
+      }
+      if (attemptId && chosen) {
+        answerRows.push({ attempt_id: attemptId, question_id: q.id, selected_option: chosen });
+      }
     });
 
-    if (error) throw error;
+    const score = Math.max(0, (correct * perCorrect) - (wrong * perWrong));
+    const maxMarks = Number(paper?.max_marks ?? (questions || []).length * perCorrect) || (questions || []).length;
+    const percentage = maxMarks > 0 ? Math.round((score / maxMarks) * 100) : 0;
+
+    if (attemptId) {
+      if (answerRows.length) {
+        const { error: ansError } = await client.from(tables().answers).insert(answerRows);
+        if (ansError) console.error('Could not save individual answers:', ansError);
+      }
+      const { error } = await client.from(tables().attempts).update({
+        score, submitted_at: new Date().toISOString(), status: 'submitted'
+      }).eq('id', attemptId);
+      if (error) throw error;
+    }
+
+    return { score, maxMarks, percentage, correct, wrong, skipped, total: (questions || []).length };
   }
 
-  async function saveCourse(payload) {
+  async function fetchAttempts(userId, paperId = null) {
     const client = await createClient();
-    if (!client) throw new Error('Supabase config missing.');
+    if (!client || !userId) return [];
 
-    const record = {
-      ...payload,
-      updated_at: new Date().toISOString(),
-      mock_duration_days: Number(payload.mock_duration_days || cfg().accessDays || 15),
-      is_published: Boolean(payload.is_published)
-    };
-
-    const { error } = await client.from(tables().courses).upsert(record);
-    if (error) throw error;
-  }
-
-  async function deleteCourse(id) {
-    const client = await createClient();
-    if (!client || !id) return;
-
-    const { error } = await client.from(tables().courses).delete().eq('id', id);
-    if (error) throw error;
-  }
-
-  async function fetchAllQuizzes(courseId = null) {
-    const client = await createClient();
-    if (!client) throw new Error('Supabase config missing.');
-
-    let query = client
-      .from(tables().quizzes)
-      .select('*')
-      .order('display_order', { ascending: true })
-      .order('created_at', { ascending: false });
-
-    if (courseId) query = query.eq('course_id', courseId);
+    let query = client.from(tables().attempts).select('*').eq('user_id', userId)
+      .order('started_at', { ascending: false });
+    if (paperId) query = query.eq('quiz_id', paperId);
 
     const { data, error } = await query;
     if (error) throw error;
     return data || [];
   }
 
-  async function saveQuiz(payload) {
+  // Legacy shim for any page still calling the old name.
+  async function saveMockAttempt({ userId, courseId, score, totalQuestions }) {
+    const papers = await fetchPapers(courseId);
+    if (!papers.length) return;
+    const attemptId = await startAttempt({ userId, paperId: papers[0].id });
     const client = await createClient();
-    if (!client) throw new Error('Supabase config missing.');
-
-    const record = {
-      ...payload,
-      updated_at: new Date().toISOString(),
-      is_active: Boolean(payload.is_active)
-    };
-
-    const { error } = await client.from(tables().quizzes).upsert(record);
-    if (error) throw error;
+    if (client && attemptId) {
+      await client.from(tables().attempts).update({
+        score, submitted_at: new Date().toISOString(), status: 'submitted'
+      }).eq('id', attemptId);
+    }
   }
 
-  async function deleteQuiz(id) {
-    const client = await createClient();
-    if (!client || !id) return;
-
-    const { error } = await client.from(tables().quizzes).delete().eq('id', id);
-    if (error) throw error;
-  }
+  /* ------------------------------------------------------------------- ui */
 
   function renderAuthSummary(target, user, profile) {
     if (!target) return;
-    const role = profile?.role ? `<span class="pill info">${escapeHtml(profile.role)}</span>` : '';
-
+    const role = profile?.role && profile.role !== 'student'
+      ? `<span class="pill info">${escapeHtml(profile.role)}</span>` : '';
     target.innerHTML = `
       <div class="badge-row">
         <span class="pill info">Logged in as ${escapeHtml(user?.email || '')}</span>
         ${role}
-      </div>
-    `;
+      </div>`;
   }
 
   function setStatus(target, message, type = 'info') {
@@ -480,51 +496,26 @@ window.NISM_APP = (() => {
 
   function friendlyError(error, fallback = 'Something went wrong. Please try again.') {
     const msg = String(error?.message || error || '');
-    if (/failed to fetch|networkerror|name_not_resolved|load failed|fetch/i.test(msg)) {
+    if (/failed to fetch|networkerror|name_not_resolved|load failed/i.test(msg)) {
       return 'Our servers are temporarily unavailable for maintenance. Please try again shortly, or email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a> for help.';
     }
     return fallback;
   }
 
+  async function fetchHomeSupport() {
+    return null; // no such table in this database
+  }
+
   return {
-    cfg,
-    tables,
-    qs,
-    money,
-    fmtDate,
-    fmtShortDate,
-    daysRemaining,
-    escapeHtml,
-    getLoginPath,
-    getLoginUrl,
-    getPendingSignup,
-    setPendingSignup,
-    clearPendingSignup,
-    createClient,
-    getSession,
-    requireAuth,
-    sendMagicLink,
-    signOutUser,
-    getProfile,
-    isAdmin,
-    upsertProfileFromUser,
-    completePendingSignup,
-    fetchHomeSupport,
-    fetchPublishedCourses,
-    fetchAllCourses,
-    fetchCourse,
-    fetchAccessRecords,
-    findActiveAccess,
-    recordPaymentAndGrantAccess,
-    fetchQuizzes,
-    saveMockAttempt,
-    saveCourse,
-    deleteCourse,
-    fetchAllQuizzes,
-    saveQuiz,
-    deleteQuiz,
-    renderAuthSummary,
-    setStatus,
-    friendlyError
+    cfg, tables, qs, money, fmtDate, fmtShortDate, daysRemaining, fmtDuration, escapeHtml,
+    getLoginPath, getLoginUrl,
+    getPendingSignup, setPendingSignup, clearPendingSignup,
+    createClient, getSession, requireAuth, sendMagicLink, signOutUser,
+    getProfile, isAdmin, upsertProfileFromUser, completePendingSignup,
+    fetchHomeSupport, fetchPublishedCourses, fetchAllCourses, fetchCourse,
+    fetchAccessRecords, findActiveAccess, recordPaymentAndGrantAccess,
+    fetchPapers, fetchPaper, fetchQuestions, fetchQuizzes,
+    startAttempt, submitAttempt, fetchAttempts, saveMockAttempt,
+    renderAuthSummary, setStatus, friendlyError
   };
 })();

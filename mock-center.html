@@ -7,10 +7,24 @@
   <meta name="robots" content="noindex">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23059669'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3ENS%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .exam-grid { display: grid; grid-template-columns: 1fr 260px; gap: 22px; align-items: start; }
+    .palette { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .palette button {
+      aspect-ratio: 1; border-radius: 9px; border: 1px solid var(--border-strong);
+      background: #fff; color: var(--text); font-weight: 700; font-size: .85rem; cursor: pointer;
+      font-family: inherit; transition: .15s ease;
+    }
+    .palette button:hover { border-color: var(--accent); }
+    .palette button.answered { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark); }
+    .palette button.current { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .timer { font-variant-numeric: tabular-nums; font-weight: 800; font-size: 1.5rem; }
+    .timer.low { color: var(--danger); }
+    .sticky-side { position: sticky; top: 90px; }
+    @media (max-width: 900px) { .exam-grid { grid-template-columns: 1fr; } .sticky-side { position: static; } }
+  </style>
 </head>
 <body>
-
-<a class="skip-link" href="#main">Skip to content</a>
 
 <header class="header">
   <div class="container nav">
@@ -18,43 +32,95 @@
       <span class="brand-badge">NS</span>
       <span>NISMSTUDY</span>
     </a>
-    <input type="checkbox" id="navToggle" class="nav-toggle-box">
-    <label for="navToggle" class="nav-toggle" aria-label="Toggle navigation">☰</label>
-    <nav class="nav-links">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="mock-tests.html">Mock Tests</a>
-    </nav>
     <div class="nav-actions">
-      <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
+      <a class="btn btn-secondary" href="mock-tests.html">Exit to Mock Tests</a>
     </div>
   </div>
 </header>
 
 <main id="main">
-  <section class="page-hero">
+  <section class="section" style="padding-top:26px;">
     <div class="container">
-      <span class="kicker">Unlimited attempts in your access window</span>
-      <h1>Take your mock test</h1>
-      <p>Answer every question, then submit to see your score instantly. Retake as many times as you like.</p>
-    </div>
-  </section>
+      <div id="loadState" class="card"><p class="muted" style="margin:0;">Loading your mock test…</p></div>
 
-  <section class="section">
-    <div class="container">
-      <div id="mockMeta" class="card">Loading mock test…</div>
-      <form id="mockForm" class="stack" style="margin-top:18px;"></form>
-      <div id="mockActions" class="action-row hidden" style="margin-top:18px;">
-        <button class="btn btn-primary btn-lg" type="submit" form="mockForm">Submit Mock</button>
-        <button class="btn btn-secondary" type="button" id="retakeBtn">Retake</button>
+      <!-- start screen -->
+      <div id="startScreen" class="hidden">
+        <div class="card">
+          <div class="badge-row"><span class="pill info" id="startType">Mock</span></div>
+          <h1 id="startTitle" style="font-size:clamp(1.6rem,2.5vw,2.2rem);margin:6px 0 6px;"></h1>
+          <p class="muted" id="startCourse" style="margin:0 0 18px;"></p>
+          <div class="grid-4">
+            <div class="metric"><strong id="mQ">–</strong><span class="small">Questions</span></div>
+            <div class="metric"><strong id="mT">–</strong><span class="small">Duration</span></div>
+            <div class="metric"><strong id="mM">–</strong><span class="small">Max marks</span></div>
+            <div class="metric"><strong id="mN">–</strong><span class="small">Negative marking</span></div>
+          </div>
+          <div class="notice" style="margin-top:18px;">
+            The timer starts when you begin and does not pause. Your answers are marked automatically on submit.
+          </div>
+          <div class="action-row" style="margin-top:18px;">
+            <button class="btn btn-primary btn-lg" id="beginBtn" type="button">Begin Test</button>
+            <a class="btn btn-secondary" href="mock-tests.html">Back</a>
+          </div>
+        </div>
       </div>
-      <div id="mockResult" class="notice ok hidden" style="margin-top:18px;"></div>
+
+      <!-- exam screen -->
+      <div id="examScreen" class="hidden exam-grid">
+        <div>
+          <div class="card">
+            <div class="badge-row">
+              <span class="pill info" id="qCounter">Question 1</span>
+              <span class="pill" id="qMarks"></span>
+            </div>
+            <h2 id="qText" style="font-size:1.12rem;margin:8px 0 16px;"></h2>
+            <div class="option-list" id="qOptions"></div>
+            <div class="action-row" style="margin-top:18px;">
+              <button class="btn btn-secondary" id="prevBtn" type="button">Previous</button>
+              <button class="btn btn-secondary" id="clearBtn" type="button">Clear</button>
+              <button class="btn btn-primary" id="nextBtn" type="button">Next</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="sticky-side">
+          <div class="card card-compact">
+            <p class="small" style="margin:0 0 4px;">Time remaining</p>
+            <div class="timer" id="timer">--:--</div>
+            <hr class="sep">
+            <p class="small" style="margin:0 0 10px;"><span id="answeredCount">0</span> answered</p>
+            <div class="palette" id="palette"></div>
+            <button class="btn btn-primary btn-block" id="submitBtn" type="button" style="margin-top:16px;">Submit Test</button>
+          </div>
+        </aside>
+      </div>
+
+      <!-- result screen -->
+      <div id="resultScreen" class="hidden">
+        <div class="card center" style="padding:38px 26px;">
+          <span class="kicker" id="resultVerdict">Result</span>
+          <h1 style="font-size:clamp(2rem,3vw,2.8rem);margin:14px 0 6px;" id="resultScore"></h1>
+          <p class="muted" id="resultPct" style="margin:0 0 22px;"></p>
+          <div class="grid-4">
+            <div class="metric"><strong id="rCorrect">0</strong><span class="small">Correct</span></div>
+            <div class="metric"><strong id="rWrong">0</strong><span class="small">Wrong</span></div>
+            <div class="metric"><strong id="rSkipped">0</strong><span class="small">Unattempted</span></div>
+            <div class="metric"><strong id="rTime">–</strong><span class="small">Time taken</span></div>
+          </div>
+          <div class="action-row" style="justify-content:center;margin-top:24px;">
+            <button class="btn btn-primary" id="reviewBtn" type="button">Review Answers</button>
+            <a class="btn btn-secondary" href="mock-tests.html">Back to Mock Tests</a>
+          </div>
+        </div>
+        <div id="reviewList" class="stack hidden" style="margin-top:20px;"></div>
+      </div>
     </div>
   </section>
 </main>
 
 <footer class="footer">
   <div class="container">
-    <p class="small center">© 2026 NISMSTUDY. All rights reserved. · <a href="contact-us.html">Contact</a> · <a href="faq.html">FAQ</a></p>
+    <p class="small center">© 2026 NISMSTUDY. All rights reserved. · <a href="contact-us.html">Contact</a></p>
   </div>
 </footer>
 
@@ -63,107 +129,220 @@
 <script src="app.js"></script>
 <script>
 (async function () {
-  document.getElementById('logoutBtn').addEventListener('click', () => NISM_APP.signOutUser());
+  const el = (id) => document.getElementById(id);
+  const loadState = el('loadState');
 
-  const meta = document.getElementById('mockMeta');
-  const form = document.getElementById('mockForm');
-  const actions = document.getElementById('mockActions');
-  const result = document.getElementById('mockResult');
-  const retakeBtn = document.getElementById('retakeBtn');
+  let paper = null, questions = [], attemptId = null;
+  let selections = {}, index = 0, deadline = 0, ticker = null, startedAt = 0;
+  let perQ = 1, neg = 0;
+
+  function show(screen) {
+    ['startScreen', 'examScreen', 'resultScreen'].forEach(s => el(s).classList.toggle('hidden', s !== screen));
+    loadState.classList.add('hidden');
+  }
+
+  function fail(html) {
+    loadState.classList.remove('hidden');
+    loadState.className = 'notice warn';
+    loadState.innerHTML = html;
+  }
 
   try {
     const auth = await NISM_APP.requireAuth('login.html');
     if (!auth) return;
 
+    // Accept ?paper= (current) or ?course= (older links) and resolve a paper.
+    let paperId = NISM_APP.qs('paper');
     const courseId = NISM_APP.qs('course');
-    if (!courseId) {
-      meta.innerHTML = 'No exam selected. <a href="dashboard.html">Go back to the dashboard</a> and pick an exam.';
-      return;
-    }
-
-    const [course, accessRecords] = await Promise.all([
-      NISM_APP.fetchCourse(courseId),
-      NISM_APP.fetchAccessRecords(auth.user.id)
-    ]);
-
-    const access = NISM_APP.findActiveAccess(accessRecords, courseId);
-    if (!course || !access) {
-      meta.innerHTML = 'Your access for this exam is not active. <a href="dashboard.html">Purchase it from the dashboard</a> first.';
-      return;
-    }
-
-    const quizzes = await NISM_APP.fetchQuizzes(courseId);
-    meta.innerHTML = `
-      <div class="badge-row">
-        <span class="status-pill ok">Access active until ${NISM_APP.fmtDate(access.access_until)}</span>
-        <span class="pill info">${quizzes.length} question(s)</span>
-      </div>
-      <h3>${NISM_APP.escapeHtml(course.exam_name || course.title || 'Mock Test')}</h3>
-      <p class="muted">Submit when finished. You can retake this mock any number of times before your access ends.</p>`;
-
-    if (!quizzes.length) {
-      form.innerHTML = '<div class="notice">No questions have been added for this exam yet. Please check back soon.</div>';
-      return;
-    }
-
-    renderQuiz(quizzes);
-    actions.classList.remove('hidden');
-
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      let score = 0;
-      const answers = [];
-      quizzes.forEach((quiz) => {
-        const selected = form.querySelector(`input[name="q_${quiz.id}"]:checked`);
-        const answer = selected ? selected.value : '';
-        const correct = answer === quiz.correct_option;
-        if (correct) score += 1;
-        answers.push({ question_id: quiz.id, answer, correct });
-      });
-
-      const pct = Math.round((score / quizzes.length) * 100);
-      result.classList.remove('hidden');
-      result.innerHTML = `You scored <strong>${score} / ${quizzes.length}</strong> (${pct}%). You can retake this mock anytime before <strong>${NISM_APP.fmtDate(access.access_until)}</strong>.`;
-
-      try {
-        await NISM_APP.saveMockAttempt({
-          userId: auth.user.id,
-          courseId,
-          score,
-          totalQuestions: quizzes.length,
-          answers
-        });
-      } catch (saveError) {
-        console.error(saveError);
+    if (!paperId && courseId) {
+      const list = await NISM_APP.fetchPapers(courseId);
+      if (!list.length) {
+        fail('No mock tests have been published for this course yet. <a href="mock-tests.html">Go back</a>.');
+        return;
       }
-      result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      paperId = list[0].id;
+    }
+    if (!paperId) {
+      fail('No mock test selected. <a href="mock-tests.html">Choose one here</a>.');
+      return;
+    }
+
+    paper = await NISM_APP.fetchPaper(paperId);
+    if (!paper) { fail('That mock test could not be found. <a href="mock-tests.html">Go back</a>.'); return; }
+
+    // The database enforces access too; this is for a clear human message.
+    const access = NISM_APP.findActiveAccess(
+      await NISM_APP.fetchAccessRecords(auth.user.id), paper.course_id);
+    if (!access) {
+      fail('Your access to this course is not active. <a href="dashboard.html">Buy access</a> to start practising.');
+      return;
+    }
+
+    questions = await NISM_APP.fetchQuestions(paper.id);
+    if (!questions.length) {
+      fail('This mock test has no questions loaded yet. Please try another test, or email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a>.');
+      return;
+    }
+
+    perQ = Number(paper.marks_per_question ?? 1) || 1;
+    neg = Number(paper.negative_marks_per_wrong ?? 0) || 0;
+
+    el('startType').textContent = (paper.exam_type || 'mock') === 'full' ? 'Full length test' : 'Mock test';
+    el('startTitle').textContent = paper.title || 'Mock Test';
+    el('startCourse').textContent = paper.courses?.exam_name || '';
+    el('mQ').textContent = questions.length;
+    el('mT').textContent = (paper.duration_minutes || 0) + ' min';
+    el('mM').textContent = paper.max_marks ?? (questions.length * perQ);
+    el('mN').textContent = neg > 0 ? `-${neg}` : 'None';
+    show('startScreen');
+
+    el('beginBtn').addEventListener('click', begin);
+
+    async function begin() {
+      try { attemptId = await NISM_APP.startAttempt({ userId: auth.user.id, paperId: paper.id }); }
+      catch (e) { console.error('Could not open an attempt record:', e); }
+
+      startedAt = Date.now();
+      const mins = Number(paper.duration_minutes || 0);
+      deadline = mins > 0 ? startedAt + mins * 60000 : 0;
+
+      buildPalette();
+      render();
+      show('examScreen');
+      if (deadline) { tick(); ticker = setInterval(tick, 1000); }
+      else { el('timer').textContent = 'No limit'; }
+    }
+
+    function tick() {
+      const left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+      const t = el('timer');
+      t.textContent = NISM_APP.fmtDuration(left);
+      t.classList.toggle('low', left <= 300);
+      if (left <= 0) { clearInterval(ticker); submit(true); }
+    }
+
+    function buildPalette() {
+      el('palette').innerHTML = questions.map((q, i) =>
+        `<button type="button" data-i="${i}">${i + 1}</button>`).join('');
+      el('palette').addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-i]');
+        if (!b) return;
+        index = Number(b.dataset.i);
+        render();
+      });
+    }
+
+    function refreshPalette() {
+      [...el('palette').children].forEach((b, i) => {
+        b.classList.toggle('answered', Boolean(selections[questions[i].id]));
+        b.classList.toggle('current', i === index);
+      });
+      el('answeredCount').textContent = Object.keys(selections).length;
+    }
+
+    function render() {
+      const q = questions[index];
+      el('qCounter').textContent = `Question ${index + 1} of ${questions.length}`;
+      el('qMarks').textContent = neg > 0 ? `+${perQ} / -${neg}` : `+${perQ}`;
+      el('qText').textContent = q.question_text || '';
+
+      el('qOptions').innerHTML = ['A', 'B', 'C', 'D'].map(opt => {
+        const text = q['option_' + opt.toLowerCase()];
+        if (!text) return '';
+        const checked = selections[q.id] === opt ? 'checked' : '';
+        return `<label class="option-item">
+            <input type="radio" name="q" value="${opt}" ${checked}>
+            <span><strong>${opt}.</strong> ${NISM_APP.escapeHtml(text)}</span>
+          </label>`;
+      }).join('');
+
+      el('prevBtn').disabled = index === 0;
+      el('nextBtn').textContent = index === questions.length - 1 ? 'Review' : 'Next';
+      refreshPalette();
+    }
+
+    el('qOptions').addEventListener('change', (e) => {
+      if (e.target.name !== 'q') return;
+      selections[questions[index].id] = e.target.value;
+      refreshPalette();
     });
 
-    retakeBtn.addEventListener('click', () => {
-      form.reset();
-      result.classList.add('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    el('clearBtn').addEventListener('click', () => {
+      delete selections[questions[index].id];
+      render();
     });
+    el('prevBtn').addEventListener('click', () => { if (index > 0) { index--; render(); } });
+    el('nextBtn').addEventListener('click', () => {
+      if (index < questions.length - 1) { index++; render(); }
+      else el('submitBtn').focus();
+    });
+    el('submitBtn').addEventListener('click', () => submit(false));
+
+    async function submit(auto) {
+      const unanswered = questions.length - Object.keys(selections).length;
+      if (!auto && unanswered > 0 &&
+          !confirm(`${unanswered} question(s) are unanswered. Submit anyway?`)) return;
+
+      if (ticker) clearInterval(ticker);
+      el('submitBtn').disabled = true;
+
+      let result;
+      try {
+        result = await NISM_APP.submitAttempt({ attemptId, paper, questions, selections });
+      } catch (e) {
+        console.error(e);
+        // Never lose the student's result to a save failure — score locally.
+        let c = 0, w = 0, s = 0;
+        questions.forEach(q => {
+          const sel = selections[q.id];
+          if (!sel) s++;
+          else if (String(sel).toUpperCase() === String(q.correct_option || '').toUpperCase()) c++;
+          else w++;
+        });
+        const max = Number(paper.max_marks ?? questions.length * perQ);
+        const score = Math.max(0, c * perQ - w * neg);
+        result = { score, maxMarks: max, percentage: max ? Math.round((score / max) * 100) : 0,
+                   correct: c, wrong: w, skipped: s, total: questions.length };
+      }
+
+      el('resultScore').textContent = `${result.score} / ${result.maxMarks}`;
+      el('resultPct').textContent = `${result.percentage}%${auto ? ' · submitted automatically when time ran out' : ''}`;
+      el('resultVerdict').textContent = result.percentage >= 60 ? 'Above the 60% benchmark' : 'Keep practising';
+      el('rCorrect').textContent = result.correct;
+      el('rWrong').textContent = result.wrong;
+      el('rSkipped').textContent = result.skipped;
+      el('rTime').textContent = NISM_APP.fmtDuration((Date.now() - startedAt) / 1000);
+      show('resultScreen');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    el('reviewBtn').addEventListener('click', () => {
+      const list = el('reviewList');
+      list.classList.toggle('hidden');
+      if (list.innerHTML) return;
+      list.innerHTML = questions.map((q, i) => {
+        const sel = selections[q.id] || null;
+        const right = String(q.correct_option || '').toUpperCase();
+        const state = !sel ? 'warn' : (sel === right ? 'ok' : 'danger');
+        const label = !sel ? 'Not answered' : (sel === right ? 'Correct' : 'Incorrect');
+        return `<article class="card">
+            <div class="badge-row">
+              <span class="pill info">Q${i + 1}</span>
+              <span class="pill ${state}">${label}</span>
+            </div>
+            <h3 style="font-size:1.02rem;">${NISM_APP.escapeHtml(q.question_text || '')}</h3>
+            <p class="small" style="margin:6px 0;">Your answer: <strong>${sel || '—'}</strong> · Correct answer: <strong>${right || '—'}</strong></p>
+            ${q.explanation ? `<div class="notice" style="margin-top:8px;">${NISM_APP.escapeHtml(q.explanation)}</div>` : ''}
+          </article>`;
+      }).join('');
+    });
+
   } catch (error) {
     console.error(error);
-    meta.innerHTML = `<div class="notice warn">${NISM_APP.friendlyError(error, 'Unable to load the mock test right now. Please refresh to try again.')}</div>`;
-  }
-
-  function renderQuiz(quizzes) {
-    form.innerHTML = quizzes.map((quiz, index) => `
-      <article class="card quiz-question">
-        <div class="badge-row"><span class="pill info">Question ${index + 1}</span></div>
-        <h3>${NISM_APP.escapeHtml(quiz.question_text)}</h3>
-        <div class="option-list">
-          ${['A', 'B', 'C', 'D'].map(option => `
-            <label class="option-item">
-              <input type="radio" name="q_${quiz.id}" value="${option}">
-              <span><strong>${option}.</strong> ${NISM_APP.escapeHtml(quiz['option_' + option.toLowerCase()] || '')}</span>
-            </label>`).join('')}
-        </div>
-      </article>`).join('');
+    fail(NISM_APP.friendlyError(error, 'Unable to load this mock test right now. Please refresh to try again.'));
   }
 })();
 </script>
+<script src="chat-widget.js" defer></script>
 </body>
 </html>
