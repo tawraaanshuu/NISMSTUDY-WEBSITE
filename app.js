@@ -496,8 +496,18 @@ window.NISM_APP = (() => {
 
   function friendlyError(error, fallback = 'Something went wrong. Please try again.') {
     const msg = String(error?.message || error || '');
+    const code = String(error?.code || error?.status || '');
+
     if (/failed to fetch|networkerror|name_not_resolved|load failed/i.test(msg)) {
       return 'Our servers are temporarily unavailable for maintenance. Please try again shortly, or email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a> for help.';
+    }
+    // The mail provider throttles login emails; without this the student just
+    // sees a generic failure and retries, which makes the throttling worse.
+    if (/rate limit|too many requests/i.test(msg) || code === '429') {
+      return 'Too many login emails have been requested just now. Please wait a few minutes and try again, or email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a> and we will help you in.';
+    }
+    if (/redirect|not allowed/i.test(msg)) {
+      return 'This login link could not be completed. Please email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a> and we will sort it out.';
     }
     return fallback;
   }
