@@ -29,11 +29,17 @@ window.NISM_APP_CONFIG = {
   // browser. Set to '' to disable the buy button everywhere.
   functionsUrl: 'https://yzmctktxzpzdfhdubwjs.supabase.co/functions/v1',
 
+  // The AI assistant runs on your own hardware (server/, backed by Ollama), so
+  // this must point at a URL the public internet can reach — a Cloudflare
+  // Tunnel to your machine, or a small VPS. See CHAT-SETUP.md.
+  //
+  // api.nismstudy.in does not currently resolve, so the widget is off: every
+  // visitor who opened it got an error on each question. The widget also
+  // probes this endpoint before rendering, so if the machine hosting the model
+  // is asleep no chat button appears at all, rather than a broken one.
+  // Flip `enabled` to true once the tunnel is up.
   chatApiUrl: 'https://api.nismstudy.in/api/chat',
   chatWidget: {
-    // api.nismstudy.in does not resolve, so every visitor who opened the
-    // widget got an error. It stays off until the API is actually deployed;
-    // the widget also probes the endpoint before showing itself.
     enabled: false
   },
 

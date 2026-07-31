@@ -44,6 +44,12 @@ __pycache__/
 tools/mcq-agent/work/
 tools/mcq-agent/out/
 
+# Chat assistant's workbook search index (~7 MB), rebuilt with
+# server/build-workbook-index.py from materials/.
+server/knowledge/workbooks.jsonl
+server/.build/
+server/srv.log
+
 
 
 

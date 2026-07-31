@@ -30,6 +30,16 @@
       .replaceAll("'", '&#39;');
   }
 
+  async function getAccessToken() {
+    try {
+      if (!window.NISM_APP?.getSession) return null;
+      const { session } = await window.NISM_APP.getSession();
+      return session?.access_token || null;
+    } catch {
+      return null;
+    }
+  }
+
   function getSessionId() {
     const key = 'nism_chat_session_id';
     let value = localStorage.getItem(key);
@@ -105,9 +115,17 @@
     const pendingNode = addMessage(ui, 'bot', 'Checking NISMSTUDY information...');
 
     try {
+      // Pass the student's Supabase session when there is one. The assistant
+      // uses it to answer "how many days do I have left?" with their real
+      // number instead of the general policy. Row-level security on the other
+      // end means the token can only ever read that student's own rows.
+      const headers = { 'Content-Type': 'application/json' };
+      const token = await getAccessToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           message: clean,
           sessionId: getSessionId(),
