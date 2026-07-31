@@ -57,9 +57,6 @@
     if (!auth) return;
 
     const courseId = NISM_APP.qs('course');
-    const paymentStatus = NISM_APP.qs('payment_status');
-    const paymentRef = NISM_APP.qs('payment_ref') || `web-${Date.now()}`;
-
     if (!courseId) {
       box.innerHTML = 'Missing exam reference. Open the <a href="dashboard.html">dashboard</a> and try again.';
       return;
@@ -71,21 +68,41 @@
       return;
     }
 
-    if (paymentStatus !== 'success') {
+    // This page does not grant anything. It used to call
+    // recordPaymentAndGrantAccess() whenever the URL said
+    // ?payment_status=success, which meant anyone who typed that URL got a free
+    // exam. Access is now created only by the Razorpay webhook, after the
+    // payment signature has been verified server-side. All this page does is
+    // wait for that to land.
+    const deadline = Date.now() + 90_000;
+    let access = null;
+
+    while (!access && Date.now() < deadline) {
+      const records = await NISM_APP.fetchAccessRecords(auth.user.id).catch(() => []);
+      access = NISM_APP.findActiveAccess(records, course.id);
+      if (access) break;
+      const left = Math.ceil((deadline - Date.now()) / 1000);
+      box.className = 'notice';
+      box.innerHTML = `Confirming your payment with Razorpay… <span class="small">(${left}s)</span>`;
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+
+    if (!access) {
+      // The webhook can be slow or can fail. Never imply the money is lost,
+      // and never guess — give them something concrete to quote to support.
+      const order = NISM_APP.qs('order');
       box.className = 'notice warn';
-      box.innerHTML = 'Your payment has not been confirmed yet. If money was deducted, email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a> with your payment reference.';
+      box.innerHTML =
+        'Your payment is still being confirmed. This can take a minute.<br>' +
+        '<strong>No need to pay again.</strong> Refresh your ' +
+        '<a href="dashboard.html">dashboard</a> shortly — if access has not appeared in ' +
+        '10 minutes, email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a>' +
+        (order ? ` quoting order <strong>${NISM_APP.escapeHtml(order)}</strong>.` : '.');
       return;
     }
 
-    const access = await NISM_APP.recordPaymentAndGrantAccess({
-      user: auth.user,
-      course,
-      paymentRef,
-      rawPayload: Object.fromEntries(new URLSearchParams(window.location.search).entries())
-    });
-
     box.className = 'notice ok';
-    box.innerHTML = `Payment recorded for <strong>${NISM_APP.escapeHtml(course.exam_name || course.title || 'exam')}</strong>.<br>Unlimited mocks are active until <strong>${NISM_APP.fmtDate(access.access_until)}</strong>.`;
+    box.innerHTML = `Payment confirmed for <strong>${NISM_APP.escapeHtml(course.exam_name || course.title || 'exam')}</strong>.<br>Unlimited mocks are active until <strong>${NISM_APP.fmtDate(access.access_until)}</strong>.`;
     goMockBtn.href = `mock-center.html?course=${course.id}`;
     goMockBtn.classList.remove('hidden');
   } catch (error) {

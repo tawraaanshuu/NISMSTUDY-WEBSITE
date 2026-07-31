@@ -47,6 +47,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
 <script>
@@ -75,35 +76,95 @@
         <div class="card card-compact">
           <h3>${NISM_APP.escapeHtml(course.exam_name || course.title || 'Exam')}</h3>
           <p class="muted">${NISM_APP.escapeHtml(course.description || 'Unlimited mock tests after successful payment.')}</p>
-          <p class="price" style="font-size:1.5rem;font-weight:800;">${NISM_APP.money(course.price || '329')}</p>
+          <p class="price" style="font-size:1.5rem;font-weight:800;">${NISM_APP.money(course.price)}</p>
           <p class="small">Access duration: ${course.mock_duration_days || 15} days · Unlimited attempts</p>
         </div>
         <div class="card card-compact">
           <h3>How payment works</h3>
           <ol class="inline-list">
-            <li>Click <strong>Proceed to Payment</strong>.</li>
-            <li>Complete payment on the secure payment page.</li>
-            <li>You'll be brought back here automatically.</li>
-            <li>Your mock test access activates instantly.</li>
+            <li>Click <strong>Pay securely</strong>.</li>
+            <li>Razorpay opens on this page — card, UPI, netbanking or wallet.</li>
+            <li>We confirm the payment with Razorpay directly.</li>
+            <li>Your access activates as soon as it clears.</li>
           </ol>
         </div>
       </div>
       <div class="action-row" style="margin-top:20px;">
-        <a class="btn btn-primary btn-lg" id="paymentBtn" href="#">Proceed to Payment</a>
+        <button class="btn btn-primary btn-lg" id="paymentBtn" type="button">Pay securely</button>
         <a class="btn btn-secondary" href="dashboard.html">Cancel</a>
       </div>`;
 
     const paymentBtn = document.getElementById('paymentBtn');
-    if (course.payment_url) {
-      paymentBtn.href = course.payment_url;
-      status.innerHTML = 'You will be redirected to our secure payment page. Access activates automatically after successful payment.';
-    } else {
-      paymentBtn.classList.add('disabled');
-      paymentBtn.removeAttribute('href');
-      paymentBtn.textContent = 'Payment temporarily unavailable';
+    const fnBase = NISM_APP.cfg().functionsUrl;
+
+    if (!fnBase || !NISM_APP.isCourseLive(course)) {
+      paymentBtn.disabled = true;
+      paymentBtn.textContent = !fnBase ? 'Payment temporarily unavailable' : 'Not on sale yet';
       status.className = 'notice warn';
-      status.innerHTML = 'Online payment for this exam is temporarily unavailable. Email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a> to complete your purchase.';
+      status.innerHTML = !fnBase
+        ? 'Online payment is temporarily unavailable. Email <a href="mailto:info@nismstudy.in">info@nismstudy.in</a> to complete your purchase.'
+        : 'This exam is not on sale yet — its question bank is still being prepared.';
+      return;
     }
+
+    status.innerHTML = 'Payments are handled by Razorpay. We never see or store your card details.';
+
+    paymentBtn.addEventListener('click', async () => {
+      paymentBtn.disabled = true;
+      paymentBtn.textContent = 'Opening payment…';
+      try {
+        // The server decides the amount. Nothing about price is sent from here,
+        // so a tampered client cannot buy a Rs 329 exam for Rs 1.
+        const response = await fetch(`${fnBase}/razorpay-create-order`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${auth.session.access_token}`
+          },
+          body: JSON.stringify({ course_id: course.id })
+        });
+        const order = await response.json();
+        if (!response.ok) throw new Error(order.error || 'Could not start the payment.');
+
+        const rzp = new Razorpay({
+          key: order.key_id,
+          order_id: order.order_id,
+          amount: order.amount,
+          currency: order.currency,
+          name: 'NISMSTUDY',
+          description: order.course_title,
+          prefill: { email: order.user_email },
+          theme: { color: '#059669' },
+          handler: () => {
+            // Access is granted by the Razorpay webhook, not by this callback —
+            // anything the browser reports here is unverified. The next page
+            // polls the database until the webhook has actually landed.
+            window.location.href =
+              `payment-success.html?course=${encodeURIComponent(course.id)}` +
+              `&order=${encodeURIComponent(order.order_id)}`;
+          },
+          modal: {
+            ondismiss: () => {
+              paymentBtn.disabled = false;
+              paymentBtn.textContent = 'Pay securely';
+              NISM_APP.setStatus(status, 'Payment cancelled. Nothing has been charged.', 'warn');
+            }
+          }
+        });
+        rzp.on('payment.failed', (e) => {
+          NISM_APP.setStatus(status,
+            `Payment failed: ${NISM_APP.escapeHtml(e?.error?.description || 'please try again')}.`, 'error');
+          paymentBtn.disabled = false;
+          paymentBtn.textContent = 'Pay securely';
+        });
+        rzp.open();
+      } catch (error) {
+        console.error(error);
+        NISM_APP.setStatus(status, NISM_APP.escapeHtml(error.message || 'Could not start the payment.'), 'error');
+        paymentBtn.disabled = false;
+        paymentBtn.textContent = 'Pay securely';
+      }
+    });
   } catch (error) {
     console.error(error);
     target.innerHTML = `<div class="notice warn">${NISM_APP.friendlyError(error, 'Unable to load checkout details right now. Please refresh to try again.')}</div>`;

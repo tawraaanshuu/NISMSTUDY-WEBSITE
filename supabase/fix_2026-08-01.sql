@@ -22,41 +22,40 @@
 
 
 -- ---------------------------------------------------------------------------
--- 1. Let a student create their own enrollment and payment rows.
+-- 1. Enrollments stay UNWRITEABLE from the browser. On purpose.
 --
--- Without this, checkout takes the money and then fails to grant access:
---   ERROR: new row violates row-level security policy for table "enrollments"
+-- An earlier draft of this file granted students INSERT on `enrollments` so
+-- checkout could grant its own access. Do not do that. payment-success.html
+-- used to call that path whenever the URL said ?payment_status=success, so the
+-- combination would have handed a free exam to anyone who typed:
 --
--- Tradeoff, stated plainly: a student who opens the browser console can insert
--- an enrollment row for themselves and get free access. That is acceptable
--- only while payment volume is low. The correct long-term fix is to grant
--- access from a payment webhook using the service-role key (which bypasses
--- RLS) and to drop the two INSERT policies below.
+--   payment-success.html?course=<id>&payment_status=success
+--
+-- Access is now created only by supabase/functions/razorpay-webhook, which
+-- runs with the service-role key (bypassing RLS entirely) and refuses any
+-- request whose Razorpay HMAC signature does not verify.
+--
+-- So the only policies students need are READ policies.
 -- ---------------------------------------------------------------------------
 alter table public.enrollments enable row level security;
 
-drop policy if exists enrollments_insert_own on public.enrollments;
-create policy enrollments_insert_own on public.enrollments
-  for insert to authenticated
-  with check (user_id = auth.uid());
+drop policy if exists enrollments_select_own on public.enrollments;
+create policy enrollments_select_own on public.enrollments
+  for select to authenticated
+  using (user_id = auth.uid());
 
+-- Explicitly remove the self-grant policies if a previous run created them.
+drop policy if exists enrollments_insert_own on public.enrollments;
 drop policy if exists enrollments_update_own on public.enrollments;
-create policy enrollments_update_own on public.enrollments
-  for update to authenticated
-  using (user_id = auth.uid())
-  with check (user_id = auth.uid());
 
 alter table public.payments enable row level security;
-
-drop policy if exists payments_insert_own on public.payments;
-create policy payments_insert_own on public.payments
-  for insert to authenticated
-  with check (user_id = auth.uid());
 
 drop policy if exists payments_select_own on public.payments;
 create policy payments_select_own on public.payments
   for select to authenticated
   using (user_id = auth.uid());
+
+drop policy if exists payments_insert_own on public.payments;
 
 
 -- ---------------------------------------------------------------------------

@@ -24,6 +24,11 @@ window.NISM_APP_CONFIG = {
     'nism-series-viii-equity-derivatives'
   ],
 
+  // Supabase Edge Functions. Payments run through these because the Razorpay
+  // key secret and the decision about how much to charge must never be in the
+  // browser. Set to '' to disable the buy button everywhere.
+  functionsUrl: 'https://yzmctktxzpzdfhdubwjs.supabase.co/functions/v1',
+
   chatApiUrl: 'https://api.nismstudy.in/api/chat',
   chatWidget: {
     // api.nismstudy.in does not resolve, so every visitor who opened the

@@ -392,49 +392,20 @@ window.NISM_APP = (() => {
     ) || null;
   }
 
-  async function recordPaymentAndGrantAccess({ user, course, paymentRef, rawPayload }) {
-    const client = await createClient();
-    if (!client) throw new Error('Supabase config missing.');
-    if (!user || !course) throw new Error('Missing user or course.');
-
-    const days = Number(course.mock_duration_days || cfg().accessDays || 15);
-    const now = new Date();
-    const accessUntil = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
-    const ref = paymentRef || `manual-${Date.now()}`;
-
-    const { error: paymentError } = await client.from(tables().payments).insert({
-      user_id: user.id,
-      course_id: course.id,
-      amount_inr: Number(course.price_inr ?? course.price ?? 329),
-      status: 'paid',
-      order_id: ref,
-      provider: 'web',
-      raw_payload: rawPayload || {}
-    });
-    // A duplicate callback must not stop access being granted.
-    if (paymentError && !String(paymentError.message || '').toLowerCase().includes('duplicate')) {
-      throw paymentError;
-    }
-
-    // enrollments has no onConflict target we can rely on, so read-then-write.
-    const { data: existing } = await client
-      .from(tables().enrollments)
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('course_id', course.id)
-      .maybeSingle();
-
-    if (existing?.id) {
-      const { error } = await client.from(tables().enrollments)
-        .update({ access_until: accessUntil }).eq('id', existing.id);
-      if (error) throw error;
-    } else {
-      const { error } = await client.from(tables().enrollments)
-        .insert({ user_id: user.id, course_id: course.id, access_until: accessUntil });
-      if (error) throw error;
-    }
-
-    return { user_id: user.id, course_id: course.id, access_until: accessUntil, payment_ref: ref };
+  // Access used to be granted from the browser, driven by a `payment_status`
+  // value in the URL. That meant anyone who typed
+  // `payment-success.html?course=<id>&payment_status=success` got a free exam.
+  //
+  // Nothing in the browser may create an enrollment. The Razorpay webhook
+  // (supabase/functions/razorpay-webhook) is the only writer, it runs with the
+  // service-role key, and it refuses any request whose HMAC signature does not
+  // verify. The function is kept as a loud failure rather than deleted so that
+  // an old cached page cannot silently fall back to the insecure path.
+  async function recordPaymentAndGrantAccess() {
+    throw new Error(
+      'Access is granted by the payment webhook, not by the browser. ' +
+      'If you reached this, reload the page.'
+    );
   }
 
   /* ------------------------------------------------- papers and questions */
