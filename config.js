@@ -26,8 +26,17 @@ window.NISM_APP_CONFIG = {
 
   // Supabase Edge Functions. Payments run through these because the Razorpay
   // key secret and the decision about how much to charge must never be in the
-  // browser. Set to '' to disable the buy button everywhere.
-  functionsUrl: 'https://yzmctktxzpzdfhdubwjs.supabase.co/functions/v1',
+  // browser.
+  //
+  // Empty on purpose: the two functions are written but NOT deployed yet, so
+  // this URL currently 404s. With it set, the button reads "Pay securely" and
+  // then throws when clicked; empty, it reads "Payment temporarily
+  // unavailable" and is disabled, which is the truth.
+  //
+  // Restore this line the moment the functions are deployed — see
+  // RAZORPAY-SETUP.md:
+  //   functionsUrl: 'https://yzmctktxzpzdfhdubwjs.supabase.co/functions/v1',
+  functionsUrl: '',
 
   // The AI assistant runs on your own hardware (server/, backed by Ollama), so
   // this must point at a URL the public internet can reach — a Cloudflare
