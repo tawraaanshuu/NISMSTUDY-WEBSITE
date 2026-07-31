@@ -196,19 +196,44 @@
     el('mN').textContent = neg > 0 ? `-${neg}` : 'None';
     show('startScreen');
 
-    el('beginBtn').addEventListener('click', begin);
+    el('beginBtn').addEventListener('click', () => begin());
 
-    async function begin() {
-      try {
-        attemptId = await NISM_APP.startAttempt({
-          userId: auth.user.id, paperId: paper.id, durationMinutes: paper.duration_minutes
-        });
+    // Arriving from the dashboard's "Resume" link. The attempt keeps its
+    // original deadline, so the time already spent is not handed back.
+    const resumeId = NISM_APP.qs('attempt');
+    if (resumeId) {
+      const resumable = await NISM_APP.fetchResumableAttempt(auth.user.id, resumeId)
+        .catch(() => null);
+      if (resumable) {
+        selections = resumable.selections;
+        begin(resumable.attempt);
+      } else {
+        NISM_APP.setStatus(
+          loadState,
+          'That attempt has already been submitted or its time ran out. Start a fresh one below.',
+          'warn'
+        );
+        loadState.classList.remove('hidden');
       }
-      catch (e) { console.error('Could not open an attempt record:', e); }
+    }
 
-      startedAt = Date.now();
-      const mins = Number(paper.duration_minutes || 0);
-      deadline = mins > 0 ? startedAt + mins * 60000 : 0;
+    async function begin(existing = null) {
+      if (existing) {
+        attemptId = existing.id;
+        startedAt = new Date(existing.started_at).getTime();
+        deadline = existing.expires_at ? new Date(existing.expires_at).getTime() : 0;
+      } else {
+        try {
+          attemptId = await NISM_APP.startAttempt({
+            userId: auth.user.id, paperId: paper.id, durationMinutes: paper.duration_minutes
+          });
+        }
+        catch (e) { console.error('Could not open an attempt record:', e); }
+
+        startedAt = Date.now();
+        const mins = Number(paper.duration_minutes || 0);
+        deadline = mins > 0 ? startedAt + mins * 60000 : 0;
+      }
 
       buildPalette();
       render();

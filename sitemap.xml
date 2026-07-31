@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://nismstudy.in/</loc></url>
-  <url><loc>https://nismstudy.in/courses.html</loc></url>
-  <url><loc>https://nismstudy.in/mock-tests.html</loc></url>
-  <url><loc>https://nismstudy.in/free-materials.html</loc></url>
-  <url><loc>https://nismstudy.in/login.html</loc></url>
-  <url><loc>https://nismstudy.in/faq.html</loc></url>
-  <url><loc>https://nismstudy.in/contact-us.html</loc></url>
-  <url><loc>https://nismstudy.in/careers.html</loc></url>
-  <url><loc>https://nismstudy.in/privacy-policy.html</loc></url>
-  <url><loc>https://nismstudy.in/refund-policy.html</loc></url>
-  <url><loc>https://nismstudy.in/terms-and-conditions.html</loc></url>
-  <url><loc>https://nismstudy.in/cancellation-policy.html</loc></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/</loc><priority>1.0</priority></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/courses.html</loc><priority>0.9</priority></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/free-materials.html</loc><priority>0.9</priority></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/mock-tests.html</loc><priority>0.8</priority></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/faq.html</loc><priority>0.7</priority></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/login.html</loc><priority>0.5</priority></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/contact-us.html</loc><priority>0.5</priority></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/careers.html</loc><priority>0.4</priority></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/privacy-policy.html</loc><priority>0.3</priority></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/refund-policy.html</loc><priority>0.3</priority></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/terms-and-conditions.html</loc><priority>0.3</priority></url>
+  <url><loc>https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/cancellation-policy.html</loc><priority>0.3</priority></url>
 </urlset>

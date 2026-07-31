@@ -131,7 +131,29 @@
     }
   }
 
-  function init() {
+  // The chat API lives on a separate host that is not always deployed. Showing
+  // a launcher that answers every question with "the chat service is not
+  // available" is worse than showing nothing, so probe first and only build the
+  // widget if something actually answers.
+  async function apiIsReachable() {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3000);
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'ping', sessionId: 'healthcheck', history: [] }),
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async function init() {
+    if (!(await apiIsReachable())) return;
     ensureStylesheet();
     const ui = buildWidget();
     const state = { pending: false, history: [] };

@@ -34,6 +34,16 @@ data/
 *.sqlite
 *.db
 
+# Python
+__pycache__/
+*.pyc
+
+# MCQ agent working files and generated question banks. These are
+# reproducible from the workbooks and can run to hundreds of MB, so the
+# tool is committed but its output is not.
+tools/mcq-agent/work/
+tools/mcq-agent/out/
+
 
 
 

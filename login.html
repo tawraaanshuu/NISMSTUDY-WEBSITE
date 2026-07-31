@@ -152,7 +152,10 @@
   const signupForm = el('signupForm');
   const loginForm = el('loginForm');
 
-  const next = NISM_APP.qs('next') || 'dashboard.html';
+  // `next` comes from the URL, so it must stay a relative path on this site —
+  // otherwise the link is an open redirect to anywhere.
+  const requested = NISM_APP.qs('next') || '';
+  const next = /^[a-z0-9_-]+\.html(\?.*)?$/i.test(requested) ? requested : 'dashboard.html';
 
   async function showLoggedIn(user) {
     const profile = await NISM_APP.getProfile(user.id);
@@ -172,7 +175,9 @@
       return;
     }
     if (session.user) {
-      // Arrived back from a magic link or already signed in.
+      // Arrived back from a magic link or already signed in. Saving the
+      // profile is best-effort: the row is created by a database trigger, and
+      // a failure to write a display name must never block sign-in.
       await NISM_APP.completePendingSignup(session.user).catch(() => {});
       await NISM_APP.upsertProfileFromUser(session.user).catch(() => {});
       await showLoggedIn(session.user);

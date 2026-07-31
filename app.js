@@ -80,12 +80,18 @@ window.NISM_APP = (() => {
   // mock_duration_days, so expose both rather than editing every page.
   function normaliseCourse(row) {
     if (!row) return null;
+    const config = cfg();
+    // The advertised price and access window override the database columns —
+    // see the note in config.js. Applied here so every page picks it up
+    // without each one repeating the rule.
+    const price = config.priceOverrideInr ?? row.price ?? row.price_inr;
+    const days = config.accessDaysOverride ?? row.mock_duration_days ?? row.access_days;
     return {
       ...row,
       exam_name: row.exam_name ?? row.title,
       description: row.description ?? row.short_description ?? row.long_description,
-      price: row.price ?? row.price_inr,
-      mock_duration_days: row.mock_duration_days ?? row.access_days
+      price,
+      mock_duration_days: days
     };
   }
 
@@ -253,54 +259,85 @@ window.NISM_APP = (() => {
   }
 
   function isAdmin(user, profile) {
+    // The table carries an `is_admin` boolean; `role` is only checked so that a
+    // future role column keeps working.
+    if (profile?.is_admin === true) return true;
     const role = profile?.role || '';
     const adminEmails = cfg().adminEmails || [];
     return ['admin', 'super_admin'].includes(role) || adminEmails.includes(user?.email || '');
   }
 
-  async function upsertProfileFromUser(user) {
+  // A database trigger already creates the profile row at signup, and the RLS
+  // policy only permits UPDATE on your own row — an upsert is an INSERT to
+  // Postgres and comes back 403, which is what used to break login. So we only
+  // ever patch, only send columns that actually exist (`phone`, not `mobile`),
+  // and treat a failure here as cosmetic: nobody should be locked out of their
+  // dashboard because a display name could not be saved.
+  async function saveProfileFields(userId, fields) {
     const client = await createClient();
-    if (!client || !user) return;
+    if (!client || !userId) return null;
 
-    const existing = await getProfile(user.id);
-    const payload = {
-      id: user.id,
-      email: user.email,
-      full_name: existing?.full_name || user.user_metadata?.full_name || user.email
-    };
-    // Only send optional columns when we actually have a value, so a missing
-    // column in the table cannot break signup.
-    const mobile = existing?.mobile || user.user_metadata?.mobile;
-    if (mobile) payload.mobile = mobile;
+    const payload = {};
+    if (fields.full_name) payload.full_name = String(fields.full_name).trim();
+    if (fields.phone) payload.phone = String(fields.phone).trim();
+    if (!Object.keys(payload).length) return null;
 
-    const { error } = await client.from(tables().profiles).upsert(payload);
-    if (error) throw error;
+    const { data, error } = await client
+      .from(tables().profiles)
+      .update(payload)
+      .eq('id', userId)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      console.warn('Profile not saved (non-fatal):', error.message);
+      return null;
+    }
+    return data;
+  }
+
+  async function upsertProfileFromUser(user) {
+    if (!user) return null;
+    const existing = await getProfile(user.id).catch(() => null);
+    // Only write when the row is actually missing something we can supply.
+    if (existing?.full_name && existing.full_name !== user.email) return existing;
+
+    return saveProfileFields(user.id, {
+      full_name: user.user_metadata?.full_name || existing?.full_name || user.email,
+      phone: user.user_metadata?.mobile || user.user_metadata?.phone || existing?.phone
+    });
   }
 
   async function completePendingSignup(user) {
-    const client = await createClient();
-    if (!client || !user) return null;
+    if (!user) return null;
 
     const pending = getPendingSignup();
     if (!pending) return null;
     if ((user.email || '').toLowerCase() !== (pending.email || '').toLowerCase()) return null;
 
-    const existing = await getProfile(user.id);
-    const payload = {
-      id: user.id,
-      email: user.email,
-      full_name: pending.full_name || existing?.full_name || user.email
-    };
-    if (pending.mobile || existing?.mobile) payload.mobile = pending.mobile || existing.mobile;
-
-    const { error } = await client.from(tables().profiles).upsert(payload);
-    if (error) throw error;
+    const saved = await saveProfileFields(user.id, {
+      full_name: pending.full_name,
+      phone: pending.mobile
+    });
 
     clearPendingSignup();
-    return payload;
+    return saved;
   }
 
   /* -------------------------------------------------------------- courses */
+
+  // A course is only sellable once its question bank is actually filled.
+  // `questions` is RLS-protected, so an anonymous visitor cannot count rows to
+  // find that out — readiness therefore comes from the `is_live` column, with
+  // `liveCourseSlugs` in config.js as the source of truth until that column is
+  // set in the database. Selling access to an empty question bank is the one
+  // failure mode worth engineering against here.
+  function isCourseLive(course) {
+    if (!course) return false;
+    if (course.is_live === true) return true;
+    const allow = cfg().liveCourseSlugs || [];
+    return allow.includes(course.slug);
+  }
 
   async function fetchPublishedCourses() {
     const client = await createClient();
@@ -506,6 +543,10 @@ window.NISM_APP = (() => {
 
     if (attemptId) {
       if (answerRows.length) {
+        // A resumed attempt already has rows from when it was first opened, so
+        // clear them before writing the final set — otherwise the answer
+        // review shows each question twice.
+        await client.from(tables().answers).delete().eq('attempt_id', attemptId);
         const { error: ansError } = await client.from(tables().answers).insert(answerRows);
         if (ansError) console.error('Could not save individual answers:', ansError);
       }
@@ -529,6 +570,77 @@ window.NISM_APP = (() => {
     const { data, error } = await query;
     if (error) throw error;
     return data || [];
+  }
+
+  // Reopen an attempt the student walked away from. Returns null unless the
+  // attempt is theirs, still open, and still inside its own deadline — the
+  // clock keeps running while they are away, which is what makes it a timed
+  // exam rather than a save file.
+  async function fetchResumableAttempt(userId, attemptId) {
+    const client = await createClient();
+    if (!client || !userId || !attemptId) return null;
+
+    const { data: attempt, error } = await client
+      .from(tables().attempts).select('*')
+      .eq('id', attemptId).eq('user_id', userId).maybeSingle();
+    if (error || !attempt) return null;
+    if (attempt.status !== 'in_progress') return null;
+    if (attempt.expires_at && new Date(attempt.expires_at).getTime() <= Date.now()) return null;
+
+    const { data: answers } = await client
+      .from(tables().answers).select('question_id, selected_option')
+      .eq('attempt_id', attemptId);
+
+    const selections = {};
+    (answers || []).forEach((a) => { selections[a.question_id] = a.selected_option; });
+    return { attempt, selections };
+  }
+
+  // Everything the dashboard needs about one course in a single round trip:
+  // its papers, and the student's attempts against them.
+  async function fetchCourseProgress(userId, courseId) {
+    const papers = await fetchPapers(courseId);
+    if (!papers.length) return { papers: [], byPaper: {}, attempted: 0, bestPct: null };
+
+    const client = await createClient();
+    const ids = papers.map(p => p.id);
+    const { data: attempts } = await client
+      .from(tables().attempts)
+      .select('*')
+      .eq('user_id', userId)
+      .in('quiz_id', ids)
+      .order('started_at', { ascending: false });
+
+    const byPaper = {};
+    (attempts || []).forEach((a) => {
+      const paper = papers.find(p => p.id === a.quiz_id);
+      const max = Number(paper?.max_marks || paper?.total_questions || 0);
+      const pct = max > 0 && a.score != null ? Math.round((Number(a.score) / max) * 100) : null;
+      const bucket = byPaper[a.quiz_id] || (byPaper[a.quiz_id] = {
+        attempts: [], count: 0, best: null, bestPct: null, inProgress: null
+      });
+      bucket.attempts.push(a);
+      if (a.status === 'submitted') {
+        bucket.count += 1;
+        if (bucket.best === null || Number(a.score) > bucket.best) {
+          bucket.best = Number(a.score);
+          bucket.bestPct = pct;
+        }
+      } else if (a.status === 'in_progress' && !bucket.inProgress) {
+        // Only offer to resume an attempt whose clock has not run out.
+        if (!a.expires_at || new Date(a.expires_at).getTime() > Date.now()) {
+          bucket.inProgress = a;
+        }
+      }
+    });
+
+    const pcts = Object.values(byPaper).map(b => b.bestPct).filter(v => v != null);
+    return {
+      papers,
+      byPaper,
+      attempted: Object.values(byPaper).reduce((n, b) => n + b.count, 0),
+      bestPct: pcts.length ? Math.max(...pcts) : null
+    };
   }
 
   // Legacy shim for any page still calling the old name.
@@ -591,11 +703,12 @@ window.NISM_APP = (() => {
     getPendingSignup, setPendingSignup, clearPendingSignup,
     createClient, getSession, requireAuth, sendMagicLink, signOutUser,
     signUpWithPassword, signInWithPassword, sendPasswordReset,
-    getProfile, isAdmin, upsertProfileFromUser, completePendingSignup,
-    fetchHomeSupport, fetchPublishedCourses, fetchAllCourses, fetchCourse,
+    getProfile, isAdmin, saveProfileFields, upsertProfileFromUser, completePendingSignup,
+    fetchHomeSupport, fetchPublishedCourses, fetchAllCourses, fetchCourse, isCourseLive,
     fetchAccessRecords, findActiveAccess, recordPaymentAndGrantAccess,
     fetchPapers, fetchPaper, fetchQuestions, fetchQuizzes,
-    startAttempt, submitAttempt, fetchAttempts, saveMockAttempt,
+    startAttempt, submitAttempt, fetchAttempts, saveMockAttempt, fetchCourseProgress,
+    fetchResumableAttempt,
     renderAuthSummary, setStatus, friendlyError
   };
 })();

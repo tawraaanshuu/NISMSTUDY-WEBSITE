@@ -4,9 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NISMSTUDY — NISM &amp; NCFM Exam Preparation, Mock Tests &amp; Study Material</title>
-  <meta name="description" content="Prepare for NISM and NCFM certification exams with curated question banks, unlimited mock tests and free exam workbooks. Flat Rs 329 per exam.">
+  <meta name="description" content="Curated NISM question banks, realistic timed mock tests and free official-style workbooks. Flat Rs 329 per exam, 15 days unlimited mocks.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23059669'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3ENS%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
+  <link rel="canonical" href="https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NISMSTUDY">
+  <meta property="og:title" content="NISMSTUDY — Pass your NISM certification in the first attempt">
+  <meta property="og:description" content="Curated NISM question banks, realistic timed mock tests and free official-style workbooks. Flat Rs 329 per exam, 15 days unlimited mocks.">
+  <meta property="og:url" content="https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/">
+  <meta property="og:image" content="https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/og-image.png">
+  <meta property="og:locale" content="en_IN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="NISMSTUDY — Pass your NISM certification in the first attempt">
+  <meta name="twitter:description" content="Curated NISM question banks, realistic timed mock tests and free official-style workbooks. Flat Rs 329 per exam, 15 days unlimited mocks.">
+  <meta name="twitter:image" content="https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/og-image.png">
+  <meta name="theme-color" content="#059669">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"EducationalOrganization","name":"NISMSTUDY","url":"https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/","description":"NISM certification exam preparation \u2014 question banks, mock tests and free workbooks.","email":"info@nismstudy.in","address":{"@type":"PostalAddress","streetAddress":"1/3325 F/F Ramnagar Ext., Shahdara","addressLocality":"Delhi","postalCode":"110032","addressCountry":"IN"}}</script>
 </head>
 <body>
 
@@ -52,7 +66,7 @@
         <h3>Everything included, one price</h3>
         <ul class="inline-list">
           <li><strong>Rs 329</strong> per exam — all NISM series covered</li>
-          <li>400–500 curated questions with explanations</li>
+          <li>600 curated questions with explanations</li>
           <li>Unlimited mock attempts for 15 days</li>
           <li>10+ free exam workbooks in PDF</li>
         </ul>
@@ -68,7 +82,7 @@
       <div class="metric"><strong>10+</strong><span class="small">Free exam workbooks</span></div>
       <div class="metric"><strong>Rs 329</strong><span class="small">Flat price per exam</span></div>
       <div class="metric"><strong>15 days</strong><span class="small">Unlimited mock attempts</span></div>
-      <div class="metric"><strong>400–500</strong><span class="small">Curated Q&amp;As per exam</span></div>
+      <div class="metric"><strong>600</strong><span class="small">Curated Q&amp;As per exam</span></div>
     </div>
   </section>
 
@@ -123,7 +137,7 @@
         <article class="card">
           <div class="badge-row"><span class="pill info">Step 1</span></div>
           <h3>Create your account</h3>
-          <p class="muted">Sign up with just your email — we send you a secure login link. No passwords to remember.</p>
+          <p class="muted">Sign up with your email and a password — it takes a few seconds, and you are signed in straight away.</p>
         </article>
         <article class="card">
           <div class="badge-row"><span class="pill info">Step 2</span></div>
@@ -210,7 +224,7 @@
   function courseCard(course) {
     const title = NISM_APP.escapeHtml(course.exam_name || course.title || 'NISM Exam');
     const desc = NISM_APP.escapeHtml(course.description || 'Complete question bank with unlimited mock tests.');
-    const price = NISM_APP.money(course.price || '329');
+    const price = NISM_APP.money(course.price);
     const days = Number(course.mock_duration_days || 15);
     return `
       <article class="card card-hover course-card">
@@ -225,7 +239,9 @@
   }
 
   try {
-    const courses = await NISM_APP.fetchPublishedCourses();
+    // The home page only advertises exams that can actually be bought today.
+    const all = await NISM_APP.fetchPublishedCourses();
+    const courses = all.filter(NISM_APP.isCourseLive);
     if (!courses.length) {
       coursesTarget.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">New courses are being added. Check back soon or <a href="contact-us.html">contact us</a>.</div>';
     } else {

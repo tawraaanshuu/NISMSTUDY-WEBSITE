@@ -4,9 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — NISMSTUDY</title>
-  <meta name="robots" content="noindex">
+  <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23059669'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3ENS%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .dash-head { display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between; }
+    .paper-row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+                 padding:12px 14px; border:1px solid var(--border); border-radius:var(--radius-sm);
+                 background:var(--card); margin-bottom:8px; }
+    .paper-row .meta { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; }
+    .paper-name { font-weight:600; }
+    .score-chip { font-variant-numeric:tabular-nums; font-weight:700; color:var(--accent-dark); }
+    .bar { height:6px; border-radius:99px; background:var(--surface); overflow:hidden; min-width:120px; flex:1; }
+    .bar > i { display:block; height:100%; background:var(--accent-grad); }
+    .course-block { margin-bottom:22px; }
+    .course-block > summary { cursor:pointer; list-style:none; padding:16px 18px; border-radius:var(--radius);
+                              border:1px solid var(--border); background:var(--card); box-shadow:var(--shadow-sm); }
+    .course-block > summary::-webkit-details-marker { display:none; }
+    .course-block[open] > summary { border-bottom-left-radius:0; border-bottom-right-radius:0; }
+    .course-body { border:1px solid var(--border); border-top:0; border-radius:0 0 var(--radius) var(--radius);
+                   padding:14px 18px 18px; background:var(--bg-2); }
+    .sum-row { display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; justify-content:space-between; }
+    .skeleton { height:78px; border-radius:var(--radius); background:var(--surface); margin-bottom:10px;
+                animation:pulse 1.3s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:.55} 50%{opacity:.95} }
+    @media (max-width:640px){ .paper-row{ align-items:flex-start; } }
+  </style>
 </head>
 <body>
 
@@ -24,9 +47,11 @@
       <a href="index.html">Home</a>
       <a href="courses.html">Courses</a>
       <a href="mock-tests.html">Mock Tests</a>
+      <a href="free-materials.html">Free Materials</a>
       <a href="dashboard.html" class="active">Dashboard</a>
     </nav>
     <div class="nav-actions">
+      <a class="btn btn-secondary hidden" id="adminLink" href="admin.html">Admin</a>
       <button class="btn btn-ghost" id="logoutBtn" type="button">Logout</button>
     </div>
   </div>
@@ -34,30 +59,75 @@
 
 <main id="main">
   <section class="page-hero">
-    <div class="container">
-      <span class="kicker">Student dashboard</span>
-      <h1>Your exams and mock tests</h1>
-      <p>Pick an exam, complete payment, then practise unlimited mocks for the next 15 days.</p>
-      <div id="dashboardAuthSummary" style="margin-top:14px;"></div>
+    <div class="container dash-head">
+      <div>
+        <span class="kicker">Student dashboard</span>
+        <h1 id="greeting" style="margin:10px 0 6px;">Welcome back</h1>
+        <p class="muted" id="greetingSub">Loading your account…</p>
+      </div>
+      <div class="badge-row" id="dashboardAuthSummary"></div>
     </div>
   </section>
 
   <section class="section">
-    <div class="container grid-3">
-      <div class="metric"><strong id="metricCourses">–</strong><span class="small">Published exams</span></div>
-      <div class="metric"><strong id="metricActive">–</strong><span class="small">Active accesses</span></div>
-      <div class="metric"><strong>15 days</strong><span class="small">Access window per paid exam</span></div>
+    <div class="container grid-4">
+      <div class="metric"><strong id="metricOwned">–</strong><span class="small">Exams you own</span></div>
+      <div class="metric"><strong id="metricAttempts">–</strong><span class="small">Mocks completed</span></div>
+      <div class="metric"><strong id="metricBest">–</strong><span class="small">Best score</span></div>
+      <div class="metric"><strong id="metricExpiry">–</strong><span class="small">Nearest expiry</span></div>
     </div>
   </section>
 
   <section class="section">
     <div class="container">
       <div class="section-head">
-        <h2>Available exams</h2>
-        <p class="lead">Buy access or jump straight into mocks for exams you already own.</p>
+        <h2>Your exams</h2>
+        <p class="lead">Open an exam to see its ten mock papers, your best score on each, and pick up anything you left unfinished.</p>
       </div>
-      <div id="dashboardState"></div>
-      <div id="dashboardCourseGrid" class="grid-3" style="margin-top:14px;"></div>
+      <div id="ownedState"></div>
+      <div id="ownedList" style="margin-top:14px;"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Add another exam</h2>
+        <p class="lead">Flat <span id="priceLabel">Rs 329</span> per exam, <span id="daysLabel">15</span> days of unlimited mocks.</p>
+      </div>
+      <div id="availableGrid" class="grid-3" style="margin-top:14px;"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container grid-2">
+      <div class="card">
+        <h2 style="margin-top:0;">Your details</h2>
+        <form id="profileForm" class="stack" style="margin-top:12px;">
+          <label class="label">Full name
+            <input class="input" type="text" id="pfName" autocomplete="name" placeholder="Your full name">
+          </label>
+          <label class="label">Mobile number
+            <input class="input" type="tel" id="pfPhone" autocomplete="tel" pattern="[0-9]{10}" placeholder="10-digit mobile number">
+          </label>
+          <label class="label">Email address
+            <input class="input" type="email" id="pfEmail" disabled>
+          </label>
+          <button class="btn btn-primary" type="submit">Save details</button>
+        </form>
+        <div id="profileStatus" class="notice hidden" style="margin-top:12px;"></div>
+      </div>
+      <div class="card">
+        <h2 style="margin-top:0;">Free study material</h2>
+        <p class="muted">Every NISM workbook we host is free to read, whether or not you have bought an exam.</p>
+        <div class="actions" style="margin-top:14px;">
+          <a class="btn btn-secondary" href="free-materials.html">Open workbooks</a>
+          <a class="btn btn-ghost" href="faq.html">Read the FAQ</a>
+        </div>
+        <hr class="sep">
+        <p class="small">Something not working? Email
+          <a href="mailto:info@nismstudy.in">info@nismstudy.in</a> and we will sort it out.</p>
+      </div>
     </div>
   </section>
 </main>
@@ -73,56 +143,205 @@
 <script src="app.js"></script>
 <script>
 (async function () {
-  const stateEl = document.getElementById('dashboardState');
-  const grid = document.getElementById('dashboardCourseGrid');
+  const el = (id) => document.getElementById(id);
+  const esc = (v) => NISM_APP.escapeHtml(v);
+  const ownedState = el('ownedState');
+  const ownedList = el('ownedList');
+  const availableGrid = el('availableGrid');
 
-  document.getElementById('logoutBtn').addEventListener('click', () => NISM_APP.signOutUser());
+  el('logoutBtn').addEventListener('click', () => NISM_APP.signOutUser());
+  ownedList.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
 
+  const cfg = NISM_APP.cfg();
+  el('priceLabel').textContent = NISM_APP.money(cfg.priceOverrideInr ?? 329);
+  el('daysLabel').textContent = String(cfg.accessDaysOverride ?? cfg.accessDays ?? 15);
+
+  const auth = await NISM_APP.requireAuth('login.html?next=dashboard.html');
+  if (!auth) return;
+
+  /* ---------------------------------------------------------------- profile */
+
+  let profile = null;
   try {
-    const auth = await NISM_APP.requireAuth('login.html');
-    if (!auth) return;
+    profile = await NISM_APP.getProfile(auth.user.id);
+  } catch (error) {
+    console.warn('Could not load profile:', error);
+  }
 
-    await NISM_APP.upsertProfileFromUser(auth.user);
-    const profile = await NISM_APP.getProfile(auth.user.id);
-    NISM_APP.renderAuthSummary(document.getElementById('dashboardAuthSummary'), auth.user, profile);
+  const displayName = (profile?.full_name && profile.full_name !== auth.user.email)
+    ? profile.full_name.split(' ')[0]
+    : null;
+  el('greeting').textContent = displayName ? `Welcome back, ${displayName}` : 'Welcome back';
+  el('greetingSub').textContent = 'Everything you have bought, and how far through it you are.';
+  NISM_APP.renderAuthSummary(el('dashboardAuthSummary'), auth.user, profile);
+  if (NISM_APP.isAdmin(auth.user, profile)) el('adminLink').classList.remove('hidden');
 
-    const courses = await NISM_APP.fetchPublishedCourses().catch(() => []);
-    const accessRecords = await NISM_APP.fetchAccessRecords(auth.user.id).catch(() => []);
+  el('pfName').value = profile?.full_name && profile.full_name !== auth.user.email ? profile.full_name : '';
+  el('pfPhone').value = profile?.phone || '';
+  el('pfEmail').value = auth.user.email || '';
 
-    document.getElementById('metricCourses').textContent = String(courses.length);
-    document.getElementById('metricActive').textContent = String(
-      accessRecords.filter(item => new Date(item.access_until).getTime() > Date.now()).length
-    );
-
-    if (!courses.length) {
-      stateEl.innerHTML = '<div class="empty-state">No exams are published right now. Please check back soon.</div>';
-      return;
+  el('profileForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const status = el('profileStatus');
+    status.classList.remove('hidden');
+    NISM_APP.setStatus(status, 'Saving…');
+    const saved = await NISM_APP.saveProfileFields(auth.user.id, {
+      full_name: el('pfName').value.trim(),
+      phone: el('pfPhone').value.trim()
+    });
+    if (saved) {
+      NISM_APP.setStatus(status, 'Saved.', 'ok');
+    } else {
+      NISM_APP.setStatus(status, 'We could not save that just now — your access is unaffected. Please try again later.', 'warn');
     }
+  });
 
-    grid.innerHTML = courses.map(course => {
-      const access = NISM_APP.findActiveAccess(accessRecords, course.id);
-      const active = Boolean(access);
-      const cta = active
-        ? `<a class="btn btn-primary" href="mock-center.html?course=${course.id}">Start Mock</a>`
-        : `<a class="btn btn-primary" href="checkout.html?course=${course.id}">Buy Access</a>`;
-      const badge = active
-        ? `<span class="status-pill ok">Active — ${NISM_APP.daysRemaining(access.access_until)} day(s) left</span>`
-        : `<span class="pill warn">Not purchased</span>`;
-      const extra = active
-        ? `<p class="small">Access until ${NISM_APP.fmtDate(access.access_until)}</p>`
-        : `<p class="small">Price: ${NISM_APP.money(course.price || '329')} · Access: ${course.mock_duration_days || 15} days</p>`;
+  /* ------------------------------------------------------------ course data */
+
+  let courses = [];
+  let access = [];
+  try {
+    [courses, access] = await Promise.all([
+      NISM_APP.fetchPublishedCourses(),
+      NISM_APP.fetchAccessRecords(auth.user.id)
+    ]);
+  } catch (error) {
+    console.error(error);
+    ownedList.innerHTML = '';
+    ownedState.innerHTML = `<div class="notice warn">${NISM_APP.friendlyError(error, 'Unable to load your exams right now. Please refresh to try again.')}</div>`;
+    return;
+  }
+
+  const owned = courses
+    .map(course => ({ course, record: NISM_APP.findActiveAccess(access, course.id) }))
+    .filter(item => item.record);
+  const notOwned = courses.filter(course => !NISM_APP.findActiveAccess(access, course.id));
+
+  el('metricOwned').textContent = String(owned.length);
+  const nearest = owned
+    .map(item => new Date(item.record.access_until).getTime())
+    .sort((a, b) => a - b)[0];
+  el('metricExpiry').textContent = nearest
+    ? `${NISM_APP.daysRemaining(new Date(nearest).toISOString())}d`
+    : '—';
+
+  /* ------------------------------------------------------- owned + progress */
+
+  function paperRow(courseId, paper, stat) {
+    const done = stat?.count || 0;
+    const bestPct = stat?.bestPct;
+    const resume = stat?.inProgress;
+    const label = paper.exam_type === 'full' ? 'Full length' : 'Mock';
+    const cta = resume
+      ? `<a class="btn btn-primary" href="mock-center.html?course=${encodeURIComponent(courseId)}&paper=${encodeURIComponent(paper.id)}&attempt=${encodeURIComponent(resume.id)}">Resume</a>`
+      : `<a class="btn ${done ? 'btn-secondary' : 'btn-primary'}" href="mock-center.html?course=${encodeURIComponent(courseId)}&paper=${encodeURIComponent(paper.id)}">${done ? 'Retake' : 'Start'}</a>`;
+    const scoreBit = bestPct != null
+      ? `<span class="score-chip">${bestPct}%</span><span class="bar"><i style="width:${Math.max(2, bestPct)}%"></i></span>`
+      : `<span class="small faint">Not attempted</span>`;
+    return `
+      <div class="paper-row">
+        <div class="meta" style="flex:1;min-width:220px;">
+          <span class="paper-name">${esc(paper.title)}</span>
+          <span class="pill">${label}</span>
+          <span class="small faint">${paper.total_questions} Q · ${paper.duration_minutes} min</span>
+        </div>
+        <div class="meta" style="flex:1;min-width:180px;">${scoreBit}</div>
+        <div class="meta">
+          ${done ? `<span class="small faint">${done} attempt${done === 1 ? '' : 's'}</span>` : ''}
+          ${resume ? '<span class="status-pill warn">In progress</span>' : ''}
+          ${cta}
+        </div>
+      </div>`;
+  }
+
+  if (!owned.length) {
+    ownedList.innerHTML = '';
+    ownedState.innerHTML = `
+      <div class="empty-state">
+        You have not bought an exam yet. Pick one below — or start with the
+        <a href="free-materials.html">free workbooks</a>.
+      </div>`;
+    el('metricAttempts').textContent = '0';
+    el('metricBest').textContent = '—';
+  } else {
+    ownedList.innerHTML = owned.map(({ course, record }) => `
+      <details class="course-block" data-course="${esc(course.id)}" ${owned.length === 1 ? 'open' : ''}>
+        <summary>
+          <div class="sum-row">
+            <div>
+              <strong>${esc(course.exam_name || course.title)}</strong>
+              <p class="small faint" style="margin:4px 0 0;">
+                Access until ${NISM_APP.fmtShortDate(record.access_until)} ·
+                ${NISM_APP.daysRemaining(record.access_until)} day(s) left
+              </p>
+            </div>
+            <span class="status-pill ok" data-role="summary">Loading papers…</span>
+          </div>
+        </summary>
+        <div class="course-body" data-role="body">
+          <div class="skeleton" style="height:56px;"></div>
+        </div>
+      </details>`).join('');
+
+    let totalAttempts = 0;
+    let bestOverall = null;
+
+    // Papers load per course so one slow or failing course cannot blank the page.
+    await Promise.all(owned.map(async ({ course }) => {
+      const block = ownedList.querySelector(`[data-course="${CSS.escape(course.id)}"]`);
+      const body = block.querySelector('[data-role="body"]');
+      const badge = block.querySelector('[data-role="summary"]');
+      try {
+        const prog = await NISM_APP.fetchCourseProgress(auth.user.id, course.id);
+        if (!prog.papers.length) {
+          body.innerHTML = '<div class="empty-state">Mock papers for this exam are being finalised. Please check back shortly.</div>';
+          badge.textContent = 'Papers coming soon';
+          badge.className = 'pill warn';
+          return;
+        }
+        totalAttempts += prog.attempted;
+        if (prog.bestPct != null && (bestOverall == null || prog.bestPct > bestOverall)) {
+          bestOverall = prog.bestPct;
+        }
+        const donePapers = prog.papers.filter(p => (prog.byPaper[p.id]?.count || 0) > 0).length;
+        badge.textContent = `${donePapers}/${prog.papers.length} papers attempted`;
+        body.innerHTML = prog.papers
+          .map(paper => paperRow(course.id, paper, prog.byPaper[paper.id]))
+          .join('');
+      } catch (error) {
+        console.error(error);
+        body.innerHTML = '<div class="notice warn">Could not load the papers for this exam. Please refresh.</div>';
+        badge.textContent = 'Unavailable';
+        badge.className = 'pill warn';
+      }
+    }));
+
+    el('metricAttempts').textContent = String(totalAttempts);
+    el('metricBest').textContent = bestOverall != null ? `${bestOverall}%` : '—';
+  }
+
+  /* ------------------------------------------------------------- available */
+
+  if (!notOwned.length) {
+    availableGrid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">You own every exam we currently publish. More are on the way.</div>';
+  } else {
+    availableGrid.innerHTML = notOwned.map((course) => {
+      const live = NISM_APP.isCourseLive(course);
+      const cta = live
+        ? `<a class="btn btn-primary" href="checkout.html?course=${encodeURIComponent(course.id)}">Buy access</a>`
+        : `<button class="btn btn-secondary" type="button" disabled>Coming soon</button>`;
+      const badge = live
+        ? '<span class="pill">Available now</span>'
+        : '<span class="pill warn">Question bank in progress</span>';
       return `
         <article class="card card-hover course-card">
           <div class="badge-row">${badge}</div>
-          <h3>${NISM_APP.escapeHtml(course.exam_name || course.title || 'Exam')}</h3>
-          <p class="muted">${NISM_APP.escapeHtml(course.description || 'Purchase access to unlock unlimited mock attempts.')}</p>
-          ${extra}
+          <h3>${esc(course.exam_name || course.title)}</h3>
+          <p class="muted">${esc(course.description || 'Full question bank with unlimited mock attempts.')}</p>
+          <p class="price">${NISM_APP.money(course.price)} <span class="small">· ${course.mock_duration_days} days access</span></p>
           <div class="actions">${cta}</div>
         </article>`;
     }).join('');
-  } catch (error) {
-    console.error(error);
-    stateEl.innerHTML = `<div class="notice warn">${NISM_APP.friendlyError(error, 'Unable to load your dashboard right now. Please refresh to try again.')}</div>`;
   }
 })();
 </script>

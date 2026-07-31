@@ -4,9 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Courses — NISMSTUDY</title>
-  <meta name="description" content="Browse all NISM and NCFM exam preparation courses. Flat Rs 329 per exam with unlimited mock tests for 15 days.">
+  <meta name="description" content="Browse every NISM certification we cover. Each exam includes a full question bank and unlimited timed mock tests for 15 days.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23059669'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3ENS%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
+  <link rel="canonical" href="https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/courses.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NISMSTUDY">
+  <meta property="og:title" content="NISM Courses & Question Banks — NISMSTUDY">
+  <meta property="og:description" content="Browse every NISM certification we cover. Each exam includes a full question bank and unlimited timed mock tests for 15 days.">
+  <meta property="og:url" content="https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/courses.html">
+  <meta property="og:image" content="https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/og-image.png">
+  <meta property="og:locale" content="en_IN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="NISM Courses & Question Banks — NISMSTUDY">
+  <meta name="twitter:description" content="Browse every NISM certification we cover. Each exam includes a full question bank and unlimited timed mock tests for 15 days.">
+  <meta name="twitter:image" content="https://tawraaanshuu.github.io/NISMSTUDY-WEBSITE/og-image.png">
+  <meta name="theme-color" content="#059669">
 </head>
 <body>
 
@@ -117,17 +130,30 @@
   function courseCard(course) {
     const title = NISM_APP.escapeHtml(course.exam_name || course.title || 'NISM Exam');
     const desc = NISM_APP.escapeHtml(course.description || 'Complete question bank with unlimited mock tests and explanations.');
-    const price = NISM_APP.money(course.price || '329');
+    const price = NISM_APP.money(course.price);
     const days = Number(course.mock_duration_days || 15);
-    const cta = loggedIn
-      ? `<a class="btn btn-primary" href="checkout.html?course=${course.id}">Buy Access</a>`
-      : `<a class="btn btn-primary" href="login.html">Login to Buy</a>`;
+    const live = NISM_APP.isCourseLive(course);
+
+    // An exam whose question bank is not loaded yet must not be sellable —
+    // taking Rs 329 for an empty mock is the one mistake worth guarding.
+    const cta = !live
+      ? `<button class="btn btn-secondary" type="button" disabled>Coming soon</button>`
+      : loggedIn
+        ? `<a class="btn btn-primary" href="checkout.html?course=${course.id}">Buy Access</a>`
+        : `<a class="btn btn-primary" href="login.html?next=courses.html">Login to Buy</a>`;
+    const tag = live
+      ? '<span class="tag">Live course</span>'
+      : '<span class="tag">Question bank in progress</span>';
+    const priceLine = live
+      ? `<p class="price">${price} <span class="small">· ${days} days unlimited mocks</span></p>`
+      : `<p class="small muted">Not on sale yet — the workbook is free to read in the meantime.</p>`;
+
     return `
       <article class="card card-hover course-card">
-        <span class="tag">Live course</span>
+        ${tag}
         <h3>${title}</h3>
         <p class="muted">${desc}</p>
-        <p class="price">${price} <span class="small">· ${days} days unlimited mocks</span></p>
+        ${priceLine}
         <div class="actions">${cta}</div>
       </article>`;
   }
@@ -139,8 +165,11 @@
       stateEl.innerHTML = '<div class="empty-state">No courses are published right now. Check back soon or <a href="contact-us.html">contact us</a>.</div>';
       return;
     }
+    // Sellable exams first; "coming soon" should not head the catalogue.
+    const ordered = courses.slice().sort((a, b) =>
+      Number(NISM_APP.isCourseLive(b)) - Number(NISM_APP.isCourseLive(a)));
     stateEl.innerHTML = '';
-    gridEl.innerHTML = courses.map(courseCard).join('');
+    gridEl.innerHTML = ordered.map(courseCard).join('');
   } catch (error) {
     console.error(error);
     gridEl.innerHTML = '';
