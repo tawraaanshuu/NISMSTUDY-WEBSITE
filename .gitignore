@@ -5,6 +5,7 @@ yarn.lock
 
 # Environment variables
 .env
+tools/secrets.env
 
 # Uploads
 uploads/
